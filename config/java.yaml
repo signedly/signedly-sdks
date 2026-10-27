@@ -1,0 +1,9 @@
+groupId: com.signedly
+artifactId: signedly-sdk
+artifactVersion: 0.1.0
+library: native
+invokerPackage: com.signedly.client
+apiPackage: com.signedly.api
+modelPackage: com.signedly.model
+gitUserId: signedly
+gitRepoId: signedly-sdks

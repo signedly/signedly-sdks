@@ -1,0 +1,24 @@
+name: Spec matches production
+
+# Weekly (and by hand): does the committed spec match what production serves?
+# A difference after a backend release means: run scripts/update-spec.sh, open a
+# PR, and publish new SDK versions.
+on:
+  schedule: [{ cron: "0 6 * * 1" }]
+  workflow_dispatch:
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -sSf https://l0ads.signedly.com/swaggerap1/?format=openapi | python3 -c '
+          import json, sys
+          live = json.load(sys.stdin)
+          live.update(host="l0ads.signedly.com", basePath="/", schemes=["https"])
+          committed = json.load(open("openapi/signedly-ap1.json"))
+          if live != committed:
+              print("Production serves a different spec: run scripts/update-spec.sh.")
+              sys.exit(1)
+          print("The committed spec matches production.")'

@@ -1,0 +1,6 @@
+npmName: "@signedly/sdk"
+npmVersion: 0.1.0
+supportsES6: true
+withSeparateModelsAndApi: false
+gitUserId: signedly
+gitRepoId: signedly-sdks
