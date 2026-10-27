@@ -3,3 +3,4 @@ composerPackageName: signedly/sdk
 artifactVersion: 0.1.0
 gitUserId: signedly
 gitRepoId: signedly-sdks
+hideGenerationTimestamp: true

@@ -4,3 +4,4 @@ packageVersion: 0.1.0
 packageUrl: https://github.com/signedly/signedly-sdks
 gitUserId: signedly
 gitRepoId: signedly-sdks
+hideGenerationTimestamp: true

@@ -49,7 +49,7 @@ import com.signedly.client.ApiClient;
   WebhookEndpointWithSecret.JSON_PROPERTY_UPDATED_AT,
   WebhookEndpointWithSecret.JSON_PROPERTY_URL
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-10-27T14:37:47.002303711+05:30[Asia/Kolkata]", comments = "Generator version: 7.10.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.10.0")
 public class WebhookEndpointWithSecret {
   public static final String JSON_PROPERTY_CREATED_AT = "created_at";
   @javax.annotation.Nullable

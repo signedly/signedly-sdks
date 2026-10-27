@@ -7,3 +7,4 @@ apiPackage: com.signedly.api
 modelPackage: com.signedly.model
 gitUserId: signedly
 gitRepoId: signedly-sdks
+hideGenerationTimestamp: true

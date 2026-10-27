@@ -41,7 +41,7 @@ import com.signedly.client.ApiClient;
   RefreshAccessToken200Response.JSON_PROPERTY_REFRESH_TOKEN_EXPIRY_DATE,
   RefreshAccessToken200Response.JSON_PROPERTY_UPDATED_AT
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-10-27T14:37:47.002303711+05:30[Asia/Kolkata]", comments = "Generator version: 7.10.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.10.0")
 public class RefreshAccessToken200Response {
   public static final String JSON_PROPERTY_ACCESS_TOKEN = "access_token";
   @javax.annotation.Nullable

@@ -37,7 +37,7 @@ import com.signedly.client.ApiClient;
   CreateDocumentFromTemplateRequestRecipientsInner.JSON_PROPERTY_NAME,
   CreateDocumentFromTemplateRequestRecipientsInner.JSON_PROPERTY_ROLE
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-10-27T14:37:47.002303711+05:30[Asia/Kolkata]", comments = "Generator version: 7.10.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.10.0")
 public class CreateDocumentFromTemplateRequestRecipientsInner {
   public static final String JSON_PROPERTY_EMAIL = "email";
   @javax.annotation.Nonnull

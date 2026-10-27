@@ -4,3 +4,4 @@ supportsES6: true
 withSeparateModelsAndApi: false
 gitUserId: signedly
 gitRepoId: signedly-sdks
+hideGenerationTimestamp: true

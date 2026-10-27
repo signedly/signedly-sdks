@@ -4,8 +4,6 @@ Signedly API
 
 - API version: v1
 
-- Build date: 2026-10-27T14:37:47.002303711+05:30[Asia/Kolkata]
-
 - Generator version: 7.10.0
 
 

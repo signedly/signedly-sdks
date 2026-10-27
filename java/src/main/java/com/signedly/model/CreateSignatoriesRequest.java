@@ -41,7 +41,7 @@ import com.signedly.client.ApiClient;
   CreateSignatoriesRequest.JSON_PROPERTY_IS_ORDERED_SIGNING,
   CreateSignatoriesRequest.JSON_PROPERTY_SIGNATORIES
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-10-27T14:37:47.002303711+05:30[Asia/Kolkata]", comments = "Generator version: 7.10.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.10.0")
 public class CreateSignatoriesRequest {
   public static final String JSON_PROPERTY_DOCUMENT_ID = "document_id";
   @javax.annotation.Nonnull

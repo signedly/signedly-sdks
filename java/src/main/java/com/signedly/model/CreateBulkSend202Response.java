@@ -47,7 +47,7 @@ import com.signedly.client.ApiClient;
   CreateBulkSend202Response.JSON_PROPERTY_TEMPLATE_ID,
   CreateBulkSend202Response.JSON_PROPERTY_TOTAL_DOCUMENTS
 })
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-10-27T14:37:47.002303711+05:30[Asia/Kolkata]", comments = "Generator version: 7.10.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.10.0")
 public class CreateBulkSend202Response {
   public static final String JSON_PROPERTY_DOCUMENTS = "documents";
   @javax.annotation.Nullable
