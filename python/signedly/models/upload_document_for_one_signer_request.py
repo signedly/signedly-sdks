@@ -26,7 +26,7 @@ class UploadDocumentForOneSignerRequest(BaseModel):
     """
     UploadDocumentForOneSignerRequest
     """ # noqa: E501
-    file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]] = Field(description="A PDF or DOCX file.")
+    file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]] = Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.")
     signee_name: StrictStr = Field(description="The signer's name.")
     signee_email: StrictStr = Field(description="The signer's email address.")
     redirect_url: StrictStr = Field(description="Where the signer is sent after signing.")

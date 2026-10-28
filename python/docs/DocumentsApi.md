@@ -553,7 +553,7 @@ configuration.api_key['Bearer'] = os.environ["API_KEY"]
 with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.DocumentsApi(api_client)
-    file = None # bytearray | A PDF or DOCX file. At most 2 MB.
+    file = None # bytearray | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
     name = 'name_example' # str | The document's name. It must differ from every other upload of this API client.
     type = 56 # int | 2 Document · 4 Template
     template_name = 'template_name_example' # str | The template's title. Required with `type` 4; it must differ from this API client's other templates. (optional)
@@ -574,7 +574,7 @@ with signedly.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **file** | **bytearray**| A PDF or DOCX file. At most 2 MB. | 
+ **file** | **bytearray**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | 
  **name** | **str**| The document&#39;s name. It must differ from every other upload of this API client. | 
  **type** | **int**| 2 Document · 4 Template | 
  **template_name** | **str**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] 
@@ -639,7 +639,7 @@ configuration.api_key['Bearer'] = os.environ["API_KEY"]
 with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.DocumentsApi(api_client)
-    file = None # bytearray | A PDF or DOCX file.
+    file = None # bytearray | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
     signee_name = 'signee_name_example' # str | The signer's name.
     signee_email = 'signee_email_example' # str | The signer's email address.
     redirect_url = 'redirect_url_example' # str | Where the signer is sent after signing.
@@ -661,7 +661,7 @@ with signedly.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **file** | **bytearray**| A PDF or DOCX file. | 
+ **file** | **bytearray**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. | 
  **signee_name** | **str**| The signer&#39;s name. | 
  **signee_email** | **str**| The signer&#39;s email address. | 
  **redirect_url** | **str**| Where the signer is sent after signing. | 

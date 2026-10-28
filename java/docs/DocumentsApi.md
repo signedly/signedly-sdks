@@ -994,7 +994,7 @@ public class Example {
         //Bearer.setApiKeyPrefix("Token");
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
-        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. At most 2 MB.
+        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
         String name = "name_example"; // String | The document's name. It must differ from every other upload of this API client.
         Integer type = 2; // Integer | 2 Document · 4 Template
         String templateName = "templateName_example"; // String | The template's title. Required with `type` 4; it must differ from this API client's other templates.
@@ -1017,7 +1017,7 @@ public class Example {
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **_file** | **File**| A PDF or DOCX file. At most 2 MB. | |
+| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | |
 | **name** | **String**| The document&#39;s name. It must differ from every other upload of this API client. | |
 | **type** | **Integer**| 2 Document · 4 Template | [enum: 2, 4] |
 | **templateName** | **String**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] |
@@ -1074,7 +1074,7 @@ public class Example {
         //Bearer.setApiKeyPrefix("Token");
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
-        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. At most 2 MB.
+        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
         String name = "name_example"; // String | The document's name. It must differ from every other upload of this API client.
         Integer type = 2; // Integer | 2 Document · 4 Template
         String templateName = "templateName_example"; // String | The template's title. Required with `type` 4; it must differ from this API client's other templates.
@@ -1099,7 +1099,7 @@ public class Example {
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **_file** | **File**| A PDF or DOCX file. At most 2 MB. | |
+| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | |
 | **name** | **String**| The document&#39;s name. It must differ from every other upload of this API client. | |
 | **type** | **Integer**| 2 Document · 4 Template | [enum: 2, 4] |
 | **templateName** | **String**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] |
@@ -1156,7 +1156,7 @@ public class Example {
         //Bearer.setApiKeyPrefix("Token");
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
-        File _file = new File("/path/to/file"); // File | A PDF or DOCX file.
+        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
         String signeeName = "signeeName_example"; // String | The signer's name.
         String signeeEmail = "signeeEmail_example"; // String | The signer's email address.
         URI redirectUrl = new URI(); // URI | Where the signer is sent after signing.
@@ -1180,7 +1180,7 @@ public class Example {
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **_file** | **File**| A PDF or DOCX file. | |
+| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. | |
 | **signeeName** | **String**| The signer&#39;s name. | |
 | **signeeEmail** | **String**| The signer&#39;s email address. | |
 | **redirectUrl** | **URI**| Where the signer is sent after signing. | |
@@ -1239,7 +1239,7 @@ public class Example {
         //Bearer.setApiKeyPrefix("Token");
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
-        File _file = new File("/path/to/file"); // File | A PDF or DOCX file.
+        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
         String signeeName = "signeeName_example"; // String | The signer's name.
         String signeeEmail = "signeeEmail_example"; // String | The signer's email address.
         URI redirectUrl = new URI(); // URI | Where the signer is sent after signing.
@@ -1265,7 +1265,7 @@ public class Example {
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **_file** | **File**| A PDF or DOCX file. | |
+| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. | |
 | **signeeName** | **String**| The signer&#39;s name. | |
 | **signeeEmail** | **String**| The signer&#39;s email address. | |
 | **redirectUrl** | **URI**| Where the signer is sent after signing. | |

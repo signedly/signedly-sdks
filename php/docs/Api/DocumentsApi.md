@@ -431,7 +431,7 @@ $apiInstance = new Signedly\Api\DocumentsApi(
     new GuzzleHttp\Client(),
     $config
 );
-$file = '/path/to/file.txt'; // \SplFileObject | A PDF or DOCX file. At most 2 MB.
+$file = '/path/to/file.txt'; // \SplFileObject | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
 $name = 'name_example'; // string | The document's name. It must differ from every other upload of this API client.
 $type = 56; // int | 2 Document · 4 Template
 $template_name = 'template_name_example'; // string | The template's title. Required with `type` 4; it must differ from this API client's other templates.
@@ -448,7 +448,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **file** | **\SplFileObject****\SplFileObject**| A PDF or DOCX file. At most 2 MB. | |
+| **file** | **\SplFileObject****\SplFileObject**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | |
 | **name** | **string**| The document&#39;s name. It must differ from every other upload of this API client. | |
 | **type** | **int**| 2 Document · 4 Template | |
 | **template_name** | **string**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] |
@@ -499,7 +499,7 @@ $apiInstance = new Signedly\Api\DocumentsApi(
     new GuzzleHttp\Client(),
     $config
 );
-$file = '/path/to/file.txt'; // \SplFileObject | A PDF or DOCX file.
+$file = '/path/to/file.txt'; // \SplFileObject | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
 $signee_name = 'signee_name_example'; // string | The signer's name.
 $signee_email = 'signee_email_example'; // string | The signer's email address.
 $redirect_url = 'redirect_url_example'; // string | Where the signer is sent after signing.
@@ -517,7 +517,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **file** | **\SplFileObject****\SplFileObject**| A PDF or DOCX file. | |
+| **file** | **\SplFileObject****\SplFileObject**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. | |
 | **signee_name** | **string**| The signer&#39;s name. | |
 | **signee_email** | **string**| The signer&#39;s email address. | |
 | **redirect_url** | **string**| Where the signer is sent after signing. | |

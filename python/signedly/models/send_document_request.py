@@ -30,7 +30,7 @@ class SendDocumentRequest(BaseModel):
     """ # noqa: E501
     document_id: StrictStr = Field(description="The document's ID.")
     expiry_date: date = Field(description="The last day the document can be signed, YYYY-MM-DD; it must be in the future.")
-    message: StrictStr = Field(description="The email's message.")
+    message: StrictStr = Field(description="The email's message; may be empty (\"\"), not null.")
     reminder_before_expiry_days: Optional[Annotated[int, Field(le=30, strict=True, ge=0)]] = Field(default=None, description="One more reminder this many days before the deadline (2–30); 0 is off. Every signatory still waiting is also reminded the day before it.")
     reminder_every_days: Optional[Annotated[int, Field(le=30, strict=True, ge=0)]] = Field(default=None, description="Automatic reminders: email each signatory who hasn't signed yet every this many days (1–30) after they were asked; 0 is off. Left out, your organisation's default applies (off unless set in the web app).")
     reminder_max: Optional[Annotated[int, Field(le=10, strict=True, ge=0)]] = Field(default=None, description="At most this many automatic reminders per signatory (1–10; 3 if left out while `reminder_every_days` is on).")

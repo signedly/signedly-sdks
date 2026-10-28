@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **elements** | [**List[FillAndSendDocumentRequestElementsInner]**](FillAndSendDocumentRequestElementsInner.md) | The fields to change; the others keep their values. | [optional] 
 **email** | **str** | The signatory&#39;s email address. | 
 **expiry_date** | **date** | The last day the document can be signed, YYYY-MM-DD; it must be in the future. | 
-**message** | **str** | The email&#39;s message. | 
+**message** | **str** | The email&#39;s message; may be empty (\&quot;\&quot;), not null. | 
 **name** | **str** | The signatory&#39;s name. | 
 **reminder_before_expiry_days** | **int** | One more reminder this many days before the deadline (2–30); 0 is off. Every signatory still waiting is also reminded the day before it. | [optional] 
 **reminder_every_days** | **int** | Automatic reminders: email each signatory who hasn&#39;t signed yet every this many days (1–30) after they were asked; 0 is off. Left out, your organisation&#39;s default applies (off unless set in the web app). | [optional] 

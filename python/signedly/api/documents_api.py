@@ -1803,7 +1803,7 @@ class DocumentsApi:
     @validate_call
     def upload_document(
         self,
-        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. At most 2 MB.")],
+        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.")],
         name: Annotated[StrictStr, Field(description="The document's name. It must differ from every other upload of this API client.")],
         type: Annotated[StrictInt, Field(description="2 Document · 4 Template")],
         template_name: Annotated[Optional[StrictStr], Field(description="The template's title. Required with `type` 4; it must differ from this API client's other templates.")] = None,
@@ -1824,7 +1824,7 @@ class DocumentsApi:
 
         Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
 
-        :param file: A PDF or DOCX file. At most 2 MB. (required)
+        :param file: A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. (required)
         :type file: bytearray
         :param name: The document's name. It must differ from every other upload of this API client. (required)
         :type name: str
@@ -1883,7 +1883,7 @@ class DocumentsApi:
     @validate_call
     def upload_document_with_http_info(
         self,
-        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. At most 2 MB.")],
+        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.")],
         name: Annotated[StrictStr, Field(description="The document's name. It must differ from every other upload of this API client.")],
         type: Annotated[StrictInt, Field(description="2 Document · 4 Template")],
         template_name: Annotated[Optional[StrictStr], Field(description="The template's title. Required with `type` 4; it must differ from this API client's other templates.")] = None,
@@ -1904,7 +1904,7 @@ class DocumentsApi:
 
         Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
 
-        :param file: A PDF or DOCX file. At most 2 MB. (required)
+        :param file: A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. (required)
         :type file: bytearray
         :param name: The document's name. It must differ from every other upload of this API client. (required)
         :type name: str
@@ -1963,7 +1963,7 @@ class DocumentsApi:
     @validate_call
     def upload_document_without_preload_content(
         self,
-        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. At most 2 MB.")],
+        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.")],
         name: Annotated[StrictStr, Field(description="The document's name. It must differ from every other upload of this API client.")],
         type: Annotated[StrictInt, Field(description="2 Document · 4 Template")],
         template_name: Annotated[Optional[StrictStr], Field(description="The template's title. Required with `type` 4; it must differ from this API client's other templates.")] = None,
@@ -1984,7 +1984,7 @@ class DocumentsApi:
 
         Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
 
-        :param file: A PDF or DOCX file. At most 2 MB. (required)
+        :param file: A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. (required)
         :type file: bytearray
         :param name: The document's name. It must differ from every other upload of this API client. (required)
         :type name: str
@@ -2126,7 +2126,7 @@ class DocumentsApi:
     @validate_call
     def upload_document_for_one_signer(
         self,
-        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file.")],
+        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.")],
         signee_name: Annotated[StrictStr, Field(description="The signer's name.")],
         signee_email: Annotated[StrictStr, Field(description="The signer's email address.")],
         redirect_url: Annotated[StrictStr, Field(description="Where the signer is sent after signing.")],
@@ -2148,7 +2148,7 @@ class DocumentsApi:
 
         Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one.
 
-        :param file: A PDF or DOCX file. (required)
+        :param file: A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. (required)
         :type file: bytearray
         :param signee_name: The signer's name. (required)
         :type signee_name: str
@@ -2211,7 +2211,7 @@ class DocumentsApi:
     @validate_call
     def upload_document_for_one_signer_with_http_info(
         self,
-        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file.")],
+        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.")],
         signee_name: Annotated[StrictStr, Field(description="The signer's name.")],
         signee_email: Annotated[StrictStr, Field(description="The signer's email address.")],
         redirect_url: Annotated[StrictStr, Field(description="Where the signer is sent after signing.")],
@@ -2233,7 +2233,7 @@ class DocumentsApi:
 
         Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one.
 
-        :param file: A PDF or DOCX file. (required)
+        :param file: A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. (required)
         :type file: bytearray
         :param signee_name: The signer's name. (required)
         :type signee_name: str
@@ -2296,7 +2296,7 @@ class DocumentsApi:
     @validate_call
     def upload_document_for_one_signer_without_preload_content(
         self,
-        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file.")],
+        file: Annotated[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]], Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.")],
         signee_name: Annotated[StrictStr, Field(description="The signer's name.")],
         signee_email: Annotated[StrictStr, Field(description="The signer's email address.")],
         redirect_url: Annotated[StrictStr, Field(description="Where the signer is sent after signing.")],
@@ -2318,7 +2318,7 @@ class DocumentsApi:
 
         Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one.
 
-        :param file: A PDF or DOCX file. (required)
+        :param file: A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. (required)
         :type file: bytearray
         :param signee_name: The signer's name. (required)
         :type signee_name: str

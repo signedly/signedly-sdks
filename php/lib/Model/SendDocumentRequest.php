@@ -434,7 +434,7 @@ class SendDocumentRequest implements ModelInterface, ArrayAccess, \JsonSerializa
     /**
      * Sets message
      *
-     * @param string $message The email's message.
+     * @param string $message The email's message; may be empty (\"\"), not null.
      *
      * @return self
      */

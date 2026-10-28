@@ -1087,8 +1087,8 @@ paths:
         content:
           application/json:
             schema:
-              description: "The fields, all on the same document (the first one's\
-                \ `document_id` is used)."
+              description: "A non-empty array of fields, all on the same document\
+                \ (the first one's `document_id` is used). Anything else is a 400."
               items:
                 $ref: '#/components/schemas/create_document_fields_request_inner'
               type: array
@@ -2039,8 +2039,8 @@ paths:
         content:
           application/json:
             schema:
-              description: "The fields, all on the same document (the first one's\
-                \ `document_id` is used)."
+              description: "A non-empty array of fields, all on the same document\
+                \ (the first one's `document_id` is used). Anything else is a 400."
               items:
                 $ref: '#/components/schemas/create_template_fields_request_inner'
               type: array
@@ -5270,7 +5270,7 @@ components:
           format: date
           type: string
         message:
-          description: The email's message.
+          description: "The email's message; may be empty (\"\"), not null."
           type: string
         reminder_before_expiry_days:
           description: One more reminder this many days before the deadline (2–30);
@@ -5383,7 +5383,7 @@ components:
           format: date
           type: string
         message:
-          description: The email's message.
+          description: "The email's message; may be empty (\"\"), not null."
           type: string
         name:
           description: The signatory's name.
@@ -6033,7 +6033,9 @@ components:
     upload_document_request:
       properties:
         file:
-          description: A PDF or DOCX file. At most 2 MB.
+          description: "A PDF or DOCX file. A PDF that can't be read (damaged, or\
+            \ not really a PDF) is refused with 400 and the reason; save or export\
+            \ it as a new PDF and upload that. At most 2 MB."
           format: binary
           type: string
         name:
@@ -6059,7 +6061,9 @@ components:
     upload_document_for_one_signer_request:
       properties:
         file:
-          description: A PDF or DOCX file.
+          description: "A PDF or DOCX file. A PDF that can't be read (damaged, or\
+            \ not really a PDF) is refused with 400 and the reason; save or export\
+            \ it as a new PDF and upload that."
           format: binary
           type: string
         signee_name:

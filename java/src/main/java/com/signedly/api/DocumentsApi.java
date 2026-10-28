@@ -596,7 +596,7 @@ public class DocumentsApi {
   /**
    * Upload a document or template
    * Uploads a PDF or DOCX file of up to 2 MB as a document (&#x60;type&#x60; 2) or a template (&#x60;type&#x60; 4). The answer is the upload; the document itself is made in the background. Find it in &#x60;GET /ap1/documents/?name&#x3D;&lt;name&gt;&#x60; (its &#x60;upload.id&#x60; is this upload&#39;s &#x60;id&#x60;), or a template in &#x60;GET /ap1/templates/&#x60;, and wait until &#x60;GET /ap1/documents/{id}/pages/&#x60; lists its pages before placing fields.
-   * @param _file A PDF or DOCX file. At most 2 MB. (required)
+   * @param _file A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. (required)
    * @param name The document&#39;s name. It must differ from every other upload of this API client. (required)
    * @param type 2 Document · 4 Template (required)
    * @param templateName The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. (optional)
@@ -611,7 +611,7 @@ public class DocumentsApi {
   /**
    * Upload a document or template
    * Uploads a PDF or DOCX file of up to 2 MB as a document (&#x60;type&#x60; 2) or a template (&#x60;type&#x60; 4). The answer is the upload; the document itself is made in the background. Find it in &#x60;GET /ap1/documents/?name&#x3D;&lt;name&gt;&#x60; (its &#x60;upload.id&#x60; is this upload&#39;s &#x60;id&#x60;), or a template in &#x60;GET /ap1/templates/&#x60;, and wait until &#x60;GET /ap1/documents/{id}/pages/&#x60; lists its pages before placing fields.
-   * @param _file A PDF or DOCX file. At most 2 MB. (required)
+   * @param _file A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. (required)
    * @param name The document&#39;s name. It must differ from every other upload of this API client. (required)
    * @param type 2 Document · 4 Template (required)
    * @param templateName The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. (optional)
@@ -705,7 +705,7 @@ public class DocumentsApi {
   /**
    * Upload a document for one signer and get their signing link
    * Uploads a PDF or DOCX for one signer and returns their signing link in &#x60;redirect_url&#x60;; give it to the signer. They place their own signature on the signing page and are then sent to the &#x60;redirect_url&#x60; you gave. The signed PDF and its audit trail are emailed to &#x60;final_email&#x60;, or to your organisation&#39;s admin without one.
-   * @param _file A PDF or DOCX file. (required)
+   * @param _file A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. (required)
    * @param signeeName The signer&#39;s name. (required)
    * @param signeeEmail The signer&#39;s email address. (required)
    * @param redirectUrl Where the signer is sent after signing. (required)
@@ -721,7 +721,7 @@ public class DocumentsApi {
   /**
    * Upload a document for one signer and get their signing link
    * Uploads a PDF or DOCX for one signer and returns their signing link in &#x60;redirect_url&#x60;; give it to the signer. They place their own signature on the signing page and are then sent to the &#x60;redirect_url&#x60; you gave. The signed PDF and its audit trail are emailed to &#x60;final_email&#x60;, or to your organisation&#39;s admin without one.
-   * @param _file A PDF or DOCX file. (required)
+   * @param _file A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. (required)
    * @param signeeName The signer&#39;s name. (required)
    * @param signeeEmail The signer&#39;s email address. (required)
    * @param redirectUrl Where the signer is sent after signing. (required)

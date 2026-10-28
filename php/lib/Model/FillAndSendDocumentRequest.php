@@ -515,7 +515,7 @@ class FillAndSendDocumentRequest implements ModelInterface, ArrayAccess, \JsonSe
     /**
      * Sets message
      *
-     * @param string $message The email's message.
+     * @param string $message The email's message; may be empty (\"\"), not null.
      *
      * @return self
      */
