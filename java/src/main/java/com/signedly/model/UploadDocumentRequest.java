@@ -101,7 +101,7 @@ public class UploadDocumentRequest {
   }
 
   /**
-   * A PDF or DOCX file. At most 2 MB.
+   * A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
    * @return _file
    */
   @javax.annotation.Nonnull

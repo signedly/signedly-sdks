@@ -33,7 +33,7 @@ class FillAndSendDocumentRequest(BaseModel):
     elements: Optional[List[FillAndSendDocumentRequestElementsInner]] = Field(default=None, description="The fields to change; the others keep their values.")
     email: StrictStr = Field(description="The signatory's email address.")
     expiry_date: date = Field(description="The last day the document can be signed, YYYY-MM-DD; it must be in the future.")
-    message: StrictStr = Field(description="The email's message.")
+    message: StrictStr = Field(description="The email's message; may be empty (\"\"), not null.")
     name: StrictStr = Field(description="The signatory's name.")
     reminder_before_expiry_days: Optional[Annotated[int, Field(le=30, strict=True, ge=0)]] = Field(default=None, description="One more reminder this many days before the deadline (2–30); 0 is off. Every signatory still waiting is also reminded the day before it.")
     reminder_every_days: Optional[Annotated[int, Field(le=30, strict=True, ge=0)]] = Field(default=None, description="Automatic reminders: email each signatory who hasn't signed yet every this many days (1–30) after they were asked; 0 is off. Left out, your organisation's default applies (off unless set in the web app).")

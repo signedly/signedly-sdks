@@ -1745,7 +1745,7 @@
                   "type": "string"
                 },
                 "message": {
-                  "description": "The email's message.",
+                  "description": "The email's message; may be empty (\"\"), not null.",
                   "type": "string"
                 },
                 "reminder_before_expiry_days": {
@@ -2008,7 +2008,7 @@
                   "type": "string"
                 },
                 "message": {
-                  "description": "The email's message.",
+                  "description": "The email's message; may be empty (\"\"), not null.",
                   "type": "string"
                 },
                 "name": {
@@ -2677,7 +2677,7 @@
             "name": "data",
             "required": true,
             "schema": {
-              "description": "The fields, all on the same document (the first one's `document_id` is used).",
+              "description": "A non-empty array of fields, all on the same document (the first one's `document_id` is used). Anything else is a 400.",
               "items": {
                 "properties": {
                   "align": {
@@ -4619,7 +4619,7 @@
             "name": "data",
             "required": true,
             "schema": {
-              "description": "The fields, all on the same document (the first one's `document_id` is used).",
+              "description": "A non-empty array of fields, all on the same document (the first one's `document_id` is used). Anything else is a 400.",
               "items": {
                 "properties": {
                   "align": {
@@ -5298,7 +5298,7 @@
         "operationId": "upload_document",
         "parameters": [
           {
-            "description": "A PDF or DOCX file. At most 2 MB.",
+            "description": "A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.",
             "in": "formData",
             "name": "file",
             "required": true,
@@ -5381,7 +5381,7 @@
         "operationId": "upload_document_for_one_signer",
         "parameters": [
           {
-            "description": "A PDF or DOCX file.",
+            "description": "A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.",
             "in": "formData",
             "name": "file",
             "required": true,

@@ -130,7 +130,7 @@ public class SendDocumentRequest {
   }
 
   /**
-   * The email&#39;s message.
+   * The email&#39;s message; may be empty (\&quot;\&quot;), not null.
    * @return message
    */
   @javax.annotation.Nonnull

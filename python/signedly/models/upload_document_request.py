@@ -26,7 +26,7 @@ class UploadDocumentRequest(BaseModel):
     """
     UploadDocumentRequest
     """ # noqa: E501
-    file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]] = Field(description="A PDF or DOCX file. At most 2 MB.")
+    file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]] = Field(description="A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.")
     name: StrictStr = Field(description="The document's name. It must differ from every other upload of this API client.")
     type: StrictInt = Field(description="2 Document · 4 Template")
     template_name: Optional[StrictStr] = Field(default=None, description="The template's title. Required with `type` 4; it must differ from this API client's other templates.")

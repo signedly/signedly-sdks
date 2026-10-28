@@ -1102,7 +1102,7 @@ export interface FillAndSendDocumentRequest {
      */
     'expiry_date': string;
     /**
-     * The email\'s message.
+     * The email\'s message; may be empty (\"\"), not null.
      * @type {string}
      * @memberof FillAndSendDocumentRequest
      */
@@ -1544,7 +1544,7 @@ export interface SendDocumentRequest {
      */
     'expiry_date': string;
     /**
-     * The email\'s message.
+     * The email\'s message; may be empty (\"\"), not null.
      * @type {string}
      * @memberof SendDocumentRequest
      */
@@ -2225,7 +2225,7 @@ export interface UploadDocumentForOneSigner200Response {
  */
 export interface UploadDocumentForOneSignerRequest {
     /**
-     * A PDF or DOCX file.
+     * A PDF or DOCX file. A PDF that can\'t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
      * @type {File}
      * @memberof UploadDocumentForOneSignerRequest
      */
@@ -2262,7 +2262,7 @@ export interface UploadDocumentForOneSignerRequest {
  */
 export interface UploadDocumentRequest {
     /**
-     * A PDF or DOCX file. At most 2 MB.
+     * A PDF or DOCX file. A PDF that can\'t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
      * @type {File}
      * @memberof UploadDocumentRequest
      */
@@ -3516,7 +3516,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
          * @summary Upload a document or template
-         * @param {File} file A PDF or DOCX file. At most 2 MB.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
          * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
          * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
          * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3579,7 +3579,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
         /**
          * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
          * @summary Upload a document for one signer and get their signing link
-         * @param {File} file A PDF or DOCX file.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
          * @param {string} signeeName The signer\\\&#39;s name.
          * @param {string} signeeEmail The signer\\\&#39;s email address.
          * @param {string} redirectUrl Where the signer is sent after signing.
@@ -3745,7 +3745,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
          * @summary Upload a document or template
-         * @param {File} file A PDF or DOCX file. At most 2 MB.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
          * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
          * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
          * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3761,7 +3761,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
         /**
          * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
          * @summary Upload a document for one signer and get their signing link
-         * @param {File} file A PDF or DOCX file.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
          * @param {string} signeeName The signer\\\&#39;s name.
          * @param {string} signeeEmail The signer\\\&#39;s email address.
          * @param {string} redirectUrl Where the signer is sent after signing.
@@ -3856,7 +3856,7 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
         /**
          * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
          * @summary Upload a document or template
-         * @param {File} file A PDF or DOCX file. At most 2 MB.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
          * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
          * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
          * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3869,7 +3869,7 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
         /**
          * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
          * @summary Upload a document for one signer and get their signing link
-         * @param {File} file A PDF or DOCX file.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
          * @param {string} signeeName The signer\\\&#39;s name.
          * @param {string} signeeEmail The signer\\\&#39;s email address.
          * @param {string} redirectUrl Where the signer is sent after signing.
@@ -3973,7 +3973,7 @@ export class DocumentsApi extends BaseAPI {
     /**
      * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
      * @summary Upload a document or template
-     * @param {File} file A PDF or DOCX file. At most 2 MB.
+     * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
      * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
      * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
      * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3988,7 +3988,7 @@ export class DocumentsApi extends BaseAPI {
     /**
      * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
      * @summary Upload a document for one signer and get their signing link
-     * @param {File} file A PDF or DOCX file.
+     * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
      * @param {string} signeeName The signer\\\&#39;s name.
      * @param {string} signeeEmail The signer\\\&#39;s email address.
      * @param {string} redirectUrl Where the signer is sent after signing.
