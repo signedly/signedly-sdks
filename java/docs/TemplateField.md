@@ -20,7 +20,7 @@
 |**isMultiLine** | **Boolean** | Text: the signer may type several lines. |  [optional] |
 |**isRequired** | **Boolean** | False: the signer may leave it empty. |  [optional] |
 |**items** | **List&lt;Object&gt;** | Radio: the options, each &#x60;{x, y, selected}&#x60;. |  [optional] |
-|**kind** | **Integer** | The field&#39;s type: 1 Text · 2 Signature · 3 Date · 4 Initials · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp. |  [optional] |
+|**kind** | **Integer** | The field&#39;s type: 1 Text · 2 Signature · 3 Date · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp. |  [optional] |
 |**label** | **String** | The field&#39;s name, shown to the signer. |  [optional] |
 |**maxLength** | **Integer** | Text: the most characters the signer may type. |  [optional] |
 |**numberFormat** | **Object** | How a calculated number is shown, or null. |  [optional] |

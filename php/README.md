@@ -28,6 +28,31 @@ belong to it and appear in its Signedly web app, and you can reach only that
 account's documents, templates, signatories and fields. Another organisation's
 IDs answer 404, as if they didn't exist.
 
+## Plans
+
+What the API allows depends on the Signedly plan of your **organisation's admin
+account** (Account & Settings → Account & Plan). The same rules apply to live and
+test keys.
+
+| What | Free | Personal Pro | Business Pro | Teams |
+|---|---|---|---|---|
+| Generate live and test keys (Account & Settings → API) | – | ✓ | ✓ | ✓ |
+| Every endpoint, `/ap1/token/` and `/ap1/refreshtoken/` included | – | ✓ | ✓ | ✓ |
+| `require_email_otp` on `POST /ap1/signatories/` and `POST /ap1/signatories/bulk/` | – | ✓ | ✓ | ✓ |
+| Bulk send: `GET /ap1/bulk-sends/columns/` and `POST /ap1/bulk-sends/` | – | – | – | ✓ |
+
+The API is part of the paid plans. On Free (or with no plan) every call answers
+403 `\"... Your plan doesn't include API access.\"`, with live or test keys, also
+with a token or keys made earlier; they work again once the plan is paid. On a
+paid plan, a feature it doesn't include answers 400 with
+`\"Your plan doesn't include ...\"` and changes nothing, and
+`GET /ap1/bulk-sends/{id}/` still reports bulk sends already made.
+
+Live documents also need an API contract with Signedly. Without one, or with an
+unpaid API invoice, `POST /ap1/upload/` (except templates), `/ap1/upload_app/`,
+`/ap1/documents/fromtemplate/` and `/ap1/bulk-sends/` answer 402 with live keys.
+Test keys work without a contract (see Sandbox).
+
 ## Sending a document for signing
 
 1. `POST /ap1/upload/` a PDF or DOCX (`type` 2). The document is prepared in the
@@ -195,8 +220,9 @@ fields and sends are only accepted while a document is 1–3 (not yet sent).
 
 | Status | Meaning |
 |---|---|
-| 400 | The request was refused; the body says why (`{\"error\": \"...\"}`, or the name of each bad field with its messages). Nothing was changed. |
-| 403 | The access token is missing, unknown or expired; the client ID and secret or the refresh token were refused; or an `expiry_date` isn't in the future (`\"Invalid Date Entered\"`). |
+| 400 | The request was refused, also when your plan doesn't include it (see Plans); the body says why (`{\"error\": \"...\"}`, or the name of each bad field with its messages). Nothing was changed. |
+| 403 | The access token is missing, unknown or expired; the client ID and secret or the refresh token were refused; the organisation's plan has no API access (Free, see Plans); or an `expiry_date` isn't in the future (`\"Invalid Date Entered\"`). |
+| 402 | No API contract, or an unpaid API invoice: live documents are refused (test keys keep working). |
 | 404 | The document, template, signatory or field doesn't exist or isn't yours. |
 | 429 | Too many token requests (wait a minute), or this month's 50 test documents are used. |
 | 5xx | Our side failed; retry later. |

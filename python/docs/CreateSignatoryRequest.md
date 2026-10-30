@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **document_id** | **str** | The document&#39;s ID. | 
 **email** | **str** | The signatory&#39;s email address; the signing link goes there. | 
 **name** | **str** | The signatory&#39;s name. | 
-**require_email_otp** | **bool** | True: whenever they open their signing link, a one-time code is e-mailed to them first (needs a plan with signer access codes). | [optional] [default to False]
+**require_email_otp** | **bool** | True: whenever they open their signing link, a one-time code is e-mailed to them first (needs Personal Pro, Business Pro or Teams; see Plans). | [optional] [default to False]
 
 ## Example
 
