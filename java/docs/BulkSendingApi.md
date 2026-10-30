@@ -19,7 +19,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 Send a template to many people
 
-Makes and sends one document per row from one of your templates, as the web app&#39;s Bulk Sending does: each row fills the template&#39;s roles and fields. Give the rows as a CSV or Excel &#x60;file&#x60; (multipart) or as JSON &#x60;rows&#x60;, with the columns from GET /ap1/bulk-sends/columns/. The whole file is checked first: if any row has a problem nothing is sent and the answer lists every one. Up to 1,000 rows; each document is billed like a single send. &#x60;subject&#x60; and &#x60;message&#x60; may use {{column}} tags. Needs a plan with bulk sending. The documents are made in the background: follow them with GET /ap1/bulk-sends/{id}/ (or webhooks).
+Makes and sends one document per row from one of your templates, as the web app&#39;s Bulk Sending does: each row fills the template&#39;s roles and fields. Give the rows as a CSV or Excel &#x60;file&#x60; (multipart) or as JSON &#x60;rows&#x60;, with the columns from GET /ap1/bulk-sends/columns/. The whole file is checked first: if any row has a problem nothing is sent and the answer lists every one. Up to 1,000 rows; each document is billed like a single send. &#x60;subject&#x60; and &#x60;message&#x60; may use {{column}} tags. Needs the Teams plan, with live or test keys. The documents are made in the background: follow them with GET /ap1/bulk-sends/{id}/ (or webhooks).
 
 ### Example
 
@@ -84,7 +84,7 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **202** | Accepted; the documents are being made. |  -  |
-| **400** | A row has a problem (every one is listed), a tag isn&#39;t a column, the date isn&#39;t in the future, or the plan has no bulk sending. |  -  |
+| **400** | A row has a problem (every one is listed), a tag isn&#39;t a column, the date isn&#39;t in the future, or the plan isn&#39;t Teams. |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 | **429** | With test keys: more rows than this month&#39;s test documents left. |  -  |
 
@@ -94,7 +94,7 @@ public class Example {
 
 Send a template to many people
 
-Makes and sends one document per row from one of your templates, as the web app&#39;s Bulk Sending does: each row fills the template&#39;s roles and fields. Give the rows as a CSV or Excel &#x60;file&#x60; (multipart) or as JSON &#x60;rows&#x60;, with the columns from GET /ap1/bulk-sends/columns/. The whole file is checked first: if any row has a problem nothing is sent and the answer lists every one. Up to 1,000 rows; each document is billed like a single send. &#x60;subject&#x60; and &#x60;message&#x60; may use {{column}} tags. Needs a plan with bulk sending. The documents are made in the background: follow them with GET /ap1/bulk-sends/{id}/ (or webhooks).
+Makes and sends one document per row from one of your templates, as the web app&#39;s Bulk Sending does: each row fills the template&#39;s roles and fields. Give the rows as a CSV or Excel &#x60;file&#x60; (multipart) or as JSON &#x60;rows&#x60;, with the columns from GET /ap1/bulk-sends/columns/. The whole file is checked first: if any row has a problem nothing is sent and the answer lists every one. Up to 1,000 rows; each document is billed like a single send. &#x60;subject&#x60; and &#x60;message&#x60; may use {{column}} tags. Needs the Teams plan, with live or test keys. The documents are made in the background: follow them with GET /ap1/bulk-sends/{id}/ (or webhooks).
 
 ### Example
 
@@ -162,7 +162,7 @@ ApiResponse<[**CreateBulkSend202Response**](CreateBulkSend202Response.md)>
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **202** | Accepted; the documents are being made. |  -  |
-| **400** | A row has a problem (every one is listed), a tag isn&#39;t a column, the date isn&#39;t in the future, or the plan has no bulk sending. |  -  |
+| **400** | A row has a problem (every one is listed), a tag isn&#39;t a column, the date isn&#39;t in the future, or the plan isn&#39;t Teams. |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 | **429** | With test keys: more rows than this month&#39;s test documents left. |  -  |
 
@@ -323,7 +323,7 @@ ApiResponse<[**CreateBulkSend202Response**](CreateBulkSend202Response.md)>
 
 List the columns a template&#39;s bulk send needs
 
-The columns of a bulk send file (or &#x60;rows&#x60;) for this template, in order: the recipient&#39;s name and email, each other open role&#39;s name and email, and one per field the sender fills in, each with what to put in it.
+The columns of a bulk send file (or &#x60;rows&#x60;) for this template, in order: the recipient&#39;s name and email, each other open role&#39;s name and email, and one per field the sender fills in, each with what to put in it. Needs the Teams plan, like the bulk send itself.
 
 ### Example
 
@@ -388,6 +388,7 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The columns. |  -  |
+| **400** | The organisation admin&#39;s plan has no bulk sending (Teams only). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 ## listBulkSendColumnsWithHttpInfo
@@ -396,7 +397,7 @@ public class Example {
 
 List the columns a template&#39;s bulk send needs
 
-The columns of a bulk send file (or &#x60;rows&#x60;) for this template, in order: the recipient&#39;s name and email, each other open role&#39;s name and email, and one per field the sender fills in, each with what to put in it.
+The columns of a bulk send file (or &#x60;rows&#x60;) for this template, in order: the recipient&#39;s name and email, each other open role&#39;s name and email, and one per field the sender fills in, each with what to put in it. Needs the Teams plan, like the bulk send itself.
 
 ### Example
 
@@ -464,5 +465,6 @@ ApiResponse<[**List&lt;ListBulkSendColumns200ResponseInner&gt;**](ListBulkSendCo
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The columns. |  -  |
+| **400** | The organisation admin&#39;s plan has no bulk sending (Teams only). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 

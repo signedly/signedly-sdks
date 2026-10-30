@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 **is_multi_line** | **bool** | Text: true lets the signer type several lines. | [optional] [default to false]
 **is_required** | **bool** | False lets the signer leave it empty. | [optional] [default to true]
 **items** | [**\Signedly\Model\UpdateDocumentFieldByBodyRequestItemsInner[]**](UpdateDocumentFieldByBodyRequestItemsInner.md) | Radio: required; the options, at least two, each &#x60;width&#x60; x &#x60;height&#x60;. &#x60;selected&#x60; 1 starts that option chosen. | [optional]
-**kind** | **int** | The field&#39;s type: 1 Text · 2 Signature · 3 Date · 4 Initials · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp. |
+**kind** | **int** | The field&#39;s type: 1 Text · 2 Signature · 3 Date · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp. |
 **label** | **string** | The field&#39;s name, shown to the signer. |
 **max_length** | **int** | Text: the most characters the signer may type (1–550). | [optional]
 **number_format** | **object** | How a calculated number is shown, e.g. {\&quot;kind\&quot;: \&quot;number\&quot;, \&quot;style\&quot;: \&quot;indian\&quot;, \&quot;decimals\&quot;: 2} or {\&quot;kind\&quot;: \&quot;words\&quot;, \&quot;currency\&quot;: \&quot;INR\&quot;}. | [optional]

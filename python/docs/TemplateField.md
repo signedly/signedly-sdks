@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 **is_multi_line** | **bool** | Text: the signer may type several lines. | [optional] 
 **is_required** | **bool** | False: the signer may leave it empty. | [optional] 
 **items** | **List[object]** | Radio: the options, each &#x60;{x, y, selected}&#x60;. | [optional] 
-**kind** | **int** | The field&#39;s type: 1 Text · 2 Signature · 3 Date · 4 Initials · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp. | [optional] 
+**kind** | **int** | The field&#39;s type: 1 Text · 2 Signature · 3 Date · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp. | [optional] 
 **label** | **str** | The field&#39;s name, shown to the signer. | [optional] 
 **max_length** | **int** | Text: the most characters the signer may type. | [optional] 
 **number_format** | **object** | How a calculated number is shown, or null. | [optional] 

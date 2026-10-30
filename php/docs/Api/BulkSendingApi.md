@@ -17,7 +17,7 @@ createBulkSend($data): \Signedly\Model\CreateBulkSend202Response
 
 Send a template to many people
 
-Makes and sends one document per row from one of your templates, as the web app's Bulk Sending does: each row fills the template's roles and fields. Give the rows as a CSV or Excel `file` (multipart) or as JSON `rows`, with the columns from GET /ap1/bulk-sends/columns/. The whole file is checked first: if any row has a problem nothing is sent and the answer lists every one. Up to 1,000 rows; each document is billed like a single send. `subject` and `message` may use {{column}} tags. Needs a plan with bulk sending. The documents are made in the background: follow them with GET /ap1/bulk-sends/{id}/ (or webhooks).
+Makes and sends one document per row from one of your templates, as the web app's Bulk Sending does: each row fills the template's roles and fields. Give the rows as a CSV or Excel `file` (multipart) or as JSON `rows`, with the columns from GET /ap1/bulk-sends/columns/. The whole file is checked first: if any row has a problem nothing is sent and the answer lists every one. Up to 1,000 rows; each document is billed like a single send. `subject` and `message` may use {{column}} tags. Needs the Teams plan, with live or test keys. The documents are made in the background: follow them with GET /ap1/bulk-sends/{id}/ (or webhooks).
 
 ### Example
 
@@ -141,7 +141,7 @@ listBulkSendColumns($template_id): \Signedly\Model\ListBulkSendColumns200Respons
 
 List the columns a template's bulk send needs
 
-The columns of a bulk send file (or `rows`) for this template, in order: the recipient's name and email, each other open role's name and email, and one per field the sender fills in, each with what to put in it.
+The columns of a bulk send file (or `rows`) for this template, in order: the recipient's name and email, each other open role's name and email, and one per field the sender fills in, each with what to put in it. Needs the Teams plan, like the bulk send itself.
 
 ### Example
 
