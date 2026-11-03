@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # import apis into sdk package
 from signedly.api.api_request_logs_api import APIRequestLogsApi
