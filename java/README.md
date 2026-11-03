@@ -246,64 +246,47 @@ whenever you need it.
 
 ## Requirements
 
-Building the API client library requires:
-
-1. Java 11+
-2. Maven/Gradle
+Java 11+
 
 ## Installation
 
-To install the API client library to your local Maven repository, simply execute:
-
-```shell
-mvn clean install
-```
-
-To deploy it to a remote Maven repository instead, configure the settings of the repository and execute:
-
-```shell
-mvn clean deploy
-```
-
-Refer to the [OSSRH Guide](http://central.sonatype.org/pages/ossrh-guide.html) for more information.
-
-### Maven users
-
-Add this dependency to your project's POM:
+### Maven
 
 ```xml
 <dependency>
   <groupId>com.signedly</groupId>
   <artifactId>signedly-sdk</artifactId>
   <version>0.1.0</version>
-  <scope>compile</scope>
 </dependency>
 ```
 
-### Gradle users
-
-Add this dependency to your project's build file:
+### Gradle
 
 ```groovy
-compile "com.signedly:signedly-sdk:0.1.0"
+implementation "com.signedly:signedly-sdk:0.1.0"
 ```
 
-### Others
+### Logging in
 
-At first generate the JAR by executing:
+Generate a client ID and secret in Signedly under **Account & Settings → API** (test keys for the sandbox, live keys for real documents). The helper fetches the access token on the first call and renews it before it expires.
 
-```shell
-mvn clean package
+```java
+import com.signedly.api.DocumentsApi;
+import com.signedly.client.ApiClient;
+import com.signedly.helpers.SignedlyAuth;
+import com.signedly.model.DocumentPage;
+
+ApiClient client = SignedlyAuth.client(clientId, clientSecret);
+DocumentPage page = new DocumentsApi(client).listDocuments(null, null, null, null, null);
 ```
 
-Then manually install the following JARs:
+Check every webhook event with `com.signedly.helpers.Webhook.verifySignature(secret, header, rawBody)`, passing the raw request body.
 
-- `target/signedly-sdk-0.1.0.jar`
-- `target/lib/*.jar`
+The whole API (every endpoint, field and status) is documented at https://l0ads.signedly.com/swaggerap1/. The [repository README](https://github.com/signedly/signedly-sdks#readme) covers the usual flow, webhooks and the sandbox.
 
 ## Getting Started
 
-Please follow the [installation](#installation) instruction and execute the following Java code:
+Calling an endpoint with the generated client and an access token you manage yourself:
 
 ```java
 

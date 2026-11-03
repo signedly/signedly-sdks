@@ -241,40 +241,30 @@ For more information, please visit [https://signedly.com](https://signedly.com).
 ### Requirements
 
 PHP 7.4 and later.
-Should also work with PHP 8.0.
 
 ### Composer
 
-To install the bindings via [Composer](https://getcomposer.org/), add the following to `composer.json`:
-
-```json
-{
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/signedly/signedly-sdks.git"
-    }
-  ],
-  "require": {
-    "signedly/signedly-sdks": "*@dev"
-  }
-}
+```sh
+composer require signedly/sdk
 ```
 
-Then run `composer install`
-
-### Manual Installation
-
-Download the files and include `autoload.php`:
+Generate a client ID and secret in Signedly under **Account & Settings → API** (test keys for the sandbox, live keys for real documents). The helper fetches the access token on the first call and renews it before it expires.
 
 ```php
 <?php
-require_once('/path/to/OpenAPIClient-php/vendor/autoload.php');
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$auth = new \Signedly\Helpers\SignedlyAuth($clientId, $clientSecret);
+$documents = (new \Signedly\Api\DocumentsApi(null, $auth->config()))->listDocuments();
 ```
+
+Call `$auth->config()` again in long-running jobs, so the token is renewed. Check every webhook event with `\Signedly\Helpers\Webhook::verifySignature($secret, $header, $rawBody)`, passing the raw request body.
+
+The whole API (every endpoint, field and status) is documented at https://l0ads.signedly.com/swaggerap1/. The [repository README](https://github.com/signedly/signedly-sdks#readme) covers the usual flow, webhooks and the sandbox.
 
 ## Getting Started
 
-Please follow the [installation procedure](#installation--usage) and then run the following:
+Calling an endpoint with the generated client and an access token you manage yourself:
 
 ```php
 <?php
