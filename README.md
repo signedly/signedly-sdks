@@ -144,7 +144,9 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
 **CI** (`.github/workflows/`):
 - `sdks.yml`, on every PR:
   - regenerating must change nothing (drift);
-  - each SDK builds, and its helper tests run.
+  - each SDK builds, and its helper tests run;
+  - each SDK logs in through its helper against a fake Signedly and must send the
+    token (`scripts/fake_signedly.py`; Java's `LoginTest`).
 - `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. That means a backend release changed the API, so update the spec and publish new versions.
 
 ## Publishing
@@ -152,7 +154,8 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
 Publishing needs Signedly's registry accounts and is done by a person. Every
 registry keeps a published version for good (PyPI and Maven Central never take the
 same version again), so publish only from an up-to-date `integration` with CI green.
-All four packages share one version.
+Each SDK has its own version (`config/<language>.yaml`): release only the ones
+that changed. Packagist takes the PHP version from the git tag `vX.Y.Z`.
 
 ### Accounts (once)
 
@@ -182,9 +185,10 @@ password manager, and add a second owner.
 
 ### Each release
 
-1. Bump the version in every `config/<language>.yaml` and in the Java install
-   lines of this README, run `scripts/generate.sh`, and merge that PR.
-2. From `integration`:
+1. Bump the version of each SDK that changed in its `config/<language>.yaml` (for
+   Java, also in the install lines of this README), run `scripts/generate.sh`, and
+   merge that PR.
+2. From `integration`, for the SDKs you bumped:
    ```bash
    # PyPI
    cd python && python -m pip install --upgrade build twine && python -m build \
@@ -193,8 +197,11 @@ password manager, and add a second owner.
    cd node && npm install && npm publish --access public && cd ..
    # Packagist reads the tag
    git tag vX.Y.Z && git push origin vX.Y.Z
-   # Maven Central (asks for the GPG passphrase)
-   cd java && mvn -P sign-artifacts deploy && cd ..
+   # Maven Central: give GPG the passphrase in the terminal first, or signing
+   # times out waiting for a pop-up
+   export GPG_TTY=$(tty)
+   echo test | gpg --pinentry-mode loopback --clearsign > /dev/null
+   cd java && mvn -P sign-artifacts -DskipTests deploy && cd ..
    ```
 3. Maven Central: in Deployments on central.sonatype.com, wait for "Validated" and
    click **Publish**.

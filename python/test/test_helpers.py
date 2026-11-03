@@ -60,3 +60,26 @@ def test_the_client_logs_in_then_refreshes_before_expiry(monkeypatch):
     now[0] += 2 * 3600 - 60  # within RENEW_BEFORE of expiry
     assert config.get_api_key_with_prefix("Bearer") == "Bearer refreshed-1"
     assert calls == [("token", "id"), ("refresh", "r1")]
+
+
+def test_requests_carry_the_token(monkeypatch):
+    """The generated client adds the Authorization header from auth_settings(),
+    which skips the hook unless "Bearer" is already in api_key."""
+    from types import SimpleNamespace
+
+    from signedly import helpers
+
+    class FakeAuth:
+        def get_access_token(self, request):
+            return SimpleNamespace(
+                access_token="tok-1",
+                refresh_token=None,
+                expiry_date=None,
+                refresh_token_expiry_date=None,
+            )
+
+    client = helpers.SignedlyClient("id", "secret")
+    client._auth = FakeAuth()
+    settings = client.configuration.auth_settings()
+    assert settings["Bearer"]["value"] == "Bearer tok-1"
+    assert settings["Bearer"]["key"] == "Authorization"

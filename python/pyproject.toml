@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "signedly"
-version = "0.1.0"
+version = "0.1.1"
 description = "Signedly API"
 authors = ["Signedly <support@signedly.com>"]
 license = "MIT"

@@ -43,6 +43,9 @@ class SignedlyClient:
         self.client_id, self.client_secret = client_id, client_secret
         self.configuration = Configuration(host=host)
         self.configuration.refresh_api_key_hook = self._ensure_token
+        # Configuration.auth_settings() only asks for the key (and so runs the hook)
+        # when "Bearer" is already in api_key; without this, requests carry no token.
+        self.configuration.api_key["Bearer"] = ""
         self.api_client = ApiClient(self.configuration)
         self._auth = AuthenticationApi(ApiClient(Configuration(host=host)))
         self._lock = threading.Lock()

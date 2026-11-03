@@ -27,6 +27,11 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install ./python pytest
       - run: cd python && pytest -q test/test_helpers.py
+      - name: Logs in and sends the token (fake Signedly)
+        run: |
+          python3 scripts/fake_signedly.py 8765 &
+          for i in $(seq 40); do curl -s -o /dev/null localhost:8765 && break; sleep 0.25; done
+          python -c 'from signedly.helpers import SignedlyClient; from signedly.api.documents_api import DocumentsApi; assert DocumentsApi(SignedlyClient("id", "secret", host="http://127.0.0.1:8765").api_client).list_documents().count == 0'
 
   node:
     runs-on: ubuntu-24.04
@@ -35,6 +40,11 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - run: cd node && npm install && npm run build && node --test helpers.test.mjs
+      - name: Logs in and sends the token (fake Signedly)
+        run: |
+          python3 scripts/fake_signedly.py 8765 &
+          for i in $(seq 40); do curl -s -o /dev/null localhost:8765 && break; sleep 0.25; done
+          cd node && node -e 'const { DocumentsApi } = require("./dist"); const { signedlyConfiguration } = require("./dist/helpers"); new DocumentsApi(signedlyConfiguration("id", "secret", "http://127.0.0.1:8765")).listDocuments().then((r) => { if (r.data.count !== 0) process.exit(1); }, (e) => { console.error(e.message); process.exit(1); });'
 
   php:
     runs-on: ubuntu-24.04
@@ -43,6 +53,11 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with: { php-version: "8.2", tools: composer }
       - run: cd php && composer install --no-interaction && vendor/bin/phpunit test/Helpers
+      - name: Logs in and sends the token (fake Signedly)
+        run: |
+          python3 scripts/fake_signedly.py 8765 &
+          for i in $(seq 40); do curl -s -o /dev/null localhost:8765 && break; sleep 0.25; done
+          cd php && php -r 'require "vendor/autoload.php"; $auth = new \Signedly\Helpers\SignedlyAuth("id", "secret", "http://127.0.0.1:8765"); exit((new \Signedly\Api\DocumentsApi(null, $auth->config()))->listDocuments()->getCount() === 0 ? 0 : 1);'
       - name: The Packagist package (root composer.json) installs php/lib
         run: |
           python3 -c '
@@ -60,4 +75,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: "17", cache: maven }
-      - run: cd java && mvn -B -q test -Dtest=WebhookTest -Dsurefire.failIfNoSpecifiedTests=false
+      - run: cd java && mvn -B -q test -Dtest='WebhookTest,LoginTest' -Dsurefire.failIfNoSpecifiedTests=false
