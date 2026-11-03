@@ -513,5 +513,5 @@ However, the instances of the api clients created from the `ApiClient` are threa
 
 ## Author
 
-info@signedly.com
+support@signedly.com
 

@@ -448,6 +448,6 @@ Authentication schemes defined for the API:
 
 ## Author
 
-info@signedly.com
+support@signedly.com
 
 

@@ -435,7 +435,7 @@ vendor/bin/phpunit
 
 ## Author
 
-info@signedly.com
+support@signedly.com
 
 ## About this package
 
