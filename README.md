@@ -24,10 +24,29 @@ and methods.
 | `php/` | `signedly/sdk` (Packagist, from the root `composer.json`) | `php` |
 | `java/` | `com.signedly:signedly-sdk` (Maven Central) | `java`, `native` library (Java 11+) |
 
+## Install
+
+| Language | Install |
+|---|---|
+| Python 3.8+ | `pip install signedly` |
+| Node / TypeScript | `npm install @signedly/sdk` |
+| PHP 7.4+ | `composer require signedly/sdk` |
+| Java 11+ | Maven `com.signedly:signedly-sdk` (Gradle: `implementation "com.signedly:signedly-sdk:0.1.0"`) |
+
+Java with Maven:
+
+```xml
+<dependency>
+  <groupId>com.signedly</groupId>
+  <artifactId>signedly-sdk</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
 ## Quick start
 
-Until the packages are published, install from this repository (the folder of
-your language).
+Generate a client ID and secret in Signedly under **Account & Settings → API**
+(test keys for the sandbox, live keys for real documents).
 
 **Python**
 
@@ -110,12 +129,13 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   - their tests.
 - **Generator settings** are in `config/<language>.yaml` (package names, versions,
   author, links and license).
-- **Template overrides** are in `config/templates/<language>/`: Node's
+- **Template overrides** are in `config/templates/<language>/`: every SDK's
+  `README.md` (install from the registry, log in with the helper), Node's
   `package.json` (author, description, `files`) and Java's `pom.xml` (the Maven
   Central publishing plugin). They are copies of openapi-generator 7.10.0's own
   templates, so re-copy them when the generator version changes.
 - **Author and license:** `scripts/generate.sh` adds Signedly's contact
-  (`info@signedly.com`) and the MIT license to a copy of the spec, so the committed
+  (`support@signedly.com`) and the MIT license to a copy of the spec, so the committed
   spec stays exactly what production serves.
 - **PHP on Packagist:** Packagist reads the root `composer.json`, which loads
   `php/lib/`. Its `require` must match `php/composer.json` (CI checks), and
@@ -165,8 +185,9 @@ password manager, and add a second owner.
 
 ### Each release
 
-1. Bump the version of each SDK that changed in its `config/<language>.yaml`, run
-   `scripts/generate.sh`, and merge that PR.
+1. Bump the version of each SDK that changed in its `config/<language>.yaml` (for
+   Java, also in the install lines of this README), run `scripts/generate.sh`, and
+   merge that PR.
 2. From `integration`, for the SDKs you bumped:
    ```bash
    # PyPI

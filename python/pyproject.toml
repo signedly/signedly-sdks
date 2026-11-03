@@ -2,7 +2,7 @@
 name = "signedly"
 version = "0.1.1"
 description = "Signedly API"
-authors = ["Signedly <info@signedly.com>"]
+authors = ["Signedly <support@signedly.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/signedly/signedly-sdks"

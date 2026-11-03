@@ -21,7 +21,7 @@ SPEC=.cache/signedly-ap1.json
 python3 - openapi/signedly-ap1.json "$SPEC" <<'PY'
 import json, sys
 spec = json.load(open(sys.argv[1]))
-spec["info"]["contact"] = {"name": "Signedly", "email": "info@signedly.com", "url": "https://signedly.com"}
+spec["info"]["contact"] = {"name": "Signedly", "email": "support@signedly.com", "url": "https://signedly.com"}
 spec["info"]["license"] = {"name": "MIT", "url": "https://opensource.org/license/mit"}
 json.dump(spec, open(sys.argv[2], "w"), indent=2)
 PY

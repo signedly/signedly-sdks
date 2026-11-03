@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   contact:
-    email: info@signedly.com
+    email: support@signedly.com
     name: Signedly
     url: https://signedly.com
   description: |2

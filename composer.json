@@ -13,12 +13,12 @@
     "authors": [
         {
             "name": "Signedly",
-            "email": "info@signedly.com",
+            "email": "support@signedly.com",
             "homepage": "https://signedly.com"
         }
     ],
     "support": {
-        "email": "info@signedly.com",
+        "email": "support@signedly.com",
         "source": "https://github.com/signedly/signedly-sdks",
         "docs": "https://l0ads.signedly.com/swaggerap1/"
     },

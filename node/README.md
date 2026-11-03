@@ -1,46 +1,31 @@
-## @signedly/sdk@0.1.0
+## @signedly/sdk
 
-This generator creates TypeScript/JavaScript client that utilizes [axios](https://github.com/axios/axios). The generated Node module can be used in the following environments:
+Signedly REST API client for Node.js and TypeScript: send documents for e-signature, track them and verify webhooks. Works with CommonJS and ES modules; TypeScript types are included.
 
-Environment
-* Node.js
-* Webpack
-* Browserify
+### Installation
 
-Language level
-* ES5 - you must have a Promises/A+ library installed
-* ES6
-
-Module system
-* CommonJS
-* ES6 module system
-
-It can be used in both TypeScript and JavaScript. In TypeScript, the definition will be automatically resolved via `package.json`. ([Reference](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html))
-
-### Building
-
-To build and compile the typescript sources to javascript use:
-```
-npm install
-npm run build
+```sh
+npm install @signedly/sdk
 ```
 
-### Publishing
+### Usage
 
-First build the package then run `npm publish`
+Generate a client ID and secret in Signedly under **Account & Settings → API** (test keys for the sandbox, live keys for real documents). The helper fetches the access token on the first call and renews it before it expires.
 
-### Consuming
+```ts
+import { DocumentsApi } from "@signedly/sdk";
+import { signedlyConfiguration } from "@signedly/sdk/dist/helpers";
 
-navigate to the folder of your consuming project and run one of the following commands.
-
-_published:_
-
-```
-npm install @signedly/sdk@0.1.0 --save
+const config = signedlyConfiguration(CLIENT_ID, CLIENT_SECRET);
+const { data } = await new DocumentsApi(config).listDocuments();
 ```
 
-_unPublished (not recommended):_
+Every endpoint has a method on its API class (`DocumentsApi`, `SignatoriesApi`, `FieldsApi`, `SendingApi`, `DownloadsApi`, `TemplatesApi`, `BulkSendingApi`, `WebhooksApi`, …), named after its operation, e.g. `uploadDocument`, `createSignatory`, `sendDocument`.
 
-```
-npm install PATH_TO_GENERATED_PACKAGE --save
-```
+Check every webhook event with `verifyWebhookSignature(secret, header, rawBody)` from `@signedly/sdk/dist/helpers`, passing the raw request body.
+
+The whole API (every endpoint, field and status) is documented at https://l0ads.signedly.com/swaggerap1/. The [repository README](https://github.com/signedly/signedly-sdks#readme) covers the usual flow, webhooks and the sandbox.
+
+### License
+
+MIT
