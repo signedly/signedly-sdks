@@ -1,0 +1,38 @@
+{
+    "name": "signedly/sdk",
+    "description": "Signedly REST API client for PHP: send documents for e-signature, track them and verify webhooks",
+    "keywords": [
+        "signedly",
+        "e-signature",
+        "esign",
+        "sdk",
+        "api"
+    ],
+    "homepage": "https://github.com/signedly/signedly-sdks",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Signedly",
+            "email": "info@signedly.com",
+            "homepage": "https://signedly.com"
+        }
+    ],
+    "support": {
+        "email": "info@signedly.com",
+        "source": "https://github.com/signedly/signedly-sdks",
+        "docs": "https://l0ads.signedly.com/swaggerap1/"
+    },
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "^7.3",
+        "guzzlehttp/psr7": "^1.7 || ^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Signedly\\": "php/lib/"
+        }
+    }
+}

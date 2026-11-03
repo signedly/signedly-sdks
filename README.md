@@ -21,7 +21,7 @@ and methods.
 |---|---|---|
 | `python/` | `signedly` (PyPI) | `python` |
 | `node/` | `@signedly/sdk` (npm) | `typescript-axios` |
-| `php/` | `signedly/sdk` (Packagist) | `php` |
+| `php/` | `signedly/sdk` (Packagist, from the root `composer.json`) | `php` |
 | `java/` | `com.signedly:signedly-sdk` (Maven Central) | `java`, `native` library (Java 11+) |
 
 ## Quick start
@@ -108,7 +108,18 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   - `php/lib/Helpers/`
   - `java/src/main/java/com/signedly/helpers/`
   - their tests.
-- **Generator settings** are in `config/<language>.yaml` (package names and versions).
+- **Generator settings** are in `config/<language>.yaml` (package names, versions,
+  author, links and license).
+- **Template overrides** are in `config/templates/<language>/`: Node's
+  `package.json` (author, description, `files`) and Java's `pom.xml` (the Maven
+  Central publishing plugin). They are copies of openapi-generator 7.10.0's own
+  templates, so re-copy them when the generator version changes.
+- **Author and license:** `scripts/generate.sh` adds Signedly's contact
+  (`info@signedly.com`) and the MIT license to a copy of the spec, so the committed
+  spec stays exactly what production serves.
+- **PHP on Packagist:** Packagist reads the root `composer.json`, which loads
+  `php/lib/`. Its `require` must match `php/composer.json` (CI checks), and
+  `.gitattributes` leaves the other languages out of PHP installs.
 
 **CI** (`.github/workflows/`):
 - `sdks.yml`, on every PR:
@@ -118,11 +129,59 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
 
 ## Publishing
 
-Publishing needs Signedly's registry accounts and is done by a person:
+Publishing needs Signedly's registry accounts and is done by a person. Every
+registry keeps a published version for good (PyPI and Maven Central never take the
+same version again), so publish only from an up-to-date `integration` with CI green.
+All four packages share one version.
 
-1. Bump the version in every `config/<language>.yaml`, then run `scripts/generate.sh`.
-2. Publish each package:
-   - **PyPI:** `cd python && python -m build && twine upload dist/*`
-   - **npm:** `cd node && npm publish --access public`
-   - **Packagist:** tag the repository (`git tag v0.x.y`), and Packagist reads `php/composer.json`. The package must be registered once, pointing at this repository.
-   - **Maven Central:** `cd java && mvn deploy`, with the Sonatype account and a GPG key in `~/.m2/settings.xml`.
+### Accounts (once)
+
+Use the username `signedly` on each, keep logins and recovery codes in the team
+password manager, and add a second owner.
+
+- **PyPI** (https://pypi.org): turn on two-factor authentication. For the first
+  upload make an API token scoped to the entire account; afterwards replace it with
+  one scoped to the `signedly` project.
+- **npm** (https://www.npmjs.com): turn on two-factor authentication for
+  authorization and writes, and create the free organisation `signedly`.
+- **Packagist** (https://packagist.org): sign in with GitHub as an admin of the
+  `signedly` org, **Submit** `https://github.com/signedly/signedly-sdks`. If the
+  package page says it isn't updated automatically, add a GitHub webhook to
+  `https://packagist.org/api/github?username=<packagist username>` (JSON, push
+  events, secret = the Packagist API token).
+- **Maven Central** (https://central.sonatype.com): sign up with email, add the
+  namespace `com.signedly` and verify it with the TXT record it shows (signedly.com's
+  DNS is at GoDaddy). Generate a user token and put it in `~/.m2/settings.xml`:
+  ```xml
+  <settings><servers><server>
+    <id>central</id><username>TOKEN_USERNAME</username><password>TOKEN_PASSWORD</password>
+  </server></servers></settings>
+  ```
+  Make a GPG key (`gpg --full-generate-key`, RSA 4096) and send its public half to
+  `keyserver.ubuntu.com` and `keys.openpgp.org` (`gpg --keyserver <server> --send-keys <KEYID>`).
+
+### Each release
+
+1. Bump the version in every `config/<language>.yaml`, run `scripts/generate.sh`,
+   and merge that PR.
+2. From `integration`:
+   ```bash
+   # PyPI
+   cd python && python -m pip install --upgrade build twine && python -m build \
+     && twine check dist/* && TWINE_USERNAME=__token__ twine upload dist/* && cd ..
+   # npm (builds first, then asks for the two-factor code)
+   cd node && npm install && npm publish --access public && cd ..
+   # Packagist reads the tag
+   git tag vX.Y.Z && git push origin vX.Y.Z
+   # Maven Central (asks for the GPG passphrase)
+   cd java && mvn -P sign-artifacts deploy && cd ..
+   ```
+3. Maven Central: in Deployments on central.sonatype.com, wait for "Validated" and
+   click **Publish**.
+4. Check each in a clean place: `pip install signedly`, `npm view @signedly/sdk`,
+   `composer require signedly/sdk`, and the artifact page
+   https://central.sonatype.com/artifact/com.signedly/signedly-sdk.
+
+## License
+
+MIT, see `LICENSE`.

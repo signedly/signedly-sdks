@@ -43,6 +43,16 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with: { php-version: "8.2", tools: composer }
       - run: cd php && composer install --no-interaction && vendor/bin/phpunit test/Helpers
+      - name: The Packagist package (root composer.json) installs php/lib
+        run: |
+          python3 -c '
+          import json, sys
+          root, php = json.load(open("composer.json")), json.load(open("php/composer.json"))
+          if root["require"] != php["require"]:
+              sys.exit("composer.json require differs from php/composer.json: copy it over.")'
+          composer validate --strict
+          composer install --no-interaction --no-dev
+          php -r 'require "vendor/autoload.php"; exit(class_exists("Signedly\\Api\\DocumentsApi") && class_exists("Signedly\\Helpers\\SignedlyAuth") ? 0 : 1);'
 
   java:
     runs-on: ubuntu-24.04

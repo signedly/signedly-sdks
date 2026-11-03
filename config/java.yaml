@@ -8,3 +8,14 @@ modelPackage: com.signedly.model
 gitUserId: signedly
 gitRepoId: signedly-sdks
 hideGenerationTimestamp: true
+artifactDescription: Signedly REST API client for Java
+artifactUrl: https://github.com/signedly/signedly-sdks
+scmConnection: scm:git:https://github.com/signedly/signedly-sdks.git
+scmDeveloperConnection: scm:git:git@github.com:signedly/signedly-sdks.git
+scmUrl: https://github.com/signedly/signedly-sdks
+licenseName: MIT License
+licenseUrl: https://opensource.org/license/mit
+developerName: Signedly
+developerEmail: info@signedly.com
+developerOrganization: Signedly
+developerOrganizationUrl: https://signedly.com

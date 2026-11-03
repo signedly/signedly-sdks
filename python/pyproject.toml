@@ -2,8 +2,8 @@
 name = "signedly"
 version = "0.1.0"
 description = "Signedly API"
-authors = ["OpenAPI Generator Community <team@openapitools.org>"]
-license = "NoLicense"
+authors = ["Signedly <info@signedly.com>"]
+license = "MIT"
 readme = "README.md"
 repository = "https://github.com/signedly/signedly-sdks"
 keywords = ["OpenAPI", "OpenAPI-Generator", "Signedly API"]

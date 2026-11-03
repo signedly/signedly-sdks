@@ -234,6 +234,7 @@ Download, view and audit links are valid for about 7 days; ask for a new one
 whenever you need it.
 
 
+For more information, please visit [https://signedly.com](https://signedly.com).
 
 ## Installation & Usage
 
@@ -434,7 +435,7 @@ vendor/bin/phpunit
 
 ## Author
 
-
+info@signedly.com
 
 ## About this package
 
