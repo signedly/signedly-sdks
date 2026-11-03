@@ -1,11 +1,15 @@
 name: Spec matches production
 
-# Weekly (and by hand): does the committed spec match what production serves?
+# Weekly, by hand, and when the spec changes on integration: does the committed
+# spec match what production serves?
 # A difference after a backend release means: run scripts/update-spec.sh, open a
 # PR, and publish new SDK versions.
 on:
   schedule: [{ cron: "0 6 * * 1" }]
   workflow_dispatch:
+  push:
+    branches: [integration]
+    paths: [openapi/signedly-ap1.json, .github/workflows/spec-check.yml]
 
 jobs:
   compare:

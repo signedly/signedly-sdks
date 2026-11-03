@@ -6,7 +6,7 @@
   "homepage": "https://github.com/signedly/signedly-sdks#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/signedly/signedly-sdks.git"
+    "url": "git+https://github.com/signedly/signedly-sdks.git"
   },
   "keywords": [
     "signedly",
