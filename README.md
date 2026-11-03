@@ -115,7 +115,7 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   Central publishing plugin). They are copies of openapi-generator 7.10.0's own
   templates, so re-copy them when the generator version changes.
 - **Author and license:** `scripts/generate.sh` adds Signedly's contact
-  (`info@signedly.com`) and the MIT license to a copy of the spec, so the committed
+  (`support@signedly.com`) and the MIT license to a copy of the spec, so the committed
   spec stays exactly what production serves.
 - **PHP on Packagist:** Packagist reads the root `composer.json`, which loads
   `php/lib/`. Its `require` must match `php/composer.json` (CI checks), and

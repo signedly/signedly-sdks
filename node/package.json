@@ -2,7 +2,7 @@
   "name": "@signedly/sdk",
   "version": "0.1.0",
   "description": "Signedly REST API client: send documents for e-signature, track them and verify webhooks",
-  "author": "Signedly <info@signedly.com>",
+  "author": "Signedly <support@signedly.com>",
   "homepage": "https://github.com/signedly/signedly-sdks#readme",
   "repository": {
     "type": "git",
