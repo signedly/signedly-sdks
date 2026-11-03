@@ -2423,9 +2423,6 @@ paths:
       operationId: upload_document
       requestBody:
         content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/upload_document_request'
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/upload_document_request'
@@ -2463,7 +2460,7 @@ paths:
       summary: Upload a document or template
       tags:
       - Documents
-      x-content-type: application/x-www-form-urlencoded
+      x-content-type: multipart/form-data
       x-accepts:
       - application/json
   /ap1/upload_app/:
@@ -2476,9 +2473,6 @@ paths:
       operationId: upload_document_for_one_signer
       requestBody:
         content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/upload_document_for_one_signer_request'
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/upload_document_for_one_signer_request'
@@ -2519,7 +2513,7 @@ paths:
       summary: Upload a document for one signer and get their signing link
       tags:
       - Documents
-      x-content-type: application/x-www-form-urlencoded
+      x-content-type: multipart/form-data
       x-accepts:
       - application/json
   /ap1/webhooks/:
@@ -3071,7 +3065,7 @@ components:
           mimetype: mimetype
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           is_test: true
-          type: 2
+          type: 1
           status: 7
         subject: subject
         created_at: 2000-01-23T04:56:07.000+00:00
@@ -3096,7 +3090,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -3129,7 +3123,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -3165,7 +3159,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -3198,7 +3192,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -3282,8 +3276,6 @@ components:
           type: integer
         subject:
           description: "The signing email's subject, once sent."
-          maxLength: 200
-          minLength: 1
           title: Subject
           type: string
         updated_at:
@@ -3328,7 +3320,7 @@ components:
             mimetype: mimetype
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             is_test: true
-            type: 2
+            type: 1
             status: 7
           subject: subject
           created_at: 2000-01-23T04:56:07.000+00:00
@@ -3353,7 +3345,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3386,7 +3378,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3422,7 +3414,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3455,7 +3447,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3506,7 +3498,7 @@ components:
             mimetype: mimetype
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             is_test: true
-            type: 2
+            type: 1
             status: 7
           subject: subject
           created_at: 2000-01-23T04:56:07.000+00:00
@@ -3531,7 +3523,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3564,7 +3556,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3600,7 +3592,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3633,7 +3625,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -3665,14 +3657,12 @@ components:
         next:
           description: "The next page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Next
           type: string
         previous:
           description: "The previous page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Previous
           type: string
@@ -3704,14 +3694,12 @@ components:
         next:
           description: "The next page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Next
           type: string
         previous:
           description: "The previous page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Previous
           type: string
@@ -3758,7 +3746,7 @@ components:
         placeholder: placeholder
         value: value
         height: 5
-        max_length: 388
+        max_length: 7
         group_name: group_name
         select_options:
         - select_options
@@ -3802,7 +3790,6 @@ components:
         font:
           default: Roboto
           description: "Text, Date and Dropdown: the font."
-          minLength: 1
           title: Font
           type: string
         font_size:
@@ -3816,7 +3803,6 @@ components:
           type: string
         group_name:
           description: "Radio: the option group's name."
-          maxLength: 100
           nullable: true
           title: Group name
           type: string
@@ -3854,14 +3840,11 @@ components:
           type: integer
         label:
           description: "The field's name, shown to the signer."
-          maxLength: 100
           nullable: true
           title: Label
           type: string
         max_length:
           description: "Text: the most characters the signer may type."
-          maximum: 550
-          minimum: 1
           nullable: true
           title: Max length
           type: integer
@@ -3882,14 +3865,12 @@ components:
           type: integer
         placeholder:
           description: Hint text shown while the field is empty.
-          maxLength: 550
           nullable: true
           title: Placeholder
           type: string
         select_options:
           description: "Dropdown: the choices the signer picks from."
           items:
-            maxLength: 100
             type: string
           type: array
         signatory_id:
@@ -3903,7 +3884,6 @@ components:
           type: integer
         tool_tip:
           description: Shown when the signer points at the field.
-          maxLength: 100
           nullable: true
           title: Tool tip
           type: string
@@ -3952,7 +3932,7 @@ components:
           placeholder: placeholder
           value: value
           height: 5
-          max_length: 388
+          max_length: 7
           group_name: group_name
           select_options:
           - select_options
@@ -3985,7 +3965,7 @@ components:
           placeholder: placeholder
           value: value
           height: 5
-          max_length: 388
+          max_length: 7
           group_name: group_name
           select_options:
           - select_options
@@ -4043,14 +4023,12 @@ components:
         next:
           description: "The next page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Next
           type: string
         previous:
           description: "The previous page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Previous
           type: string
@@ -4072,12 +4050,10 @@ components:
       properties:
         method:
           description: The HTTP method.
-          minLength: 1
           title: Method
           type: string
         path:
           description: The path called.
-          minLength: 1
           title: Path
           type: string
         total_hits:
@@ -4098,7 +4074,6 @@ components:
       properties:
         body:
           description: "The request's body, credentials redacted."
-          minLength: 1
           title: Body
           type: string
         created_at:
@@ -4109,7 +4084,6 @@ components:
           type: string
         headers:
           description: "The request's headers, credentials redacted."
-          minLength: 1
           title: Headers
           type: string
         id:
@@ -4120,17 +4094,14 @@ components:
           type: string
         ip_address:
           description: The caller's IP address.
-          minLength: 1
           title: Ip address
           type: string
         method:
           description: The HTTP method.
-          minLength: 1
           title: Method
           type: string
         path:
           description: The path called.
-          minLength: 1
           title: Path
           type: string
         query_params:
@@ -4168,14 +4139,12 @@ components:
         next:
           description: "The next page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Next
           type: string
         previous:
           description: "The previous page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Previous
           type: string
@@ -4215,8 +4184,6 @@ components:
         email:
           description: The signatory's email address.
           format: email
-          maxLength: 254
-          minLength: 1
           title: Email
           type: string
         id:
@@ -4227,7 +4194,6 @@ components:
           type: string
         name:
           description: The signatory's name.
-          maxLength: 50
           nullable: true
           title: Name
           type: string
@@ -4269,7 +4235,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -4302,7 +4268,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -4338,7 +4304,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -4371,7 +4337,7 @@ components:
             placeholder: placeholder
             value: value
             height: 5
-            max_length: 388
+            max_length: 7
             group_name: group_name
             select_options:
             - select_options
@@ -4400,7 +4366,7 @@ components:
           mimetype: mimetype
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           is_test: true
-          type: 2
+          type: 1
           status: 7
         created_at: 2000-01-23T04:56:07.000+00:00
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -4458,7 +4424,7 @@ components:
         placeholder: placeholder
         value: value
         height: 5
-        max_length: 127
+        max_length: 2
         group_name: group_name
         select_options:
         - select_options
@@ -4501,7 +4467,6 @@ components:
         font:
           default: Roboto
           description: "Text, Date and Dropdown: the font."
-          minLength: 1
           title: Font
           type: string
         font_size:
@@ -4515,7 +4480,6 @@ components:
           type: string
         group_name:
           description: "Radio: the option group's name."
-          maxLength: 100
           nullable: true
           title: Group name
           type: string
@@ -4553,14 +4517,11 @@ components:
           type: integer
         label:
           description: "The field's name, shown to the signer."
-          maxLength: 100
           nullable: true
           title: Label
           type: string
         max_length:
           description: "Text: the most characters the signer may type."
-          maximum: 550
-          minimum: 1
           nullable: true
           title: Max length
           type: integer
@@ -4581,7 +4542,6 @@ components:
           type: integer
         placeholder:
           description: Hint text shown while the field is empty.
-          maxLength: 550
           nullable: true
           title: Placeholder
           type: string
@@ -4592,7 +4552,6 @@ components:
         select_options:
           description: "Dropdown: the choices the signer picks from."
           items:
-            maxLength: 100
             type: string
           type: array
         size:
@@ -4601,7 +4560,6 @@ components:
           type: integer
         tool_tip:
           description: Shown when the signer points at the field.
-          maxLength: 100
           nullable: true
           title: Tool tip
           type: string
@@ -4655,7 +4613,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4688,7 +4646,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4724,7 +4682,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4757,7 +4715,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4786,7 +4744,7 @@ components:
             mimetype: mimetype
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             is_test: true
-            type: 2
+            type: 1
             status: 7
           created_at: 2000-01-23T04:56:07.000+00:00
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -4808,7 +4766,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4841,7 +4799,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4877,7 +4835,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4910,7 +4868,7 @@ components:
               placeholder: placeholder
               value: value
               height: 5
-              max_length: 388
+              max_length: 7
               group_name: group_name
               select_options:
               - select_options
@@ -4939,7 +4897,7 @@ components:
             mimetype: mimetype
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             is_test: true
-            type: 2
+            type: 1
             status: 7
           created_at: 2000-01-23T04:56:07.000+00:00
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -4953,14 +4911,12 @@ components:
         next:
           description: "The next page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Next
           type: string
         previous:
           description: "The previous page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Previous
           type: string
@@ -4982,7 +4938,7 @@ components:
         mimetype: mimetype
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         is_test: true
-        type: 2
+        type: 1
         status: 7
       properties:
         created_at:
@@ -5004,14 +4960,10 @@ components:
           type: boolean
         mimetype:
           description: The file's type.
-          maxLength: 100
-          minLength: 1
           title: Mimetype
           type: string
         name:
           description: The name given at upload.
-          maxLength: 250
-          minLength: 1
           title: File Name
           type: string
         status:
@@ -5020,8 +4972,6 @@ components:
           type: integer
         type:
           description: 2 Document · 4 Template
-          maximum: 10
-          minimum: 1
           title: Type
           type: integer
         updated_at:
@@ -5077,7 +5027,6 @@ components:
           type: string
         event_type:
           description: e.g. document.signed
-          minLength: 1
           readOnly: true
           title: Event type
           type: string
@@ -5089,7 +5038,6 @@ components:
           type: string
         last_error:
           description: "Why the last try failed, or empty."
-          minLength: 1
           readOnly: true
           title: Last error
           type: string
@@ -5112,13 +5060,11 @@ components:
           type: object
         response_snippet:
           description: The start of your endpoint's last answer.
-          minLength: 1
           readOnly: true
           title: Response snippet
           type: string
         status:
           description: "pending (being tried), succeeded or failed."
-          minLength: 1
           readOnly: true
           title: Status
           type: string
@@ -5163,14 +5109,12 @@ components:
         next:
           description: "The next page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Next
           type: string
         previous:
           description: "The previous page, or null."
           format: uri
-          minLength: 1
           nullable: true
           title: Previous
           type: string
@@ -5217,7 +5161,6 @@ components:
         events:
           description: "The event types to send (empty: all)."
           items:
-            minLength: 1
             type: string
           type: array
         failures_in_a_row:
@@ -5245,8 +5188,6 @@ components:
         url:
           description: "Where events are posted: https://, public."
           format: uri
-          maxLength: 500
-          minLength: 1
           title: Url
           type: string
       required:
@@ -5286,7 +5227,6 @@ components:
         events:
           description: "The event types to send (empty: all)."
           items:
-            minLength: 1
             type: string
           type: array
         failures_in_a_row:
@@ -5308,7 +5248,6 @@ components:
         secret:
           description: "Signs every event (Signedly-Signature). Shown only when made\
             \ or rotated: keep it."
-          minLength: 1
           readOnly: true
           title: Secret
           type: string
@@ -5321,8 +5260,6 @@ components:
         url:
           description: "Where events are posted: https://, public."
           format: uri
-          maxLength: 500
-          minLength: 1
           title: Url
           type: string
       required:

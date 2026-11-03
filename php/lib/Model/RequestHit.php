@@ -289,14 +289,6 @@ class RequestHit implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['method']) && (mb_strlen($this->container['method']) < 1)) {
-            $invalidProperties[] = "invalid value for 'method', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['path']) && (mb_strlen($this->container['path']) < 1)) {
-            $invalidProperties[] = "invalid value for 'path', the character length must be bigger than or equal to 1.";
-        }
-
         return $invalidProperties;
     }
 
@@ -334,11 +326,6 @@ class RequestHit implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($method)) {
             throw new \InvalidArgumentException('non-nullable method cannot be null');
         }
-
-        if ((mb_strlen($method) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $method when calling RequestHit., must be bigger than or equal to 1.');
-        }
-
         $this->container['method'] = $method;
 
         return $this;
@@ -366,11 +353,6 @@ class RequestHit implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($path)) {
             throw new \InvalidArgumentException('non-nullable path cannot be null');
         }
-
-        if ((mb_strlen($path) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $path when calling RequestHit., must be bigger than or equal to 1.');
-        }
-
         $this->container['path'] = $path;
 
         return $this;

@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from signedly.models.page import Page
 from signedly.models.signatory import Signatory
 from signedly.models.upload import Upload
@@ -43,7 +42,7 @@ class Document(BaseModel):
     sent_at: Optional[datetime] = Field(default=None, description="When it was sent, or null.")
     signatories: Optional[List[Signatory]] = Field(default=None, description="Who signs it.")
     status: Optional[StrictInt] = Field(default=None, description="1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired")
-    subject: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=200)]] = Field(default=None, description="The signing email's subject, once sent.")
+    subject: Optional[StrictStr] = Field(default=None, description="The signing email's subject, once sent.")
     updated_at: Optional[datetime] = Field(default=None, description="When it last changed.")
     upload: Optional[Upload] = None
     __properties: ClassVar[List[str]] = ["created_at", "document_name", "expired_at", "id", "is_bulk_signing", "is_template", "message", "pages", "sent_at", "signatories", "status", "subject", "updated_at", "upload"]

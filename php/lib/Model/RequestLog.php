@@ -324,26 +324,6 @@ class RequestLog implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['body']) && (mb_strlen($this->container['body']) < 1)) {
-            $invalidProperties[] = "invalid value for 'body', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['headers']) && (mb_strlen($this->container['headers']) < 1)) {
-            $invalidProperties[] = "invalid value for 'headers', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['ip_address']) && (mb_strlen($this->container['ip_address']) < 1)) {
-            $invalidProperties[] = "invalid value for 'ip_address', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['method']) && (mb_strlen($this->container['method']) < 1)) {
-            $invalidProperties[] = "invalid value for 'method', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['path']) && (mb_strlen($this->container['path']) < 1)) {
-            $invalidProperties[] = "invalid value for 'path', the character length must be bigger than or equal to 1.";
-        }
-
         return $invalidProperties;
     }
 
@@ -381,11 +361,6 @@ class RequestLog implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($body)) {
             throw new \InvalidArgumentException('non-nullable body cannot be null');
         }
-
-        if ((mb_strlen($body) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $body when calling RequestLog., must be bigger than or equal to 1.');
-        }
-
         $this->container['body'] = $body;
 
         return $this;
@@ -440,11 +415,6 @@ class RequestLog implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($headers)) {
             throw new \InvalidArgumentException('non-nullable headers cannot be null');
         }
-
-        if ((mb_strlen($headers) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $headers when calling RequestLog., must be bigger than or equal to 1.');
-        }
-
         $this->container['headers'] = $headers;
 
         return $this;
@@ -499,11 +469,6 @@ class RequestLog implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($ip_address)) {
             throw new \InvalidArgumentException('non-nullable ip_address cannot be null');
         }
-
-        if ((mb_strlen($ip_address) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $ip_address when calling RequestLog., must be bigger than or equal to 1.');
-        }
-
         $this->container['ip_address'] = $ip_address;
 
         return $this;
@@ -531,11 +496,6 @@ class RequestLog implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($method)) {
             throw new \InvalidArgumentException('non-nullable method cannot be null');
         }
-
-        if ((mb_strlen($method) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $method when calling RequestLog., must be bigger than or equal to 1.');
-        }
-
         $this->container['method'] = $method;
 
         return $this;
@@ -563,11 +523,6 @@ class RequestLog implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($path)) {
             throw new \InvalidArgumentException('non-nullable path cannot be null');
         }
-
-        if ((mb_strlen($path) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $path when calling RequestLog., must be bigger than or equal to 1.');
-        }
-
         $this->container['path'] = $path;
 
         return $this;

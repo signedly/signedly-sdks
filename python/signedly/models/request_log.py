@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,13 +28,13 @@ class RequestLog(BaseModel):
     """
     RequestLog
     """ # noqa: E501
-    body: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The request's body, credentials redacted.")
+    body: Optional[StrictStr] = Field(default=None, description="The request's body, credentials redacted.")
     created_at: Optional[datetime] = Field(default=None, description="When the call was made.")
-    headers: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The request's headers, credentials redacted.")
+    headers: Optional[StrictStr] = Field(default=None, description="The request's headers, credentials redacted.")
     id: Optional[StrictStr] = Field(default=None, description="The call's ID.")
-    ip_address: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The caller's IP address.")
-    method: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The HTTP method.")
-    path: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The path called.")
+    ip_address: Optional[StrictStr] = Field(default=None, description="The caller's IP address.")
+    method: Optional[StrictStr] = Field(default=None, description="The HTTP method.")
+    path: Optional[StrictStr] = Field(default=None, description="The path called.")
     var_query_params: Optional[StrictStr] = Field(default=None, description="The query parameters.", alias="query_params")
     __properties: ClassVar[List[str]] = ["body", "created_at", "headers", "id", "ip_address", "method", "path", "query_params"]
 

@@ -366,14 +366,6 @@ class Document implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['subject']) && (mb_strlen($this->container['subject']) > 200)) {
-            $invalidProperties[] = "invalid value for 'subject', the character length must be smaller than or equal to 200.";
-        }
-
-        if (!is_null($this->container['subject']) && (mb_strlen($this->container['subject']) < 1)) {
-            $invalidProperties[] = "invalid value for 'subject', the character length must be bigger than or equal to 1.";
-        }
-
         return $invalidProperties;
     }
 
@@ -729,13 +721,6 @@ class Document implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($subject)) {
             throw new \InvalidArgumentException('non-nullable subject cannot be null');
         }
-        if ((mb_strlen($subject) > 200)) {
-            throw new \InvalidArgumentException('invalid length for $subject when calling Document., must be smaller than or equal to 200.');
-        }
-        if ((mb_strlen($subject) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $subject when calling Document., must be bigger than or equal to 1.');
-        }
-
         $this->container['subject'] = $subject;
 
         return $this;

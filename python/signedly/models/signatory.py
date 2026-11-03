@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,9 +30,9 @@ class Signatory(BaseModel):
     """ # noqa: E501
     created_at: Optional[datetime] = Field(default=None, description="When they were added.")
     document_id: Optional[StrictStr] = Field(default=None, description="The document's ID.")
-    email: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=254)]] = Field(default=None, description="The signatory's email address.")
+    email: Optional[StrictStr] = Field(default=None, description="The signatory's email address.")
     id: Optional[StrictStr] = Field(default=None, description="The signatory's ID.")
-    name: Optional[Annotated[str, Field(strict=True, max_length=50)]] = Field(default=None, description="The signatory's name.")
+    name: Optional[StrictStr] = Field(default=None, description="The signatory's name.")
     position: Optional[StrictInt] = Field(default=None, description="Their place in the signing order, from 0.")
     require_email_otp: Optional[StrictBool] = Field(default=False, description="A one-time code is e-mailed to them when they open their link.")
     status: Optional[StrictInt] = Field(default=None, description="1 Waiting · 2 Invited · 3 Signed · 4 Viewed · 5 Rejected")

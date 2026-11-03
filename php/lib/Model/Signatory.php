@@ -331,18 +331,6 @@ class Signatory implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['email']) && (mb_strlen($this->container['email']) > 254)) {
-            $invalidProperties[] = "invalid value for 'email', the character length must be smaller than or equal to 254.";
-        }
-
-        if (!is_null($this->container['email']) && (mb_strlen($this->container['email']) < 1)) {
-            $invalidProperties[] = "invalid value for 'email', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['name']) && (mb_strlen($this->container['name']) > 50)) {
-            $invalidProperties[] = "invalid value for 'name', the character length must be smaller than or equal to 50.";
-        }
-
         return $invalidProperties;
     }
 
@@ -434,13 +422,6 @@ class Signatory implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($email)) {
             throw new \InvalidArgumentException('non-nullable email cannot be null');
         }
-        if ((mb_strlen($email) > 254)) {
-            throw new \InvalidArgumentException('invalid length for $email when calling Signatory., must be smaller than or equal to 254.');
-        }
-        if ((mb_strlen($email) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $email when calling Signatory., must be bigger than or equal to 1.');
-        }
-
         $this->container['email'] = $email;
 
         return $this;
@@ -502,10 +483,6 @@ class Signatory implements ModelInterface, ArrayAccess, \JsonSerializable
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-        if (!is_null($name) && (mb_strlen($name) > 50)) {
-            throw new \InvalidArgumentException('invalid length for $name when calling Signatory., must be smaller than or equal to 50.');
-        }
-
         $this->container['name'] = $name;
 
         return $this;

@@ -324,30 +324,6 @@ class Upload implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['mimetype']) && (mb_strlen($this->container['mimetype']) > 100)) {
-            $invalidProperties[] = "invalid value for 'mimetype', the character length must be smaller than or equal to 100.";
-        }
-
-        if (!is_null($this->container['mimetype']) && (mb_strlen($this->container['mimetype']) < 1)) {
-            $invalidProperties[] = "invalid value for 'mimetype', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['name']) && (mb_strlen($this->container['name']) > 250)) {
-            $invalidProperties[] = "invalid value for 'name', the character length must be smaller than or equal to 250.";
-        }
-
-        if (!is_null($this->container['name']) && (mb_strlen($this->container['name']) < 1)) {
-            $invalidProperties[] = "invalid value for 'name', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['type']) && ($this->container['type'] > 10)) {
-            $invalidProperties[] = "invalid value for 'type', must be smaller than or equal to 10.";
-        }
-
-        if (!is_null($this->container['type']) && ($this->container['type'] < 1)) {
-            $invalidProperties[] = "invalid value for 'type', must be bigger than or equal to 1.";
-        }
-
         return $invalidProperties;
     }
 
@@ -466,13 +442,6 @@ class Upload implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($mimetype)) {
             throw new \InvalidArgumentException('non-nullable mimetype cannot be null');
         }
-        if ((mb_strlen($mimetype) > 100)) {
-            throw new \InvalidArgumentException('invalid length for $mimetype when calling Upload., must be smaller than or equal to 100.');
-        }
-        if ((mb_strlen($mimetype) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $mimetype when calling Upload., must be bigger than or equal to 1.');
-        }
-
         $this->container['mimetype'] = $mimetype;
 
         return $this;
@@ -500,13 +469,6 @@ class Upload implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($name)) {
             throw new \InvalidArgumentException('non-nullable name cannot be null');
         }
-        if ((mb_strlen($name) > 250)) {
-            throw new \InvalidArgumentException('invalid length for $name when calling Upload., must be smaller than or equal to 250.');
-        }
-        if ((mb_strlen($name) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $name when calling Upload., must be bigger than or equal to 1.');
-        }
-
         $this->container['name'] = $name;
 
         return $this;
@@ -561,14 +523,6 @@ class Upload implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($type)) {
             throw new \InvalidArgumentException('non-nullable type cannot be null');
         }
-
-        if (($type > 10)) {
-            throw new \InvalidArgumentException('invalid value for $type when calling Upload., must be smaller than or equal to 10.');
-        }
-        if (($type < 1)) {
-            throw new \InvalidArgumentException('invalid value for $type when calling Upload., must be bigger than or equal to 1.');
-        }
-
         $this->container['type'] = $type;
 
         return $this;

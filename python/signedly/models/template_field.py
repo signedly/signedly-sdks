@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -33,26 +32,26 @@ class TemplateField(BaseModel):
     checked: Optional[StrictBool] = Field(default=False, description="Checkbox: ticked or not.")
     created_at: Optional[datetime] = Field(default=None, description="When the field was added.")
     date_format: Optional[StrictInt] = Field(default=None, description="Date: 1 dd_mm_yyyy · 2 mm_dd_yyyy · 3 dd mmm yyyy · 4 dd-mm-yyyy.")
-    font: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default='Roboto', description="Text, Date and Dropdown: the font.")
+    font: Optional[StrictStr] = Field(default='Roboto', description="Text, Date and Dropdown: the font.")
     font_size: Optional[StrictInt] = Field(default=None, description="Text and Dropdown: the font size in points (Date: 10).")
     formula: Optional[StrictStr] = Field(default=None, description="A calculated field's formula, or null.")
-    group_name: Optional[Annotated[str, Field(strict=True, max_length=100)]] = Field(default=None, description="Radio: the option group's name.")
+    group_name: Optional[StrictStr] = Field(default=None, description="Radio: the option group's name.")
     height: Optional[StrictInt] = Field(default=None, description="In PDF points (1/72 inch): the field's height.")
     id: Optional[StrictStr] = Field(default=None, description="The field's ID.")
     is_multi_line: Optional[StrictBool] = Field(default=None, description="Text: the signer may type several lines.")
     is_required: Optional[StrictBool] = Field(default=None, description="False: the signer may leave it empty.")
     items: Optional[List[Dict[str, Any]]] = Field(default=None, description="Radio: the options, each `{x, y, selected}`.")
     kind: Optional[StrictInt] = Field(default=None, description="The field's type: 1 Text · 2 Signature · 3 Date · 5 Checkbox · 6 Radio · 9 Dropdown · 10 Sign Stamp.")
-    label: Optional[Annotated[str, Field(strict=True, max_length=100)]] = Field(default=None, description="The field's name, shown to the signer.")
-    max_length: Optional[Annotated[int, Field(le=550, strict=True, ge=1)]] = Field(default=None, description="Text: the most characters the signer may type.")
+    label: Optional[StrictStr] = Field(default=None, description="The field's name, shown to the signer.")
+    max_length: Optional[StrictInt] = Field(default=None, description="Text: the most characters the signer may type.")
     number_format: Optional[Dict[str, Any]] = Field(default=None, description="How a calculated number is shown, or null.")
     page: Optional[StrictStr] = Field(default=None, description="The ID of the page the field is on.")
     page_number: Optional[StrictInt] = Field(default=None, description="That page's number, counting from 0.")
-    placeholder: Optional[Annotated[str, Field(strict=True, max_length=550)]] = Field(default=None, description="Hint text shown while the field is empty.")
+    placeholder: Optional[StrictStr] = Field(default=None, description="Hint text shown while the field is empty.")
     readonly: Optional[StrictBool] = Field(default=None, description="True: the signer can't change the value.")
-    select_options: Optional[List[Annotated[str, Field(strict=True, max_length=100)]]] = Field(default=None, description="Dropdown: the choices the signer picks from.")
+    select_options: Optional[List[StrictStr]] = Field(default=None, description="Dropdown: the choices the signer picks from.")
     size: Optional[StrictInt] = Field(default=None, description="Checkbox and Radio: the side of the tick or dot in points.")
-    tool_tip: Optional[Annotated[str, Field(strict=True, max_length=100)]] = Field(default=None, description="Shown when the signer points at the field.")
+    tool_tip: Optional[StrictStr] = Field(default=None, description="Shown when the signer points at the field.")
     updated_at: Optional[datetime] = Field(default=None, description="When the field last changed.")
     value: Optional[StrictStr] = Field(default=None, description="The field's current value.")
     width: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="In PDF points (1/72 inch): the field's width.")

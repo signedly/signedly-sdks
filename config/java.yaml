@@ -1,6 +1,6 @@
 groupId: com.signedly
 artifactId: signedly-sdk
-artifactVersion: 0.1.0
+artifactVersion: 0.1.1
 library: native
 invokerPackage: com.signedly.client
 apiPackage: com.signedly.api

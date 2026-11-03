@@ -31,7 +31,7 @@ and methods.
 | Python 3.8+ | `pip install signedly` |
 | Node / TypeScript | `npm install @signedly/sdk` |
 | PHP 7.4+ | `composer require signedly/sdk` |
-| Java 11+ | Maven `com.signedly:signedly-sdk` (Gradle: `implementation "com.signedly:signedly-sdk:0.1.0"`) |
+| Java 11+ | Maven `com.signedly:signedly-sdk` (Gradle: `implementation "com.signedly:signedly-sdk:0.1.1"`) |
 
 Java with Maven:
 
@@ -39,7 +39,7 @@ Java with Maven:
 <dependency>
   <groupId>com.signedly</groupId>
   <artifactId>signedly-sdk</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 
@@ -131,8 +131,10 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   author, links and license).
 - **Template overrides** are in `config/templates/<language>/`: every SDK's
   `README.md` (install from the registry, log in with the helper), Node's
-  `package.json` (author, description, `files`) and Java's `pom.xml` (the Maven
-  Central publishing plugin). They are copies of openapi-generator 7.10.0's own
+  `package.json` (author, description, `files`), Java's `pom.xml` (the Maven
+  Central publishing plugin) and Java's `api.mustache` (multipart uploads skip
+  optional fields left null, give the file's type from its name, and are sent with
+  their length, not chunked). They are copies of openapi-generator 7.10.0's own
   templates, so re-copy them when the generator version changes.
 - **Author and license:** `scripts/generate.sh` adds Signedly's contact
   (`support@signedly.com`) and the MIT license to a copy of the spec, so the committed

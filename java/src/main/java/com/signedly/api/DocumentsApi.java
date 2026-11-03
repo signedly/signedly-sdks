@@ -669,30 +669,44 @@ public class DocumentsApi {
 
     localVarRequestBuilder.header("Accept", "application/json");
 
-    List<NameValuePair> formValues = new ArrayList<>();
+    MultipartEntityBuilder multiPartBuilder = MultipartEntityBuilder.create();
+    boolean hasFiles = false;
     if (_file != null) {
-        formValues.add(new BasicNameValuePair("file", _file.toString()));
+    String _fileName = _file.getName().toLowerCase(java.util.Locale.ROOT);
+    String _fileType = _fileName.endsWith(".pdf") ? "application/pdf"
+        : _fileName.endsWith(".docx")
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : java.net.URLConnection.guessContentTypeFromName(_fileName);
+    multiPartBuilder.addBinaryBody(
+        "file",
+        _file,
+        _fileType == null
+            ? org.apache.http.entity.ContentType.DEFAULT_BINARY
+            : org.apache.http.entity.ContentType.create(_fileType),
+        _file.getName());
+    hasFiles = true;
     }
     if (name != null) {
-        formValues.add(new BasicNameValuePair("name", name.toString()));
+    multiPartBuilder.addTextBody("name", name.toString());
     }
     if (type != null) {
-        formValues.add(new BasicNameValuePair("type", type.toString()));
+    multiPartBuilder.addTextBody("type", type.toString());
     }
     if (templateName != null) {
-        formValues.add(new BasicNameValuePair("template_name", templateName.toString()));
+    multiPartBuilder.addTextBody("template_name", templateName.toString());
     }
-    HttpEntity entity = new UrlEncodedFormEntity(formValues, java.nio.charset.StandardCharsets.UTF_8);
+    HttpEntity entity = multiPartBuilder.build();
     ByteArrayOutputStream formOutputStream = new ByteArrayOutputStream();
     try {
         entity.writeTo(formOutputStream);
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
+    HttpRequest.BodyPublisher formDataPublisher =
+        HttpRequest.BodyPublishers.ofByteArray(formOutputStream.toByteArray());
     localVarRequestBuilder
         .header("Content-Type", entity.getContentType().getValue())
-        .method("POST", HttpRequest.BodyPublishers
-            .ofInputStream(() -> new ByteArrayInputStream(formOutputStream.toByteArray())));
+        .method("POST", formDataPublisher);
     if (memberVarReadTimeout != null) {
       localVarRequestBuilder.timeout(memberVarReadTimeout);
     }
@@ -784,33 +798,47 @@ public class DocumentsApi {
 
     localVarRequestBuilder.header("Accept", "application/json");
 
-    List<NameValuePair> formValues = new ArrayList<>();
+    MultipartEntityBuilder multiPartBuilder = MultipartEntityBuilder.create();
+    boolean hasFiles = false;
     if (_file != null) {
-        formValues.add(new BasicNameValuePair("file", _file.toString()));
+    String _fileName = _file.getName().toLowerCase(java.util.Locale.ROOT);
+    String _fileType = _fileName.endsWith(".pdf") ? "application/pdf"
+        : _fileName.endsWith(".docx")
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : java.net.URLConnection.guessContentTypeFromName(_fileName);
+    multiPartBuilder.addBinaryBody(
+        "file",
+        _file,
+        _fileType == null
+            ? org.apache.http.entity.ContentType.DEFAULT_BINARY
+            : org.apache.http.entity.ContentType.create(_fileType),
+        _file.getName());
+    hasFiles = true;
     }
     if (signeeName != null) {
-        formValues.add(new BasicNameValuePair("signee_name", signeeName.toString()));
+    multiPartBuilder.addTextBody("signee_name", signeeName.toString());
     }
     if (signeeEmail != null) {
-        formValues.add(new BasicNameValuePair("signee_email", signeeEmail.toString()));
+    multiPartBuilder.addTextBody("signee_email", signeeEmail.toString());
     }
     if (redirectUrl != null) {
-        formValues.add(new BasicNameValuePair("redirect_url", redirectUrl.toString()));
+    multiPartBuilder.addTextBody("redirect_url", redirectUrl.toString());
     }
     if (finalEmail != null) {
-        formValues.add(new BasicNameValuePair("final_email", finalEmail.toString()));
+    multiPartBuilder.addTextBody("final_email", finalEmail.toString());
     }
-    HttpEntity entity = new UrlEncodedFormEntity(formValues, java.nio.charset.StandardCharsets.UTF_8);
+    HttpEntity entity = multiPartBuilder.build();
     ByteArrayOutputStream formOutputStream = new ByteArrayOutputStream();
     try {
         entity.writeTo(formOutputStream);
     } catch (IOException e) {
         throw new RuntimeException(e);
     }
+    HttpRequest.BodyPublisher formDataPublisher =
+        HttpRequest.BodyPublishers.ofByteArray(formOutputStream.toByteArray());
     localVarRequestBuilder
         .header("Content-Type", entity.getContentType().getValue())
-        .method("POST", HttpRequest.BodyPublishers
-            .ofInputStream(() -> new ByteArrayInputStream(formOutputStream.toByteArray())));
+        .method("POST", formDataPublisher);
     if (memberVarReadTimeout != null) {
       localVarRequestBuilder.timeout(memberVarReadTimeout);
     }

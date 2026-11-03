@@ -1033,7 +1033,7 @@ public class Example {
 
 ### HTTP request headers
 
-- **Content-Type**: application/x-www-form-urlencoded, multipart/form-data
+- **Content-Type**: multipart/form-data
 - **Accept**: application/json
 
 ### HTTP response details
@@ -1115,7 +1115,7 @@ ApiResponse<[**Upload**](Upload.md)>
 
 ### HTTP request headers
 
-- **Content-Type**: application/x-www-form-urlencoded, multipart/form-data
+- **Content-Type**: multipart/form-data
 - **Accept**: application/json
 
 ### HTTP response details
@@ -1197,7 +1197,7 @@ public class Example {
 
 ### HTTP request headers
 
-- **Content-Type**: application/x-www-form-urlencoded, multipart/form-data
+- **Content-Type**: multipart/form-data
 - **Accept**: application/json
 
 ### HTTP response details
@@ -1282,7 +1282,7 @@ ApiResponse<[**UploadDocumentForOneSigner200Response**](UploadDocumentForOneSign
 
 ### HTTP request headers
 
-- **Content-Type**: application/x-www-form-urlencoded, multipart/form-data
+- **Content-Type**: multipart/form-data
 - **Accept**: application/json
 
 ### HTTP response details

@@ -256,14 +256,14 @@ Java 11+
 <dependency>
   <groupId>com.signedly</groupId>
   <artifactId>signedly-sdk</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```groovy
-implementation "com.signedly:signedly-sdk:0.1.0"
+implementation "com.signedly:signedly-sdk:0.1.1"
 ```
 
 ### Logging in

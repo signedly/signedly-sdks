@@ -338,21 +338,9 @@ class WebhookEndpointWithSecret implements ModelInterface, ArrayAccess, \JsonSer
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['secret']) && (mb_strlen($this->container['secret']) < 1)) {
-            $invalidProperties[] = "invalid value for 'secret', the character length must be bigger than or equal to 1.";
-        }
-
         if ($this->container['url'] === null) {
             $invalidProperties[] = "'url' can't be null";
         }
-        if ((mb_strlen($this->container['url']) > 500)) {
-            $invalidProperties[] = "invalid value for 'url', the character length must be smaller than or equal to 500.";
-        }
-
-        if ((mb_strlen($this->container['url']) < 1)) {
-            $invalidProperties[] = "invalid value for 'url', the character length must be bigger than or equal to 1.";
-        }
-
         return $invalidProperties;
     }
 
@@ -579,11 +567,6 @@ class WebhookEndpointWithSecret implements ModelInterface, ArrayAccess, \JsonSer
         if (is_null($secret)) {
             throw new \InvalidArgumentException('non-nullable secret cannot be null');
         }
-
-        if ((mb_strlen($secret) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $secret when calling WebhookEndpointWithSecret., must be bigger than or equal to 1.');
-        }
-
         $this->container['secret'] = $secret;
 
         return $this;
@@ -638,13 +621,6 @@ class WebhookEndpointWithSecret implements ModelInterface, ArrayAccess, \JsonSer
         if (is_null($url)) {
             throw new \InvalidArgumentException('non-nullable url cannot be null');
         }
-        if ((mb_strlen($url) > 500)) {
-            throw new \InvalidArgumentException('invalid length for $url when calling WebhookEndpointWithSecret., must be smaller than or equal to 500.');
-        }
-        if ((mb_strlen($url) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $url when calling WebhookEndpointWithSecret., must be bigger than or equal to 1.');
-        }
-
         $this->container['url'] = $url;
 
         return $this;

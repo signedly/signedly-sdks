@@ -18,9 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -28,8 +27,8 @@ class RequestHit(BaseModel):
     """
     RequestHit
     """ # noqa: E501
-    method: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The HTTP method.")
-    path: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The path called.")
+    method: Optional[StrictStr] = Field(default=None, description="The HTTP method.")
+    path: Optional[StrictStr] = Field(default=None, description="The path called.")
     total_hits: Optional[StrictInt] = Field(default=None, description="How many calls this client has made to it.")
     __properties: ClassVar[List[str]] = ["method", "path", "total_hits"]
 

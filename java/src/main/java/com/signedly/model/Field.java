@@ -574,8 +574,6 @@ public class Field {
 
   /**
    * Text: the most characters the signer may type.
-   * minimum: 1
-   * maximum: 550
    * @return maxLength
    */
   @javax.annotation.Nullable
