@@ -15,13 +15,26 @@ if [ ! -f "$JAR" ]; then
 fi
 echo "$SHA1  $JAR" | sha1sum -c --quiet -
 
-SPEC=openapi/signedly-ap1.json
+# The committed spec stays exactly what production serves (spec-check.yml compares
+# them); the packages' author and license are added to a copy here.
+SPEC=.cache/signedly-ap1.json
+python3 - openapi/signedly-ap1.json "$SPEC" <<'PY'
+import json, sys
+spec = json.load(open(sys.argv[1]))
+spec["info"]["contact"] = {"name": "Signedly", "email": "info@signedly.com", "url": "https://signedly.com"}
+spec["info"]["license"] = {"name": "MIT", "url": "https://opensource.org/license/mit"}
+json.dump(spec, open(sys.argv[2], "w"), indent=2)
+PY
+
 declare -A GENERATOR=([python]=python [node]=typescript-axios [php]=php [java]=java)
 for sdk in "${@:-python node php java}"; do
   for name in $sdk; do
+    templates=()
+    [ -d "config/templates/$name" ] && templates=(--template-dir "config/templates/$name")
     java -jar "$JAR" generate --input-spec "$SPEC" \
       --generator-name "${GENERATOR[$name]}" \
       --config "config/$name.yaml" \
+      "${templates[@]}" \
       --output "$name" \
       --skip-validate-spec \
       --global-property skipFormModel=false > /dev/null

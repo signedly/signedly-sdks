@@ -7,3 +7,4 @@ target/
 dist/
 .venv/
 node/package-lock.json
+/composer.lock

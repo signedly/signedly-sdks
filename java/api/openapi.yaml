@@ -1,5 +1,9 @@
 openapi: 3.0.1
 info:
+  contact:
+    email: info@signedly.com
+    name: Signedly
+    url: https://signedly.com
   description: |2
 
     The Signedly REST API lets your system upload documents, add signatories and
@@ -233,6 +237,9 @@ info:
 
     Download, view and audit links are valid for about 7 days; ask for a new one
     whenever you need it.
+  license:
+    name: MIT
+    url: https://opensource.org/license/mit
   title: Signedly API
   version: v1
 servers:

@@ -4,3 +4,7 @@ artifactVersion: 0.1.0
 gitUserId: signedly
 gitRepoId: signedly-sdks
 hideGenerationTimestamp: true
+artifactUrl: https://github.com/signedly/signedly-sdks
+licenseName: MIT
+developerOrganization: Signedly
+developerOrganizationUrl: https://signedly.com
