@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -34,14 +33,14 @@ class WebhookDelivery(BaseModel):
     delivered_at: Optional[datetime] = Field(default=None, description="When it succeeded, or null.")
     duration_ms: Optional[StrictInt] = Field(default=None, description="How long the last try took.")
     event_id: Optional[StrictStr] = Field(default=None, description="The event's ID (Signedly-Event-Id).")
-    event_type: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="e.g. document.signed")
+    event_type: Optional[StrictStr] = Field(default=None, description="e.g. document.signed")
     id: Optional[StrictStr] = Field(default=None, description="The delivery's ID.")
-    last_error: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="Why the last try failed, or empty.")
+    last_error: Optional[StrictStr] = Field(default=None, description="Why the last try failed, or empty.")
     last_status_code: Optional[StrictInt] = Field(default=None, description="Your endpoint's last HTTP answer, or null.")
     next_attempt_at: Optional[datetime] = Field(default=None, description="When it is tried next, while pending.")
     payload: Optional[Dict[str, Any]] = Field(default=None, description="The body sent.")
-    response_snippet: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="The start of your endpoint's last answer.")
-    status: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="pending (being tried), succeeded or failed.")
+    response_snippet: Optional[StrictStr] = Field(default=None, description="The start of your endpoint's last answer.")
+    status: Optional[StrictStr] = Field(default=None, description="pending (being tried), succeeded or failed.")
     __properties: ClassVar[List[str]] = ["attempts", "created_at", "delivered_at", "duration_ms", "event_id", "event_type", "id", "last_error", "last_status_code", "next_attempt_at", "payload", "response_snippet", "status"]
 
     model_config = ConfigDict(

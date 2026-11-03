@@ -302,17 +302,9 @@ class WebhookDeliveryPage implements ModelInterface, ArrayAccess, \JsonSerializa
         if ($this->container['next'] === null) {
             $invalidProperties[] = "'next' can't be null";
         }
-        if ((mb_strlen($this->container['next']) < 1)) {
-            $invalidProperties[] = "invalid value for 'next', the character length must be bigger than or equal to 1.";
-        }
-
         if ($this->container['previous'] === null) {
             $invalidProperties[] = "'previous' can't be null";
         }
-        if ((mb_strlen($this->container['previous']) < 1)) {
-            $invalidProperties[] = "invalid value for 'previous', the character length must be bigger than or equal to 1.";
-        }
-
         if ($this->container['results'] === null) {
             $invalidProperties[] = "'results' can't be null";
         }
@@ -387,11 +379,6 @@ class WebhookDeliveryPage implements ModelInterface, ArrayAccess, \JsonSerializa
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-
-        if (!is_null($next) && (mb_strlen($next) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $next when calling WebhookDeliveryPage., must be bigger than or equal to 1.');
-        }
-
         $this->container['next'] = $next;
 
         return $this;
@@ -426,11 +413,6 @@ class WebhookDeliveryPage implements ModelInterface, ArrayAccess, \JsonSerializa
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-
-        if (!is_null($previous) && (mb_strlen($previous) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $previous when calling WebhookDeliveryPage., must be bigger than or equal to 1.');
-        }
-
         $this->container['previous'] = $previous;
 
         return $this;

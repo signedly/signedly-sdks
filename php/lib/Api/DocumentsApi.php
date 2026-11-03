@@ -91,11 +91,9 @@ class DocumentsApi
             'application/json',
         ],
         'uploadDocument' => [
-            'application/x-www-form-urlencoded',
             'multipart/form-data',
         ],
         'uploadDocumentForOneSigner' => [
-            'application/x-www-form-urlencoded',
             'multipart/form-data',
         ],
     ];

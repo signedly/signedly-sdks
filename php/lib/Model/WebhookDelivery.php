@@ -359,22 +359,6 @@ class WebhookDelivery implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['event_type']) && (mb_strlen($this->container['event_type']) < 1)) {
-            $invalidProperties[] = "invalid value for 'event_type', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['last_error']) && (mb_strlen($this->container['last_error']) < 1)) {
-            $invalidProperties[] = "invalid value for 'last_error', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['response_snippet']) && (mb_strlen($this->container['response_snippet']) < 1)) {
-            $invalidProperties[] = "invalid value for 'response_snippet', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['status']) && (mb_strlen($this->container['status']) < 1)) {
-            $invalidProperties[] = "invalid value for 'status', the character length must be bigger than or equal to 1.";
-        }
-
         return $invalidProperties;
     }
 
@@ -547,11 +531,6 @@ class WebhookDelivery implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($event_type)) {
             throw new \InvalidArgumentException('non-nullable event_type cannot be null');
         }
-
-        if ((mb_strlen($event_type) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $event_type when calling WebhookDelivery., must be bigger than or equal to 1.');
-        }
-
         $this->container['event_type'] = $event_type;
 
         return $this;
@@ -606,11 +585,6 @@ class WebhookDelivery implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($last_error)) {
             throw new \InvalidArgumentException('non-nullable last_error cannot be null');
         }
-
-        if ((mb_strlen($last_error) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $last_error when calling WebhookDelivery., must be bigger than or equal to 1.');
-        }
-
         $this->container['last_error'] = $last_error;
 
         return $this;
@@ -719,11 +693,6 @@ class WebhookDelivery implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($response_snippet)) {
             throw new \InvalidArgumentException('non-nullable response_snippet cannot be null');
         }
-
-        if ((mb_strlen($response_snippet) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $response_snippet when calling WebhookDelivery., must be bigger than or equal to 1.');
-        }
-
         $this->container['response_snippet'] = $response_snippet;
 
         return $this;
@@ -751,11 +720,6 @@ class WebhookDelivery implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($status)) {
             throw new \InvalidArgumentException('non-nullable status cannot be null');
         }
-
-        if ((mb_strlen($status) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $status when calling WebhookDelivery., must be bigger than or equal to 1.');
-        }
-
         $this->container['status'] = $status;
 
         return $this;

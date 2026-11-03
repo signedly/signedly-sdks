@@ -589,7 +589,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/x-www-form-urlencoded, multipart/form-data
+ - **Content-Type**: multipart/form-data
  - **Accept**: application/json
 
 ### HTTP response details
@@ -677,7 +677,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/x-www-form-urlencoded, multipart/form-data
+ - **Content-Type**: multipart/form-data
  - **Accept**: application/json
 
 ### HTTP response details

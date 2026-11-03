@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -32,13 +31,13 @@ class WebhookEndpointWithSecret(BaseModel):
     created_at: Optional[datetime] = Field(default=None, description="When made.")
     description: Optional[StrictStr] = Field(default=None, description="Your note about it.")
     disabled_at: Optional[datetime] = Field(default=None, description="When Signedly switched it off, or null.")
-    events: Optional[List[Annotated[str, Field(min_length=1, strict=True)]]] = Field(default=None, description="The event types to send (empty: all).")
+    events: Optional[List[StrictStr]] = Field(default=None, description="The event types to send (empty: all).")
     failures_in_a_row: Optional[StrictInt] = Field(default=None, description="Events that failed for good since the last success.")
     id: Optional[StrictStr] = Field(default=None, description="The endpoint's ID.")
     is_active: Optional[StrictBool] = Field(default=None, description="False when you or Signedly switched it off; true switches it on.")
-    secret: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(default=None, description="Signs every event (Signedly-Signature). Shown only when made or rotated: keep it.")
+    secret: Optional[StrictStr] = Field(default=None, description="Signs every event (Signedly-Signature). Shown only when made or rotated: keep it.")
     updated_at: Optional[datetime] = Field(default=None, description="Last change.")
-    url: Annotated[str, Field(min_length=1, strict=True, max_length=500)] = Field(description="Where events are posted: https://, public.")
+    url: StrictStr = Field(description="Where events are posted: https://, public.")
     __properties: ClassVar[List[str]] = ["created_at", "description", "disabled_at", "events", "failures_in_a_row", "id", "is_active", "secret", "updated_at", "url"]
 
     model_config = ConfigDict(

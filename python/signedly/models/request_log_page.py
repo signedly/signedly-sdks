@@ -18,9 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from signedly.models.request_log import RequestLog
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,8 +29,8 @@ class RequestLogPage(BaseModel):
     RequestLogPage
     """ # noqa: E501
     count: StrictInt = Field(description="How many results in all.")
-    next: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(description="The next page, or null.")
-    previous: Optional[Annotated[str, Field(min_length=1, strict=True)]] = Field(description="The previous page, or null.")
+    next: Optional[StrictStr] = Field(description="The next page, or null.")
+    previous: Optional[StrictStr] = Field(description="The previous page, or null.")
     results: List[RequestLog]
     __properties: ClassVar[List[str]] = ["count", "next", "previous", "results"]
 

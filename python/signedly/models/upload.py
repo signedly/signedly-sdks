@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -32,10 +31,10 @@ class Upload(BaseModel):
     created_at: Optional[datetime] = Field(default=None, description="When it was uploaded.")
     id: Optional[StrictStr] = Field(default=None, description="The upload's ID.")
     is_test: Optional[StrictBool] = Field(default=None, description="Made with your test keys: a watermarked test document, not billed (see Sandbox).")
-    mimetype: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=100)]] = Field(default=None, description="The file's type.")
-    name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=250)]] = Field(default=None, description="The name given at upload.")
+    mimetype: Optional[StrictStr] = Field(default=None, description="The file's type.")
+    name: Optional[StrictStr] = Field(default=None, description="The name given at upload.")
     status: Optional[StrictInt] = Field(default=None, description="1 Uploading · 2 Uploaded · 3 Processing · 4 Processed · 5 Error")
-    type: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = Field(default=None, description="2 Document · 4 Template")
+    type: Optional[StrictInt] = Field(default=None, description="2 Document · 4 Template")
     updated_at: Optional[datetime] = Field(default=None, description="When it last changed.")
     __properties: ClassVar[List[str]] = ["created_at", "id", "is_test", "mimetype", "name", "status", "type", "updated_at"]
 

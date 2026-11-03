@@ -224,8 +224,6 @@ public class Upload {
 
   /**
    * 2 Document · 4 Template
-   * minimum: 1
-   * maximum: 10
    * @return type
    */
   @javax.annotation.Nullable

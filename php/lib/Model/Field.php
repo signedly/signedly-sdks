@@ -471,34 +471,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $invalidProperties = [];
 
-        if (!is_null($this->container['font']) && (mb_strlen($this->container['font']) < 1)) {
-            $invalidProperties[] = "invalid value for 'font', the character length must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['group_name']) && (mb_strlen($this->container['group_name']) > 100)) {
-            $invalidProperties[] = "invalid value for 'group_name', the character length must be smaller than or equal to 100.";
-        }
-
-        if (!is_null($this->container['label']) && (mb_strlen($this->container['label']) > 100)) {
-            $invalidProperties[] = "invalid value for 'label', the character length must be smaller than or equal to 100.";
-        }
-
-        if (!is_null($this->container['max_length']) && ($this->container['max_length'] > 550)) {
-            $invalidProperties[] = "invalid value for 'max_length', must be smaller than or equal to 550.";
-        }
-
-        if (!is_null($this->container['max_length']) && ($this->container['max_length'] < 1)) {
-            $invalidProperties[] = "invalid value for 'max_length', must be bigger than or equal to 1.";
-        }
-
-        if (!is_null($this->container['placeholder']) && (mb_strlen($this->container['placeholder']) > 550)) {
-            $invalidProperties[] = "invalid value for 'placeholder', the character length must be smaller than or equal to 550.";
-        }
-
-        if (!is_null($this->container['tool_tip']) && (mb_strlen($this->container['tool_tip']) > 100)) {
-            $invalidProperties[] = "invalid value for 'tool_tip', the character length must be smaller than or equal to 100.";
-        }
-
         return $invalidProperties;
     }
 
@@ -644,11 +616,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
         if (is_null($font)) {
             throw new \InvalidArgumentException('non-nullable font cannot be null');
         }
-
-        if ((mb_strlen($font) < 1)) {
-            throw new \InvalidArgumentException('invalid length for $font when calling Field., must be bigger than or equal to 1.');
-        }
-
         $this->container['font'] = $font;
 
         return $this;
@@ -744,10 +711,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-        if (!is_null($group_name) && (mb_strlen($group_name) > 100)) {
-            throw new \InvalidArgumentException('invalid length for $group_name when calling Field., must be smaller than or equal to 100.');
-        }
-
         $this->container['group_name'] = $group_name;
 
         return $this;
@@ -944,10 +907,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-        if (!is_null($label) && (mb_strlen($label) > 100)) {
-            throw new \InvalidArgumentException('invalid length for $label when calling Field., must be smaller than or equal to 100.');
-        }
-
         $this->container['label'] = $label;
 
         return $this;
@@ -982,14 +941,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-
-        if (!is_null($max_length) && ($max_length > 550)) {
-            throw new \InvalidArgumentException('invalid value for $max_length when calling Field., must be smaller than or equal to 550.');
-        }
-        if (!is_null($max_length) && ($max_length < 1)) {
-            throw new \InvalidArgumentException('invalid value for $max_length when calling Field., must be bigger than or equal to 1.');
-        }
-
         $this->container['max_length'] = $max_length;
 
         return $this;
@@ -1112,10 +1063,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-        if (!is_null($placeholder) && (mb_strlen($placeholder) > 550)) {
-            throw new \InvalidArgumentException('invalid length for $placeholder when calling Field., must be smaller than or equal to 550.');
-        }
-
         $this->container['placeholder'] = $placeholder;
 
         return $this;
@@ -1231,10 +1178,6 @@ class Field implements ModelInterface, ArrayAccess, \JsonSerializable
                 $this->setOpenAPINullablesSetToNull($nullablesSetToNull);
             }
         }
-        if (!is_null($tool_tip) && (mb_strlen($tool_tip) > 100)) {
-            throw new \InvalidArgumentException('invalid length for $tool_tip when calling Field., must be smaller than or equal to 100.');
-        }
-
         $this->container['tool_tip'] = $tool_tip;
 
         return $this;
