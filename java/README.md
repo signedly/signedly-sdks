@@ -141,6 +141,21 @@ Import the whole API into Postman with **Import → Link** and
 collection's **Variables**, run **Get an access token** (it saves the token for
 every other request), and set `document_id` when a request needs one.
 
+## SDKs
+
+Official client libraries, generated from this API's spec. Each also gets and
+renews the access token for you and checks webhook signatures:
+
+| Language | Install |
+|---|---|
+| Python 3.8+ | `pip install signedly` |
+| Node / TypeScript | `npm install @signedly/sdk` |
+| PHP 7.4+ | `composer require signedly/sdk` |
+| Java 11+ | Maven or Gradle `com.signedly:signedly-sdk` |
+
+Source and a quick start for each language:
+https://github.com/signedly/signedly-sdks
+
 ## Webhooks
 
 Instead of polling, add an endpoint with `POST /ap1/webhooks/` (or in **Account &

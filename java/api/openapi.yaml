@@ -140,6 +140,21 @@ info:
     collection's **Variables**, run **Get an access token** (it saves the token for
     every other request), and set `document_id` when a request needs one.
 
+    ## SDKs
+
+    Official client libraries, generated from this API's spec. Each also gets and
+    renews the access token for you and checks webhook signatures:
+
+    | Language | Install |
+    |---|---|
+    | Python 3.8+ | `pip install signedly` |
+    | Node / TypeScript | `npm install @signedly/sdk` |
+    | PHP 7.4+ | `composer require signedly/sdk` |
+    | Java 11+ | Maven or Gradle `com.signedly:signedly-sdk` |
+
+    Source and a quick start for each language:
+    https://github.com/signedly/signedly-sdks
+
     ## Webhooks
 
     Instead of polling, add an endpoint with `POST /ap1/webhooks/` (or in **Account &
@@ -3232,7 +3247,7 @@ components:
           description: "The last day it can be signed, or null."
           format: date-time
           nullable: true
-          title: Expired at
+          title: Expiry date
           type: string
         id:
           description: The document's ID.
@@ -5674,6 +5689,10 @@ components:
           description: Shown when the signer points at the field. Defaults to the
             label.
           type: string
+        value:
+          description: Leave it out for an empty field the signer fills in; a value
+            given is prefilled.
+          type: string
         width:
           description: "In PDF points (1/72 inch): the field's width (each option's,\
             \ for Radio). The field must fit on its page."
@@ -5799,6 +5818,10 @@ components:
         tool_tip:
           description: Shown when the signer points at the field. Defaults to the
             label.
+          type: string
+        value:
+          description: Leave it out for an empty field the signer fills in; a value
+            given is prefilled.
           type: string
         width:
           description: "In PDF points (1/72 inch): the field's width (each option's,\
@@ -6115,6 +6138,10 @@ components:
         tool_tip:
           description: Shown when the signer points at the field. Defaults to the
             label.
+          type: string
+        value:
+          description: Leave it out for an empty field the signer fills in; a value
+            given is prefilled.
           type: string
         width:
           description: "In PDF points (1/72 inch): the field's width (each option's,\

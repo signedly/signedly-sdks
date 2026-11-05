@@ -30,6 +30,7 @@
 |**signatoryId** | **UUID** | The signatory who fills in this field (from GET /ap1/signatories/). |  |
 |**size** | **Integer** | Checkbox and Radio: the side of the tick or dot in points, centred in the box. Defaults to the box&#39;s smaller side. |  [optional] |
 |**toolTip** | **String** | Shown when the signer points at the field. Defaults to the label. |  [optional] |
+|**value** | **String** | Leave it out for an empty field the signer fills in; a value given is prefilled. |  [optional] |
 |**width** | **BigDecimal** | In PDF points (1/72 inch): the field&#39;s width (each option&#39;s, for Radio). The field must fit on its page. |  |
 |**x** | **BigDecimal** | In PDF points (1/72 inch): from the page&#39;s left edge to the field&#39;s left edge. Required for every type but Radio (whose options have their own). |  [optional] |
 |**y** | **BigDecimal** | In PDF points (1/72 inch): from the page&#39;s top edge to the field&#39;s top edge. Required for every type but Radio. |  [optional] |
