@@ -27,6 +27,7 @@ Name | Type | Description | Notes
 **select_options** | **string[]** | Dropdown: required; the choices the signer picks from, at least one (up to 100 characters each). | [optional]
 **size** | **int** | Checkbox and Radio: the side of the tick or dot in points, centred in the box. Defaults to the box&#39;s smaller side. | [optional]
 **tool_tip** | **string** | Shown when the signer points at the field. Defaults to the label. | [optional]
+**value** | **string** | Leave it out for an empty field the signer fills in; a value given is prefilled. | [optional]
 **width** | **float** | In PDF points (1/72 inch): the field&#39;s width (each option&#39;s, for Radio). The field must fit on its page. |
 **x** | **float** | In PDF points (1/72 inch): from the page&#39;s left edge to the field&#39;s left edge. Required for every type but Radio (whose options have their own). | [optional]
 **y** | **float** | In PDF points (1/72 inch): from the page&#39;s top edge to the field&#39;s top edge. Required for every type but Radio. | [optional]
