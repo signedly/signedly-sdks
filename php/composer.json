@@ -28,8 +28,8 @@
         "guzzlehttp/psr7": "^1.7 || ^2.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.0 || ^9.0",
-        "friendsofphp/php-cs-fixer": "^3.5"
+        "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5 || ^12.5 || ^13.4",
+        "friendsofphp/php-cs-fixer": "^3.95"
     },
     "autoload": {
         "psr-4": { "Signedly\\" : "lib/" }
