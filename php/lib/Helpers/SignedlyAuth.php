@@ -21,6 +21,8 @@ class SignedlyAuth
     public const LIVE_HOST = 'https://l0ads.signedly.com';
     private const RENEW_BEFORE = 120;
 
+    private string $clientId;
+    private string $clientSecret;
     private Configuration $config;
     private AuthenticationApi $auth;
     private string $refreshToken = '';
@@ -28,10 +30,12 @@ class SignedlyAuth
     private int $refreshExpires = 0;
 
     public function __construct(
-        private string $clientId,
-        private string $clientSecret,
+        string $clientId,
+        string $clientSecret,
         string $host = self::LIVE_HOST
     ) {
+        $this->clientId = $clientId;
+        $this->clientSecret = $clientSecret;
         $this->config = (new Configuration())->setHost($host);
         $this->auth = new AuthenticationApi(null, (new Configuration())->setHost($host));
     }

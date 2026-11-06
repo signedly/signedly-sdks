@@ -30,7 +30,7 @@ and methods.
 |---|---|
 | Python 3.8+ | `pip install signedly` |
 | Node / TypeScript | `npm install @signedly/sdk` |
-| PHP 8.0+ | `composer require signedly/sdk` (Guzzle 7) |
+| PHP 7.4+ | `composer require signedly/sdk` (Guzzle 7) |
 | Java 11+ | Maven `com.signedly:signedly-sdk` (Gradle: `implementation "com.signedly:signedly-sdk:0.1.1"`) |
 
 Java with Maven:
@@ -143,7 +143,8 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   `scripts/generate.sh`.
 - **Runtime dependencies** keep the generator's wide ranges, so customers choose
   their own versions. `java/pom.xml` lists exact versions, as Maven does; customers
-  can override them. The root `composer.json` `require` follows `php/composer.json`.
+  can override them. Its Jackson version is in `pom.mustache`, with
+  `jackson-annotations` separate because that artifact has no patch versions. The root `composer.json` `require` follows `php/composer.json`.
 - **Kept back on purpose:**
   - openapi-generator stays on 7.10.0. Newer versions rewrite the generated code in
     every SDK and raise the runtime minimums (for example pydantic 2.11, axios 1.18,
@@ -165,7 +166,7 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
 - `sdks.yml`, on every PR:
   - regenerating must change nothing (drift);
   - each SDK builds, and its helper tests run, on the oldest and the newest runtime
-    (Python 3.8 and 3.14, Node 20 and 26, PHP 8.0 and 8.5, Java 11 and 25);
+    (Python 3.8 and 3.14, Node 20 and 26, PHP 7.4 and 8.5, Java 11 and 25);
   - each SDK logs in through its helper against a fake Signedly and must send the
     token (`scripts/fake_signedly.py`; Java's `LoginTest`).
 - `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. That means a backend release changed the API, so update the spec and publish new versions.
