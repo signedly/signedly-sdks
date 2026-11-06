@@ -1,0 +1,44 @@
+{
+    {{#composerPackageName}}
+    "name": "{{{.}}}",
+    {{/composerPackageName}}
+    {{#artifactVersion}}
+    "version": "{{{.}}}",
+    {{/artifactVersion}}
+    "description": "{{{appDescription}}}",
+    "keywords": [
+        "openapitools",
+        "openapi-generator",
+        "openapi",
+        "php",
+        "sdk",
+        "rest",
+        "api"
+    ],
+    "homepage": "{{{artifactUrl}}}",
+    "license": "{{{licenseName}}}",
+    "authors": [
+        {
+            "name": "{{{developerOrganization}}}",
+            "homepage": "{{{developerOrganizationUrl}}}"
+        }
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "^7.3",
+        "guzzlehttp/psr7": "^1.7 || ^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6 || ^10.5 || ^11.5 || ^12.5 || ^13.4",
+        "friendsofphp/php-cs-fixer": "^3.95"
+    },
+    "autoload": {
+        "psr-4": { "{{{escapedInvokerPackage}}}\\" : "{{{srcBasePath}}}/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "{{{escapedInvokerPackage}}}\\Test\\" : "{{{testBasePath}}}/" }
+    }
+}

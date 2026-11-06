@@ -30,7 +30,7 @@ and methods.
 |---|---|
 | Python 3.8+ | `pip install signedly` |
 | Node / TypeScript | `npm install @signedly/sdk` |
-| PHP 7.4+ | `composer require signedly/sdk` |
+| PHP 7.4+ | `composer require signedly/sdk` (Guzzle 7) |
 | Java 11+ | Maven `com.signedly:signedly-sdk` (Gradle: `implementation "com.signedly:signedly-sdk:0.1.1"`) |
 
 Java with Maven:
@@ -136,6 +136,25 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   optional fields left null, give the file's type from its name, and are sent with
   their length, not chunked). They are copies of openapi-generator 7.10.0's own
   templates, so re-copy them when the generator version changes.
+- **Dev and build dependencies** are set in the template overrides too, because
+  regenerating writes the manifests: `node/package.json` and `node/tsconfig.json`,
+  `python/pyproject.toml` and `python/test-requirements.txt` (those need Python
+  3.11+), `php/composer.json` and `java/pom.xml`. Change the template, then run
+  `scripts/generate.sh`.
+- **Runtime dependencies** keep the generator's wide ranges, so customers choose
+  their own versions. `java/pom.xml` lists exact versions, as Maven does; customers
+  can override them. Its Jackson version is in `pom.mustache`, with
+  `jackson-annotations` separate because that artifact has no patch versions. The root `composer.json` `require` follows `php/composer.json`.
+- **Kept back on purpose:**
+  - openapi-generator stays on 7.10.0. Newer versions rewrite the generated code in
+    every SDK and raise the runtime minimums (for example pydantic 2.11, axios 1.18,
+    PHP 8.1).
+  - TypeScript stays on 6: `tsc` 6 with `node/tsconfig.json` builds the same `dist/`
+    as 5.9, and TypeScript 7 writes typings (`globalAxios.AxiosResponse`) that don't
+    compile in customers' projects.
+  - JUnit stays on 5, which still runs on Java 11; JUnit 6 needs Java 17.
+  - Guzzle 8 is not in the PHP range: the generated code calls
+    `GuzzleHttp\Utils::jsonEncode`, which Guzzle 8 removed.
 - **Author and license:** `scripts/generate.sh` adds Signedly's contact
   (`support@signedly.com`) and the MIT license to a copy of the spec, so the committed
   spec stays exactly what production serves.
@@ -146,7 +165,8 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
 **CI** (`.github/workflows/`):
 - `sdks.yml`, on every PR:
   - regenerating must change nothing (drift);
-  - each SDK builds, and its helper tests run;
+  - each SDK builds, and its helper tests run, on the oldest and the newest runtime
+    (Python 3.8 and 3.14, Node 20 and 26, PHP 7.4 and 8.5, Java 11 and 25);
   - each SDK logs in through its helper against a fake Signedly and must send the
     token (`scripts/fake_signedly.py`; Java's `LoginTest`).
 - `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. That means a backend release changed the API, so update the spec and publish new versions.
