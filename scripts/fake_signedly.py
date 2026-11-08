@@ -1,4 +1,4 @@
-"""A fake Signedly for CI: /ap1/token/ hands out "tok-1"; every GET answers an empty
+"""A fake Signedly for CI: /ap1/token/ and /ap1/refreshtoken/ hand out "tok-1"; every GET answers an empty
 page with "Authorization: Bearer tok-1" and 403 without it; POST /ap1/upload/ answers
 200 only for multipart/form-data with a PDF in its "file" part, sent with its length
 (400 otherwise, as the real API does: it reads no body from a chunked request). Usage:
@@ -52,7 +52,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         body = self.body()
         print(f"POST {self.path} Content-Type={self.headers.get('Content-Type')!r}", flush=True)
-        if self.path.startswith("/ap1/token/"):
+        if self.path.startswith(("/ap1/token/", "/ap1/refreshtoken/")):
             now = datetime.now(timezone.utc)
             return self.answer(
                 200,
