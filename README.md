@@ -171,6 +171,9 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
     token (`scripts/fake_signedly.py`; Java's `LoginTest`).
 - `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. That means a backend release changed the API, so update the spec and publish new versions.
 
+A newer push to a PR cancels the `sdks.yml` run it replaces. Workflow jobs run on GitHub's runners, or on the self-hosted runner when the repo
+variable `CI_RUNNER` names its label (signedly/bigga `deploy/ci-runner/README.md`).
+
 ## Publishing
 
 Publishing needs Signedly's registry accounts and is done by a person. Every

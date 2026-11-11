@@ -5,10 +5,15 @@ on:
   push:
     branches: [integration]
 
+# A newer push to the same PR or branch cancels the run it replaces.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   drift:
     name: Generated code matches the spec
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-24.04' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -20,7 +25,7 @@ jobs:
           test -z "$(git status --porcelain)" || { git diff --stat; exit 1; }
 
   python:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
@@ -43,7 +48,7 @@ jobs:
           assert documents.upload_document(file=("t.pdf", b"%PDF-1.4 test"), name="t", type=2).is_test'
 
   node:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
@@ -68,7 +73,7 @@ jobs:
           })().catch((e) => { console.error(e.message); process.exit(1); });'
 
   php:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
@@ -101,7 +106,7 @@ jobs:
           php -r 'require "vendor/autoload.php"; exit(class_exists("Signedly\\Api\\DocumentsApi") && class_exists("Signedly\\Helpers\\SignedlyAuth") ? 0 : 1);'
 
   java:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
