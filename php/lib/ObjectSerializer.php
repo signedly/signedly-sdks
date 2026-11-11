@@ -555,6 +555,25 @@ class ObjectSerializer
     }
 
     /**
+     * JSON-encodes a request body, as Guzzle 7's `GuzzleHttp\Utils::jsonEncode` did
+     * (Guzzle 8 removed it): `json_encode`, and an \InvalidArgumentException for a
+     * value it can't encode.
+     *
+     * @param mixed $value
+     *
+     * @throws \InvalidArgumentException if the value can't be encoded
+     */
+    public static function jsonEncode($value): string
+    {
+        $json = \json_encode($value);
+        if (\JSON_ERROR_NONE !== \json_last_error()) {
+            throw new \InvalidArgumentException('json_encode error: ' . \json_last_error_msg());
+        }
+
+        return $json;
+    }
+
+    /**
     * Build a query string from an array of key value pairs.
     *
     * This function can use the return value of `parse()` to build a query

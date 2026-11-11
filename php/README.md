@@ -255,7 +255,7 @@ For more information, please visit [https://signedly.com](https://signedly.com).
 
 ### Requirements
 
-PHP 7.4 and later.
+PHP 7.4 and later, with Guzzle 7 or 8.
 
 ### Composer
 

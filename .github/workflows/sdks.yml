@@ -78,11 +78,17 @@ jobs:
       fail-fast: false
       matrix:
         php: ["7.4", "8.5"]
+        guzzle: ["7", "8"]
+    name: php (${{ matrix.php }}, Guzzle ${{ matrix.guzzle }})
     steps:
       - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with: { php-version: "${{ matrix.php }}", tools: composer }
-      - run: cd php && composer install --no-interaction && vendor/bin/phpunit test/Helpers
+      - run: |
+          cd php
+          composer update --no-interaction -W --with "guzzlehttp/guzzle:^${{ matrix.guzzle }}.0"
+          composer show guzzlehttp/guzzle | grep versions
+          vendor/bin/phpunit test/Helpers
       - name: Logs in, sends the token and uploads a PDF (fake Signedly)
         run: |
           python3 scripts/fake_signedly.py 8765 &
