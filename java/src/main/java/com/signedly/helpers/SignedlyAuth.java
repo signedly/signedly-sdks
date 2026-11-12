@@ -17,7 +17,8 @@ import java.time.Instant;
  * </pre>
  *
  * Every request carries a fresh access token: fetched on the first call, renewed
- * (refresh token, then the keys again) shortly before it expires.
+ * (refresh token, then the keys again) shortly before it expires. When Signedly refuses
+ * the keys, the API call throws that {@link ApiException} (403 and the reason).
  */
 public final class SignedlyAuth {
   public static final String LIVE_HOST = "https://l0ads.signedly.com";
@@ -72,7 +73,18 @@ public final class SignedlyAuth {
       }
       return access;
     } catch (ApiException e) {
-      throw new IllegalStateException("Signedly refused the API keys: " + e.getMessage(), e);
+      throw SignedlyAuth.<RuntimeException>asIs(e);
     }
+  }
+
+  /**
+   * Throws the token call's ApiException unchanged. The request interceptor's type
+   * (Consumer) can't declare it, but every API method that runs the interceptor does,
+   * so the caller's {@code catch (ApiException e)} gets refused keys with their status
+   * code and body, like any other refused request.
+   */
+  @SuppressWarnings("unchecked")
+  private static <E extends Throwable> E asIs(Throwable e) throws E {
+    throw (E) e;
   }
 }

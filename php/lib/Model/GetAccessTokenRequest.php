@@ -249,7 +249,7 @@ class GetAccessTokenRequest implements ModelInterface, ArrayAccess, \JsonSeriali
      * @param mixed[] $data Associated array of property values
      *                      initializing the model
      */
-    public function __construct(array $data = null)
+    public function __construct(?array $data = null)
     {
         $this->setIfExists('client_id', $data ?? [], null);
         $this->setIfExists('client_secret', $data ?? [], null);

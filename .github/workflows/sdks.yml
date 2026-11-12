@@ -89,6 +89,12 @@ jobs:
           composer update --no-interaction -W --with "guzzlehttp/guzzle:^${{ matrix.guzzle }}.0"
           composer show guzzlehttp/guzzle | grep versions
           vendor/bin/phpunit test/Helpers
+      - name: No PHP file gives a deprecation line
+        run: |
+          cd php
+          find lib test -name '*.php' -print0 \
+            | xargs -0 -n1 php -d error_reporting=-1 -d display_errors=1 -l > /tmp/php-lint.txt 2>&1 || true
+          ! grep -E 'Deprecated:|Warning:|Notice:|Parse error|Fatal error' /tmp/php-lint.txt
       - name: Logs in, sends the token and uploads a PDF (fake Signedly)
         run: |
           python3 scripts/fake_signedly.py 8765 &
