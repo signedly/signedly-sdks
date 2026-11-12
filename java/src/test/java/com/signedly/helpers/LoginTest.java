@@ -1,8 +1,11 @@
 package com.signedly.helpers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.signedly.api.DocumentsApi;
+import com.signedly.client.ApiException;
 import com.signedly.model.Upload;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -88,6 +91,26 @@ class LoginTest {
       assertEquals(true, upload.getIsTest());
       assertEquals(
           List.of("token", "documents Bearer tok-1", "upload multipart/form-data true length true true"), seen);
+    } finally {
+      server.stop(0);
+    }
+  }
+
+  /** Refused keys reach the caller as the API's own exception, with its status and reason. */
+  @Test
+  void refusedKeysThrowApiException() throws Exception {
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext(
+        "/ap1/token/", exchange -> answer(exchange, 403, "{\"detail\": \"Client not found\"}"));
+    server.start();
+    try {
+      String host = "http://127.0.0.1:" + server.getAddress().getPort();
+      DocumentsApi documents = new DocumentsApi(SignedlyAuth.client("id", "wrong", host));
+      ApiException refused =
+          assertThrows(
+              ApiException.class, () -> documents.listDocuments(null, null, null, null, null));
+      assertEquals(403, refused.getCode());
+      assertTrue(refused.getResponseBody().contains("Client not found"), refused.getResponseBody());
     } finally {
       server.stop(0);
     }

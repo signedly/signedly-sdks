@@ -255,7 +255,7 @@ class UpdateDocumentFieldByBodyRequestItemsInner implements ModelInterface, Arra
      * @param mixed[] $data Associated array of property values
      *                      initializing the model
      */
-    public function __construct(array $data = null)
+    public function __construct(?array $data = null)
     {
         $this->setIfExists('selected', $data ?? [], null);
         $this->setIfExists('x', $data ?? [], null);

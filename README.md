@@ -85,6 +85,9 @@ ApiClient client = SignedlyAuth.client(clientId, clientSecret);
 DocumentPage page = new DocumentsApi(client).listDocuments(null, null, null, null, null);
 ```
 
+When Signedly refuses the client ID and secret, the call throws `ApiException`
+(`getCode()` 403, the reason in `getResponseBody()`), like any other refused request.
+
 The usual flow is: upload, add signatories, place fields, send, then follow the
 document by webhook or by polling. See "Sending a document for signing" in the
 API docs. Every SDK has a method per endpoint, named after its operation, e.g.
@@ -137,7 +140,10 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   their length, not chunked), and PHP's `api.mustache` and `ObjectSerializer.mustache`
   (JSON bodies are encoded by `ObjectSerializer::jsonEncode`, not
   `GuzzleHttp\Utils::jsonEncode`, which Guzzle 8 removed, so the SDK runs on
-  Guzzle 7 and 8). They are copies of openapi-generator 7.10.0's own
+  Guzzle 7 and 8). PHP's `api.mustache`, `model_generic.mustache` and
+  `Configuration.mustache` also write optional typed parameters as explicitly
+  nullable (`?array $data = null`), so PHP 8.4 and later print no deprecation
+  lines. They are copies of openapi-generator 7.10.0's own
   templates, so re-copy them when the generator version changes.
 - **Dev and build dependencies** are set in the template overrides too, because
   regenerating writes the manifests: `node/package.json` and `node/tsconfig.json`,
@@ -169,7 +175,8 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
   - each SDK builds, and its helper tests run, on the oldest and the newest runtime
     (Python 3.8 and 3.14, Node 20 and 26, PHP 7.4 and 8.5, Java 11 and 25); PHP
     runs each of those on Guzzle 7 and on Guzzle 8 (`test/Helpers/JsonBodyTest.php`
-    checks JSON request bodies);
+    checks JSON request bodies), and no PHP file may give a deprecation line
+    when loaded with every error shown;
   - each SDK logs in through its helper against a fake Signedly and must send the
     token (`scripts/fake_signedly.py`; Java's `LoginTest`).
 - `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. That means a backend release changed the API, so update the spec and publish new versions.
