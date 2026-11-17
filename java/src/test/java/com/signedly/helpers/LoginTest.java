@@ -115,4 +115,57 @@ class LoginTest {
       server.stop(0);
     }
   }
+
+  /**
+   * A refused refresh token (signed out, or replaced) makes the client log in again
+   * with the keys instead of failing every later call.
+   */
+  @Test
+  void refusedRefreshTokenFallsBackToTheKeys() throws Exception {
+    List<String> seen = new ArrayList<>();
+    int[] issued = {0};
+    HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+    server.createContext(
+        "/ap1/token/",
+        exchange -> {
+          seen.add("token");
+          issued[0] += 1;
+          OffsetDateTime now = OffsetDateTime.now();
+          // Expires within the renewal margin, so the next call renews.
+          answer(
+              exchange,
+              200,
+              "{\"access_token\": \"tok-"
+                  + issued[0]
+                  + "\", \"refresh_token\": \"ref-1\", \"expiry_date\": \""
+                  + now.plusSeconds(60)
+                  + "\", \"refresh_token_expiry_date\": \""
+                  + now.plusDays(7)
+                  + "\"}");
+        });
+    server.createContext(
+        "/ap1/refreshtoken/",
+        exchange -> {
+          seen.add("refresh");
+          answer(exchange, 403, "{\"status\": \"Token not found\"}");
+        });
+    server.createContext(
+        "/ap1/documents/",
+        exchange -> {
+          seen.add("documents " + exchange.getRequestHeaders().getFirst("Authorization"));
+          answer(exchange, 200, "{\"count\": 0, \"next\": null, \"previous\": null, \"results\": []}");
+        });
+    server.start();
+    try {
+      String host = "http://127.0.0.1:" + server.getAddress().getPort();
+      DocumentsApi documents = new DocumentsApi(SignedlyAuth.client("id", "secret", host));
+      documents.listDocuments(null, null, null, null, null);
+      documents.listDocuments(null, null, null, null, null);
+      assertEquals(
+          List.of("token", "documents Bearer tok-1", "refresh", "token", "documents Bearer tok-2"),
+          seen);
+    } finally {
+      server.stop(0);
+    }
+  }
 }

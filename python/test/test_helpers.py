@@ -117,7 +117,7 @@ def test_a_refused_refresh_token_falls_back_to_the_keys(monkeypatch):
     client = helpers.SignedlyClient("id", "secret")
     client._auth = FakeAuth()
     config = client.configuration
-    assert config.get_api_key_with_prefix("Bearer") == "Bearer access-0"
+    assert config.get_api_key_with_prefix("Bearer") == "Bearer access-1"
     now[0] += 2 * 3600 - 60
-    assert config.get_api_key_with_prefix("Bearer") == "Bearer access-2"
+    assert config.get_api_key_with_prefix("Bearer") == "Bearer access-3"
     assert calls == ["token", "refresh", "token"]

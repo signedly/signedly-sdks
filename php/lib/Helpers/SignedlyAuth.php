@@ -13,6 +13,7 @@ namespace Signedly\Helpers;
 
 use Signedly\Api\AuthenticationApi;
 use Signedly\Configuration;
+use Signedly\ApiException;
 use Signedly\Model\GetAccessTokenRequest;
 use Signedly\Model\RefreshAccessTokenRequest;
 
@@ -46,11 +47,19 @@ class SignedlyAuth
         if ($now < $this->expires - self::RENEW_BEFORE) {
             return $this->config;
         }
+        $token = null;
         if ($this->refreshToken !== '' && $now < $this->refreshExpires - self::RENEW_BEFORE) {
-            $token = $this->auth->refreshAccessToken(
-                new RefreshAccessTokenRequest(['refresh_token' => $this->refreshToken])
-            );
-        } else {
+            try {
+                $token = $this->auth->refreshAccessToken(
+                    new RefreshAccessTokenRequest(['refresh_token' => $this->refreshToken])
+                );
+            } catch (ApiException $refused) {
+                // A refused refresh token (signed out, or replaced) isn't fatal:
+                // log in again with the keys.
+                $this->refreshToken = '';
+            }
+        }
+        if ($token === null) {
             $token = $this->auth->getAccessToken(new GetAccessTokenRequest([
                 'client_id' => $this->clientId,
                 'client_secret' => $this->clientSecret,
