@@ -22,6 +22,19 @@ def test_wrong_secret_changed_body_or_old_signature_fail():
     assert not verify_webhook_signature("whsec_x", "garbage", b"{}", now=1000)
 
 
+
+def test_during_a_secret_rotation_either_secrets_v1_verifies():
+    body = '{"id":"1"}'
+    new = sign("whsec_new", 1000, body).split(",v1=")[1]
+    old = sign("whsec_old", 1000, body).split(",v1=")[1]
+    for header in (f"t=1000,v1={new},v1={old}", f"t=1000,v1={old},v1={new}"):
+        assert verify_webhook_signature("whsec_new", header, body.encode(), now=1000)
+        assert verify_webhook_signature("whsec_old", header, body.encode(), now=1000)
+        assert not verify_webhook_signature("whsec_other", header, body.encode(), now=1000)
+    assert verify_webhook_signature("whsec_new", f"t=1000,v1=00,v1={new}", body, now=1000)
+    assert not verify_webhook_signature("whsec_new", "t=1000,v1=00,v1=11", body, now=1000)
+    assert not verify_webhook_signature("whsec_new", None, body, now=1000)
+
 def test_the_client_logs_in_then_refreshes_before_expiry(monkeypatch):
     from datetime import datetime, timedelta, timezone
     from types import SimpleNamespace

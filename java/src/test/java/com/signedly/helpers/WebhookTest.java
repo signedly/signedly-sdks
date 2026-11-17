@@ -28,4 +28,19 @@ class WebhookTest {
     assertFalse(Webhook.verifySignature("whsec_x", header, "{\"id\":\"1\"}", 1301));
     assertFalse(Webhook.verifySignature("whsec_x", "garbage", "{}", 1000));
   }
+
+  @Test
+  void duringASecretRotationEitherSecretsV1Verifies() throws Exception {
+    String body = "{\"id\":\"1\"}";
+    String fresh = sign("whsec_new", 1000, body).split(",v1=")[1];
+    String old = sign("whsec_old", 1000, body).split(",v1=")[1];
+    for (String header :
+        new String[] {"t=1000,v1=" + fresh + ",v1=" + old, "t=1000,v1=" + old + ",v1=" + fresh}) {
+      assertTrue(Webhook.verifySignature("whsec_new", header, body, 1000));
+      assertTrue(Webhook.verifySignature("whsec_old", header, body, 1000));
+      assertFalse(Webhook.verifySignature("whsec_other", header, body, 1000));
+    }
+    assertTrue(Webhook.verifySignature("whsec_new", "t=1000,v1=00,v1=" + fresh, body, 1000));
+    assertFalse(Webhook.verifySignature("whsec_new", "t=1000,v1=00,v1=11", body, 1000));
+  }
 }

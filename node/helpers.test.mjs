@@ -39,6 +39,20 @@ test("malformed headers fail without throwing", () => {
     assert.equal(verifyWebhookSignature("whsec_x", undefined, "{}", 1000), false);
 });
 
+test("during a secret rotation either secret's v1 verifies, in any order", () => {
+    const body = '{"id":"1"}';
+    const v1 = (secret) => sign(secret, 1000, body).split(",v1=")[1];
+    const both = `t=1000,v1=${v1("whsec_new")},v1=${v1("whsec_old")}`;
+    const reversed = `t=1000,v1=${v1("whsec_old")},v1=${v1("whsec_new")}`;
+    for (const header of [both, reversed]) {
+        assert.equal(verifyWebhookSignature("whsec_new", header, body, 1000), true);
+        assert.equal(verifyWebhookSignature("whsec_old", header, body, 1000), true);
+        assert.equal(verifyWebhookSignature("whsec_other", header, body, 1000), false);
+    }
+    assert.equal(verifyWebhookSignature("whsec_new", `t=1000,v1=00,v1=${v1("whsec_new")}`, body, 1000), true);
+    assert.equal(verifyWebhookSignature("whsec_new", "t=1000,v1=00,v1=11", body, 1000), false);
+});
+
 // Login and token renewal ---------------------------------------------------------
 
 /** A fake Signedly: /ap1/token/, /ap1/refreshtoken/ and /ap1/documents/. */
