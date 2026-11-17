@@ -86,22 +86,34 @@ export function signedlyConfiguration(
 }
 
 /** True if `Signedly-Signature` signs this raw body with the endpoint's secret,
- * made within 5 minutes. Pass the body exactly as received. */
+ * made within 5 minutes. Pass the body exactly as received. With several `v1`
+ * values (a secret rotation), any of them may match. */
 export function verifyWebhookSignature(
     secret: string,
     signatureHeader: string,
     rawBody: string | Buffer,
     nowSeconds: number = Date.now() / 1000,
 ): boolean {
-    const parts: Record<string, string> = {};
+    // During a secret rotation the header carries one v1 per secret
+    // (t=…,v1=<new>,v1=<old>): any of them may match.
+    let t: string | undefined;
+    const signatures: string[] = [];
     for (const item of (signatureHeader || "").split(",")) {
         const at = item.indexOf("=");
-        if (at > 0) parts[item.slice(0, at)] = item.slice(at + 1);
+        if (at <= 0) continue;
+        const key = item.slice(0, at);
+        const value = item.slice(at + 1);
+        if (key === "t") t = value;
+        else if (key === "v1" && value) signatures.push(value);
     }
-    const timestamp = Number(parts.t);
-    if (!parts.v1 || !Number.isInteger(timestamp)) return false;
+    const timestamp = Number(t);
+    if (!signatures.length || t === undefined || !Number.isInteger(timestamp)) return false;
     if (Math.abs(nowSeconds - timestamp) > SIGNATURE_TOLERANCE_S) return false;
-    const expected = createHmac("sha256", secret).update(`${timestamp}.${rawBody.toString()}`).digest("hex");
-    const given = Buffer.from(parts.v1);
-    return given.length === expected.length && timingSafeEqual(given, Buffer.from(expected));
+    const expected = Buffer.from(
+        createHmac("sha256", secret).update(`${timestamp}.${rawBody.toString()}`).digest("hex"),
+    );
+    return signatures.some((signature) => {
+        const given = Buffer.from(signature);
+        return given.length === expected.length && timingSafeEqual(given, expected);
+    });
 }

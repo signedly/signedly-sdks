@@ -10,7 +10,8 @@ PHP and Java**. Each is generated from the API's OpenAPI spec
   expires. A refused refresh token (signed out, or replaced) makes the client log
   in again with the keys.
 - **Check webhook signatures:** `Signedly-Signature` against the endpoint's secret,
-  refused when older than 5 minutes.
+  refused when older than 5 minutes. A header with several `v1` values (one per
+  secret while a secret is being rotated) verifies when any of them matches.
 - **Sandbox:** test keys work exactly like live ones; what they make is a
   watermarked, unbilled test document.
 

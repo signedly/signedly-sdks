@@ -2,8 +2,8 @@ package com.signedly.helpers;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -13,27 +13,40 @@ public final class Webhook {
 
   private Webhook() {}
 
-  /** True if the Signedly-Signature header signs this raw body, made within 5 minutes. */
+  /**
+   * True if the Signedly-Signature header signs this raw body, made within 5 minutes; with
+   * several v1 values (a secret rotation), any of them may match.
+   */
   public static boolean verifySignature(String secret, String signatureHeader, String rawBody) {
     return verifySignature(secret, signatureHeader, rawBody, System.currentTimeMillis() / 1000);
   }
 
   public static boolean verifySignature(
       String secret, String signatureHeader, String rawBody, long nowSeconds) {
-    Map<String, String> parts = new HashMap<>();
+    // During a secret rotation the header carries one v1 per secret
+    // (t=…,v1=<new>,v1=<old>): any of them may match.
+    String t = null;
+    List<String> signatures = new ArrayList<>();
     for (String item : (signatureHeader == null ? "" : signatureHeader).split(",")) {
       int at = item.indexOf('=');
-      if (at > 0) {
-        parts.put(item.substring(0, at), item.substring(at + 1));
+      if (at <= 0) {
+        continue;
+      }
+      String key = item.substring(0, at);
+      String value = item.substring(at + 1);
+      if (key.equals("t")) {
+        t = value;
+      } else if (key.equals("v1") && !value.isEmpty()) {
+        signatures.add(value);
       }
     }
     long timestamp;
     try {
-      timestamp = Long.parseLong(parts.get("t"));
+      timestamp = Long.parseLong(t);
     } catch (NumberFormatException | NullPointerException e) {
       return false;
     }
-    if (parts.get("v1") == null || Math.abs(nowSeconds - timestamp) > TOLERANCE_SECONDS) {
+    if (signatures.isEmpty() || Math.abs(nowSeconds - timestamp) > TOLERANCE_SECONDS) {
       return false;
     }
     try {
@@ -44,9 +57,13 @@ public final class Webhook {
       for (byte b : digest) {
         expected.append(String.format("%02x", b));
       }
-      return MessageDigest.isEqual(
-          expected.toString().getBytes(StandardCharsets.UTF_8),
-          parts.get("v1").getBytes(StandardCharsets.UTF_8));
+      byte[] wanted = expected.toString().getBytes(StandardCharsets.UTF_8);
+      for (String signature : signatures) {
+        if (MessageDigest.isEqual(wanted, signature.getBytes(StandardCharsets.UTF_8))) {
+          return true;
+        }
+      }
+      return false;
     } catch (Exception e) {
       return false;
     }

@@ -84,11 +84,22 @@ class SignedlyClient:
 
 def verify_webhook_signature(secret, signature_header, raw_body, now=None):
     """True if `Signedly-Signature` signs this raw body with the endpoint's secret
-    and was made within 5 minutes. Pass the body exactly as received (bytes)."""
+    and was made within 5 minutes. Pass the body exactly as received (bytes). With
+    several v1 values (a secret rotation), any of them may match."""
+    # During a secret rotation the header carries one v1 per secret
+    # (t=…,v1=<new>,v1=<old>): any of them may match.
+    timestamp, signatures = None, []
+    for item in (signature_header or "").split(","):
+        key, _, value = item.partition("=")
+        if key == "t":
+            timestamp = value
+        elif key == "v1" and value:
+            signatures.append(value)
     try:
-        parts = dict(item.split("=", 1) for item in signature_header.split(","))
-        timestamp = int(parts["t"])
-    except (KeyError, ValueError, AttributeError):
+        timestamp = int(timestamp)
+    except (TypeError, ValueError):
+        return False
+    if not signatures:
         return False
     if abs((time.time() if now is None else now) - timestamp) > SIGNATURE_TOLERANCE:
         return False
@@ -96,4 +107,4 @@ def verify_webhook_signature(secret, signature_header, raw_body, now=None):
     expected = hmac.new(
         secret.encode(), f"{timestamp}.{body}".encode(), hashlib.sha256
     ).hexdigest()
-    return hmac.compare_digest(parts.get("v1", ""), expected)
+    return any(hmac.compare_digest(signature, expected) for signature in signatures)
