@@ -19,7 +19,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 Get a link to the audit trail
 
-A link to the document&#39;s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+A link to the document&#39;s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
 
 ### Example
 
@@ -84,6 +84,8 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The link. |  -  |
+| **202** | The audit trail isn&#39;t made yet. |  -  |
+| **400** | &#x60;id&#x60; isn&#39;t a document ID (a UUID). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 ## getAuditTrailLinkWithHttpInfo
@@ -92,7 +94,7 @@ public class Example {
 
 Get a link to the audit trail
 
-A link to the document&#39;s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+A link to the document&#39;s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
 
 ### Example
 
@@ -160,6 +162,8 @@ ApiResponse<[**GetAuditTrailLink200Response**](GetAuditTrailLink200Response.md)>
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The link. |  -  |
+| **202** | The audit trail isn&#39;t made yet. |  -  |
+| **400** | &#x60;id&#x60; isn&#39;t a document ID (a UUID). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 
@@ -235,6 +239,7 @@ public class Example {
 |-------------|-------------|------------------|
 | **200** | The link. |  -  |
 | **202** | The signed PDF isn&#39;t ready yet. |  -  |
+| **400** | &#x60;id&#x60; isn&#39;t a document ID (a UUID). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 ## getDownloadLinkWithHttpInfo
@@ -312,6 +317,7 @@ ApiResponse<[**GetAuditTrailLink200Response**](GetAuditTrailLink200Response.md)>
 |-------------|-------------|------------------|
 | **200** | The link. |  -  |
 | **202** | The signed PDF isn&#39;t ready yet. |  -  |
+| **400** | &#x60;id&#x60; isn&#39;t a document ID (a UUID). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 
@@ -321,7 +327,7 @@ ApiResponse<[**GetAuditTrailLink200Response**](GetAuditTrailLink200Response.md)>
 
 Get a link to view the document
 
-A link to the document&#39;s PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+A link to the document&#39;s PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
 
 ### Example
 
@@ -386,6 +392,8 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The link. |  -  |
+| **202** | The document&#39;s PDF isn&#39;t made yet (the document isn&#39;t sent). |  -  |
+| **400** | &#x60;id&#x60; isn&#39;t a document ID (a UUID). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 ## getViewLinkWithHttpInfo
@@ -394,7 +402,7 @@ public class Example {
 
 Get a link to view the document
 
-A link to the document&#39;s PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+A link to the document&#39;s PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
 
 ### Example
 
@@ -462,5 +470,7 @@ ApiResponse<[**GetAuditTrailLink200Response**](GetAuditTrailLink200Response.md)>
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The link. |  -  |
+| **202** | The document&#39;s PDF isn&#39;t made yet (the document isn&#39;t sent). |  -  |
+| **400** | &#x60;id&#x60; isn&#39;t a document ID (a UUID). |  -  |
 | **404** | The document doesn&#39;t exist or isn&#39;t yours. |  -  |
 

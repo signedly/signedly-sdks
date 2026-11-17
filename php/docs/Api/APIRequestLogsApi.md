@@ -16,7 +16,7 @@ listRequestCounts($method, $path, $limit, $offset): \Signedly\Model\RequestCount
 
 Count your API calls per path
 
-How many calls this API client has made to each path and method, most recently used first. Paged: see `limit` and `offset`.
+How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged: see `limit` and `offset`.
 
 ### Example
 
@@ -39,7 +39,7 @@ $apiInstance = new Signedly\Api\APIRequestLogsApi(
 );
 $method = 'method_example'; // string | Only this HTTP method.
 $path = 'path_example'; // string | Only paths that contain this, e.g. `/ap1/document/`.
-$limit = 56; // int | How many results to return (default 10).
+$limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
@@ -56,7 +56,7 @@ try {
 | ------------- | ------------- | ------------- | ------------- |
 | **method** | **string**| Only this HTTP method. | [optional] |
 | **path** | **string**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
-| **limit** | **int**| How many results to return (default 10). | [optional] |
+| **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 
 ### Return type
@@ -84,7 +84,7 @@ listRequestLogs($method, $path, $ip_address, $limit, $offset): \Signedly\Model\R
 
 List your API calls
 
-This API client's calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`.
+This API client's calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see `limit` and `offset`.
 
 ### Example
 
@@ -108,7 +108,7 @@ $apiInstance = new Signedly\Api\APIRequestLogsApi(
 $method = 'method_example'; // string | Only this HTTP method.
 $path = 'path_example'; // string | Only paths that contain this, e.g. `/ap1/document/`.
 $ip_address = 'ip_address_example'; // string | Only calls from this IP address.
-$limit = 56; // int | How many results to return (default 10).
+$limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
@@ -126,7 +126,7 @@ try {
 | **method** | **string**| Only this HTTP method. | [optional] |
 | **path** | **string**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
 | **ip_address** | **string**| Only calls from this IP address. | [optional] |
-| **limit** | **int**| How many results to return (default 10). | [optional] |
+| **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 
 ### Return type

@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 Count your API calls per path
 
-How many calls this API client has made to each path and method, most recently used first. Paged: see `limit` and `offset`.
+How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged: see `limit` and `offset`.
 
 ### Example
 
@@ -48,7 +48,7 @@ with signedly.ApiClient(configuration) as api_client:
     api_instance = signedly.APIRequestLogsApi(api_client)
     method = 'method_example' # str | Only this HTTP method. (optional)
     path = 'path_example' # str | Only paths that contain this, e.g. `/ap1/document/`. (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
@@ -69,7 +69,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **method** | **str**| Only this HTTP method. | [optional] 
  **path** | **str**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] 
- **limit** | **int**| How many results to return (default 10). | [optional] 
+ **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
 ### Return type
@@ -98,7 +98,7 @@ Name | Type | Description  | Notes
 
 List your API calls
 
-This API client's calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`.
+This API client's calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see `limit` and `offset`.
 
 ### Example
 
@@ -134,7 +134,7 @@ with signedly.ApiClient(configuration) as api_client:
     method = 'method_example' # str | Only this HTTP method. (optional)
     path = 'path_example' # str | Only paths that contain this, e.g. `/ap1/document/`. (optional)
     ip_address = 'ip_address_example' # str | Only calls from this IP address. (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
@@ -156,7 +156,7 @@ Name | Type | Description  | Notes
  **method** | **str**| Only this HTTP method. | [optional] 
  **path** | **str**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] 
  **ip_address** | **str**| Only calls from this IP address. | [optional] 
- **limit** | **int**| How many results to return (default 10). | [optional] 
+ **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
 ### Return type

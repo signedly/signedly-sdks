@@ -23,7 +23,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template&#39;s roles (GET /ap1/signatories/?document_id&#x3D;&lt;the template&#39;s ID&gt; lists them; a template made in the web app can have several): the role whose &#x60;id&#x60; is its &#x60;signatory_id&#x60;, or without one the first role in signing order. On a document made from the template, a role&#39;s fields go to the signatory who takes that role. A &#x60;signatory_id&#x60; that isn&#39;t one of this template&#39;s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field&#39;s &#x60;page_number&#x60; must be the one GET /ap1/documents/{id}/pages/ lists for its &#x60;page&#x60;.
 
 ### Example
 
@@ -97,7 +97,7 @@ public class Example {
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template&#39;s roles (GET /ap1/signatories/?document_id&#x3D;&lt;the template&#39;s ID&gt; lists them; a template made in the web app can have several): the role whose &#x60;id&#x60; is its &#x60;signatory_id&#x60;, or without one the first role in signing order. On a document made from the template, a role&#39;s fields go to the signatory who takes that role. A &#x60;signatory_id&#x60; that isn&#39;t one of this template&#39;s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field&#39;s &#x60;page_number&#x60; must be the one GET /ap1/documents/{id}/pages/ lists for its &#x60;page&#x60;.
 
 ### Example
 
@@ -171,7 +171,7 @@ ApiResponse<[**List&lt;TemplateField&gt;**](TemplateField.md)>
 
 ## deleteDocument
 
-> SendDocument200Response deleteDocument(id)
+> DeleteDocument204Response deleteDocument(id)
 
 Delete a template or an unsent document
 
@@ -202,7 +202,7 @@ public class Example {
         TemplatesApi apiInstance = new TemplatesApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The document's or template's ID.
         try {
-            SendDocument200Response result = apiInstance.deleteDocument(id);
+            DeleteDocument204Response result = apiInstance.deleteDocument(id);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling TemplatesApi#deleteDocument");
@@ -224,7 +224,7 @@ public class Example {
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 
 ### Authorization
@@ -241,12 +241,11 @@ public class Example {
 |-------------|-------------|------------------|
 | **204** | Deleted. |  -  |
 | **400** | The document has been sent, so it is kept. |  -  |
-| **403** | The document isn&#39;t your organisation&#39;s. |  -  |
-| **404** | No document has this ID. |  -  |
+| **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 ## deleteDocumentWithHttpInfo
 
-> ApiResponse<SendDocument200Response> deleteDocument deleteDocumentWithHttpInfo(id)
+> ApiResponse<DeleteDocument204Response> deleteDocument deleteDocumentWithHttpInfo(id)
 
 Delete a template or an unsent document
 
@@ -278,7 +277,7 @@ public class Example {
         TemplatesApi apiInstance = new TemplatesApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The document's or template's ID.
         try {
-            ApiResponse<SendDocument200Response> response = apiInstance.deleteDocumentWithHttpInfo(id);
+            ApiResponse<DeleteDocument204Response> response = apiInstance.deleteDocumentWithHttpInfo(id);
             System.out.println("Status code: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
             System.out.println("Response body: " + response.getData());
@@ -302,7 +301,7 @@ public class Example {
 
 ### Return type
 
-ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
+ApiResponse<[**DeleteDocument204Response**](DeleteDocument204Response.md)>
 
 
 ### Authorization
@@ -319,8 +318,7 @@ ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
 |-------------|-------------|------------------|
 | **204** | Deleted. |  -  |
 | **400** | The document has been sent, so it is kept. |  -  |
-| **403** | The document isn&#39;t your organisation&#39;s. |  -  |
-| **404** | No document has this ID. |  -  |
+| **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 
 ## listTemplateFields
@@ -505,7 +503,7 @@ public class Example {
 
         TemplatesApi apiInstance = new TemplatesApi(defaultClient);
         String name = "name_example"; // String | Only templates whose title contains this (any case).
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             TemplatePage result = apiInstance.listTemplates(name, limit, offset);
@@ -527,7 +525,7 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **name** | **String**| Only templates whose title contains this (any case). | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -582,7 +580,7 @@ public class Example {
 
         TemplatesApi apiInstance = new TemplatesApi(defaultClient);
         String name = "name_example"; // String | Only templates whose title contains this (any case).
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             ApiResponse<TemplatePage> response = apiInstance.listTemplatesWithHttpInfo(name, limit, offset);
@@ -606,7 +604,7 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **name** | **String**| Only templates whose title contains this (any case). | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -635,7 +633,7 @@ ApiResponse<[**TemplatePage**](TemplatePage.md)>
 
 Change a template&#39;s field
 
-Changes a template&#39;s field; send all of its values, as when adding it. Its page can&#39;t change: delete the field and add it again.
+Changes a template&#39;s field; send all of its values, as when adding it. A &#x60;signatory_id&#x60; naming another of the template&#39;s roles moves the field to that role; without one it keeps its role. Its page can&#39;t change: delete the field and add it again.
 
 ### Example
 
@@ -711,7 +709,7 @@ public class Example {
 
 Change a template&#39;s field
 
-Changes a template&#39;s field; send all of its values, as when adding it. Its page can&#39;t change: delete the field and add it again.
+Changes a template&#39;s field; send all of its values, as when adding it. A &#x60;signatory_id&#x60; naming another of the template&#39;s roles moves the field to that role; without one it keeps its role. Its page can&#39;t change: delete the field and add it again.
 
 ### Example
 

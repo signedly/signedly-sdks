@@ -506,7 +506,7 @@ public class Example {
         WebhooksApi apiInstance = new WebhooksApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The endpoint's ID.
         String status = "status_example"; // String | Only `pending`, `succeeded` or `failed` deliveries.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             WebhookDeliveryPage result = apiInstance.listWebhookDeliveries(id, status, limit, offset);
@@ -529,7 +529,7 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **id** | **UUID**| The endpoint&#39;s ID. | |
 | **status** | **String**| Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -586,7 +586,7 @@ public class Example {
         WebhooksApi apiInstance = new WebhooksApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The endpoint's ID.
         String status = "status_example"; // String | Only `pending`, `succeeded` or `failed` deliveries.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             ApiResponse<WebhookDeliveryPage> response = apiInstance.listWebhookDeliveriesWithHttpInfo(id, status, limit, offset);
@@ -611,7 +611,7 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **id** | **UUID**| The endpoint&#39;s ID. | |
 | **status** | **String**| Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type

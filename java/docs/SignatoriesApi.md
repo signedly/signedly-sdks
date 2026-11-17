@@ -321,7 +321,7 @@ ApiResponse<[**Signatory**](Signatory.md)>
 
 ## deleteSignatory
 
-> SendDocument200Response deleteSignatory(id, data)
+> DeleteDocument204Response deleteSignatory(id, data)
 
 Remove a signatory
 
@@ -353,7 +353,7 @@ public class Example {
         UUID id = UUID.randomUUID(); // UUID | The signatory's ID.
         DeleteFieldRequest data = new DeleteFieldRequest(); // DeleteFieldRequest | 
         try {
-            SendDocument200Response result = apiInstance.deleteSignatory(id, data);
+            DeleteDocument204Response result = apiInstance.deleteSignatory(id, data);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling SignatoriesApi#deleteSignatory");
@@ -376,7 +376,7 @@ public class Example {
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 
 ### Authorization
@@ -397,7 +397,7 @@ public class Example {
 
 ## deleteSignatoryWithHttpInfo
 
-> ApiResponse<SendDocument200Response> deleteSignatory deleteSignatoryWithHttpInfo(id, data)
+> ApiResponse<DeleteDocument204Response> deleteSignatory deleteSignatoryWithHttpInfo(id, data)
 
 Remove a signatory
 
@@ -430,7 +430,7 @@ public class Example {
         UUID id = UUID.randomUUID(); // UUID | The signatory's ID.
         DeleteFieldRequest data = new DeleteFieldRequest(); // DeleteFieldRequest | 
         try {
-            ApiResponse<SendDocument200Response> response = apiInstance.deleteSignatoryWithHttpInfo(id, data);
+            ApiResponse<DeleteDocument204Response> response = apiInstance.deleteSignatoryWithHttpInfo(id, data);
             System.out.println("Status code: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
             System.out.println("Response body: " + response.getData());
@@ -455,7 +455,7 @@ public class Example {
 
 ### Return type
 
-ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
+ApiResponse<[**DeleteDocument204Response**](DeleteDocument204Response.md)>
 
 
 ### Authorization

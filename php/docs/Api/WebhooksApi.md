@@ -231,7 +231,7 @@ $apiInstance = new Signedly\Api\WebhooksApi(
 );
 $id = 'id_example'; // string | The endpoint's ID.
 $status = 'status_example'; // string | Only `pending`, `succeeded` or `failed` deliveries.
-$limit = 56; // int | How many results to return (default 10).
+$limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
@@ -248,7 +248,7 @@ try {
 | ------------- | ------------- | ------------- | ------------- |
 | **id** | **string**| The endpoint&#39;s ID. | |
 | **status** | **string**| Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries. | [optional] |
-| **limit** | **int**| How many results to return (default 10). | [optional] |
+| **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 
 ### Return type

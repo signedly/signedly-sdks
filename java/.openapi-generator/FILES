@@ -19,6 +19,7 @@ docs/CreateSignatoriesRequestSignatoriesInner.md
 docs/CreateSignatoryRequest.md
 docs/CreateTemplateFieldsRequestInner.md
 docs/CreateWebhookEndpointRequest.md
+docs/DeleteDocument204Response.md
 docs/DeleteFieldRequest.md
 docs/Document.md
 docs/DocumentPage.md
@@ -42,6 +43,7 @@ docs/RequestHit.md
 docs/RequestLog.md
 docs/RequestLogPage.md
 docs/SendDocument200Response.md
+docs/SendDocument200ResponseExistingSignatures.md
 docs/SendDocumentByLink200Response.md
 docs/SendDocumentByLinkRequest.md
 docs/SendDocumentRequest.md
@@ -104,6 +106,7 @@ src/main/java/com/signedly/model/CreateSignatoriesRequestSignatoriesInner.java
 src/main/java/com/signedly/model/CreateSignatoryRequest.java
 src/main/java/com/signedly/model/CreateTemplateFieldsRequestInner.java
 src/main/java/com/signedly/model/CreateWebhookEndpointRequest.java
+src/main/java/com/signedly/model/DeleteDocument204Response.java
 src/main/java/com/signedly/model/DeleteFieldRequest.java
 src/main/java/com/signedly/model/Document.java
 src/main/java/com/signedly/model/DocumentPage.java
@@ -124,6 +127,7 @@ src/main/java/com/signedly/model/RequestHit.java
 src/main/java/com/signedly/model/RequestLog.java
 src/main/java/com/signedly/model/RequestLogPage.java
 src/main/java/com/signedly/model/SendDocument200Response.java
+src/main/java/com/signedly/model/SendDocument200ResponseExistingSignatures.java
 src/main/java/com/signedly/model/SendDocumentByLink200Response.java
 src/main/java/com/signedly/model/SendDocumentByLinkRequest.java
 src/main/java/com/signedly/model/SendDocumentRequest.java
@@ -142,3 +146,5 @@ src/main/java/com/signedly/model/WebhookDelivery.java
 src/main/java/com/signedly/model/WebhookDeliveryPage.java
 src/main/java/com/signedly/model/WebhookEndpoint.java
 src/main/java/com/signedly/model/WebhookEndpointWithSecret.java
+src/test/java/com/signedly/model/DeleteDocument204ResponseTest.java
+src/test/java/com/signedly/model/SendDocument200ResponseExistingSignaturesTest.java

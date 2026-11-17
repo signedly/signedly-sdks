@@ -9,7 +9,7 @@ All URIs are relative to https://l0ads.signedly.com, except if the operation def
 | [**getDownloadStatus()**](DocumentsApi.md#getDownloadStatus) | **GET** /ap1/documents-status/{id}/ | Check whether the signed PDF is ready |
 | [**listDocumentPages()**](DocumentsApi.md#listDocumentPages) | **GET** /ap1/documents/{id}/pages/ | List a document&#39;s pages and their fields |
 | [**listDocumentStatuses()**](DocumentsApi.md#listDocumentStatuses) | **GET** /ap1/documents-status-list/ | List the status of your organisation&#39;s documents |
-| [**listDocuments()**](DocumentsApi.md#listDocuments) | **GET** /ap1/documents/ | List the documents this API client created |
+| [**listDocuments()**](DocumentsApi.md#listDocuments) | **GET** /ap1/documents/ | List your organisation&#39;s documents |
 | [**uploadDocument()**](DocumentsApi.md#uploadDocument) | **POST** /ap1/upload/ | Upload a document or template |
 | [**uploadDocumentForOneSigner()**](DocumentsApi.md#uploadDocumentForOneSigner) | **POST** /ap1/upload_app/ | Upload a document for one signer and get their signing link |
 
@@ -79,7 +79,7 @@ try {
 ## `deleteDocument()`
 
 ```php
-deleteDocument($id): \Signedly\Model\SendDocument200Response
+deleteDocument($id): \Signedly\Model\DeleteDocument204Response
 ```
 
 Delete a template or an unsent document
@@ -123,7 +123,7 @@ try {
 
 ### Return type
 
-[**\Signedly\Model\SendDocument200Response**](../Model/SendDocument200Response.md)
+[**\Signedly\Model\DeleteDocument204Response**](../Model/DeleteDocument204Response.md)
 
 ### Authorization
 
@@ -292,9 +292,9 @@ $apiInstance = new Signedly\Api\DocumentsApi(
     $config
 );
 $name = 'name_example'; // string | Only documents whose name contains this (any case).
-$status = array(56); // int[] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
+$status = array(56); // int[] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
 $document_ids = array('document_ids_example'); // string[] | Only these documents. Repeat it or separate IDs with commas.
-$limit = 56; // int | How many results to return (default 10).
+$limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
@@ -310,9 +310,9 @@ try {
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **name** | **string**| Only documents whose name contains this (any case). | [optional] |
-| **status** | [**int[]**](../Model/int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
+| **status** | [**int[]**](../Model/int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
 | **document_ids** | [**string[]**](../Model/string.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] |
-| **limit** | **int**| How many results to return (default 10). | [optional] |
+| **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 
 ### Return type
@@ -338,9 +338,9 @@ try {
 listDocuments($name, $status, $document_ids, $limit, $offset): \Signedly\Model\DocumentPage
 ```
 
-List the documents this API client created
+List your organisation's documents
 
-The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren't listed. Paged: see `limit` and `offset`.
+Every document of your organisation's admin account, newest change first, with their signatories, pages and fields: those made through the API (`upload_app` included) and in the web app. Templates and unsent bulk-send copies aren't listed. Paged: see `limit` and `offset`.
 
 ### Example
 
@@ -362,9 +362,9 @@ $apiInstance = new Signedly\Api\DocumentsApi(
     $config
 );
 $name = 'name_example'; // string | Only documents whose name contains this (any case).
-$status = array(56); // int[] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
+$status = array(56); // int[] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
 $document_ids = array('document_ids_example'); // string[] | Only these documents. Repeat it or separate IDs with commas.
-$limit = 56; // int | How many results to return (default 10).
+$limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
@@ -380,9 +380,9 @@ try {
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **name** | **string**| Only documents whose name contains this (any case). | [optional] |
-| **status** | [**int[]**](../Model/int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
+| **status** | [**int[]**](../Model/int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
 | **document_ids** | [**string[]**](../Model/string.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] |
-| **limit** | **int**| How many results to return (default 10). | [optional] |
+| **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 
 ### Return type
@@ -410,7 +410,7 @@ uploadDocument($file, $name, $type, $template_name): \Signedly\Model\Upload
 
 Upload a document or template
 
-Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
+Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields. The answer also has `existing_signatures` and `warnings`: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -431,7 +431,7 @@ $apiInstance = new Signedly\Api\DocumentsApi(
     new GuzzleHttp\Client(),
     $config
 );
-$file = '/path/to/file.txt'; // \SplFileObject | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+$file = '/path/to/file.txt'; // \SplFileObject | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn't a Word document is refused the same way. At most 2 MB.
 $name = 'name_example'; // string | The document's name. It must differ from every other upload of this API client.
 $type = 56; // int | 2 Document · 4 Template
 $template_name = 'template_name_example'; // string | The template's title. Required with `type` 4; it must differ from this API client's other templates.
@@ -448,7 +448,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **file** | **\SplFileObject****\SplFileObject**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | |
+| **file** | **\SplFileObject****\SplFileObject**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn&#39;t a Word document is refused the same way. At most 2 MB. | |
 | **name** | **string**| The document&#39;s name. It must differ from every other upload of this API client. | |
 | **type** | **int**| 2 Document · 4 Template | |
 | **template_name** | **string**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] |
@@ -478,7 +478,7 @@ uploadDocumentForOneSigner($file, $signee_name, $signee_email, $redirect_url, $f
 
 Upload a document for one signer and get their signing link
 
-Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one.
+Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 

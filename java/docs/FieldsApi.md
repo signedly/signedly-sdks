@@ -29,7 +29,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 Add fields to a document
 
-Places fields on a document, each assigned to a signatory. Only while the document isn&#39;t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+Places fields on a document, each assigned to a signatory. Only while the document isn&#39;t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field&#39;s &#x60;page_number&#x60; must be the one GET /ap1/documents/{id}/pages/ lists for its &#x60;page&#x60;. For a template, use POST /ap1/templates/fields/.
 
 ### Example
 
@@ -103,7 +103,7 @@ public class Example {
 
 Add fields to a document
 
-Places fields on a document, each assigned to a signatory. Only while the document isn&#39;t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+Places fields on a document, each assigned to a signatory. Only while the document isn&#39;t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field&#39;s &#x60;page_number&#x60; must be the one GET /ap1/documents/{id}/pages/ lists for its &#x60;page&#x60;. For a template, use POST /ap1/templates/fields/.
 
 ### Example
 
@@ -181,7 +181,7 @@ ApiResponse<[**List&lt;Field&gt;**](Field.md)>
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template&#39;s roles (GET /ap1/signatories/?document_id&#x3D;&lt;the template&#39;s ID&gt; lists them; a template made in the web app can have several): the role whose &#x60;id&#x60; is its &#x60;signatory_id&#x60;, or without one the first role in signing order. On a document made from the template, a role&#39;s fields go to the signatory who takes that role. A &#x60;signatory_id&#x60; that isn&#39;t one of this template&#39;s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field&#39;s &#x60;page_number&#x60; must be the one GET /ap1/documents/{id}/pages/ lists for its &#x60;page&#x60;.
 
 ### Example
 
@@ -255,7 +255,7 @@ public class Example {
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template&#39;s roles (GET /ap1/signatories/?document_id&#x3D;&lt;the template&#39;s ID&gt; lists them; a template made in the web app can have several): the role whose &#x60;id&#x60; is its &#x60;signatory_id&#x60;, or without one the first role in signing order. On a document made from the template, a role&#39;s fields go to the signatory who takes that role. A &#x60;signatory_id&#x60; that isn&#39;t one of this template&#39;s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field&#39;s &#x60;page_number&#x60; must be the one GET /ap1/documents/{id}/pages/ lists for its &#x60;page&#x60;.
 
 ### Example
 
@@ -329,7 +329,7 @@ ApiResponse<[**List&lt;TemplateField&gt;**](TemplateField.md)>
 
 ## deleteField
 
-> SendDocument200Response deleteField(id, data)
+> DeleteDocument204Response deleteField(id, data)
 
 Delete a field
 
@@ -361,7 +361,7 @@ public class Example {
         UUID id = UUID.randomUUID(); // UUID | The field's ID.
         DeleteFieldRequest data = new DeleteFieldRequest(); // DeleteFieldRequest | 
         try {
-            SendDocument200Response result = apiInstance.deleteField(id, data);
+            DeleteDocument204Response result = apiInstance.deleteField(id, data);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling FieldsApi#deleteField");
@@ -384,7 +384,7 @@ public class Example {
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 
 ### Authorization
@@ -405,7 +405,7 @@ public class Example {
 
 ## deleteFieldWithHttpInfo
 
-> ApiResponse<SendDocument200Response> deleteField deleteFieldWithHttpInfo(id, data)
+> ApiResponse<DeleteDocument204Response> deleteField deleteFieldWithHttpInfo(id, data)
 
 Delete a field
 
@@ -438,7 +438,7 @@ public class Example {
         UUID id = UUID.randomUUID(); // UUID | The field's ID.
         DeleteFieldRequest data = new DeleteFieldRequest(); // DeleteFieldRequest | 
         try {
-            ApiResponse<SendDocument200Response> response = apiInstance.deleteFieldWithHttpInfo(id, data);
+            ApiResponse<DeleteDocument204Response> response = apiInstance.deleteFieldWithHttpInfo(id, data);
             System.out.println("Status code: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
             System.out.println("Response body: " + response.getData());
@@ -463,7 +463,7 @@ public class Example {
 
 ### Return type
 
-ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
+ApiResponse<[**DeleteDocument204Response**](DeleteDocument204Response.md)>
 
 
 ### Authorization
@@ -1099,7 +1099,7 @@ ApiResponse<[**Field**](Field.md)>
 
 Change a template&#39;s field
 
-Changes a template&#39;s field; send all of its values, as when adding it. Its page can&#39;t change: delete the field and add it again.
+Changes a template&#39;s field; send all of its values, as when adding it. A &#x60;signatory_id&#x60; naming another of the template&#39;s roles moves the field to that role; without one it keeps its role. Its page can&#39;t change: delete the field and add it again.
 
 ### Example
 
@@ -1175,7 +1175,7 @@ public class Example {
 
 Change a template&#39;s field
 
-Changes a template&#39;s field; send all of its values, as when adding it. Its page can&#39;t change: delete the field and add it again.
+Changes a template&#39;s field; send all of its values, as when adding it. A &#x60;signatory_id&#x60; naming another of the template&#39;s roles moves the field to that role; without one it keeps its role. Its page can&#39;t change: delete the field and add it again.
 
 ### Example
 

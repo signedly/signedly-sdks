@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 Fill in fields, add a signatory and send, in one call
 
-Sets the values of the document's fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can't be sent, nor a document that has been sent already, and every field must sit on its page.
+Sets the values of the document's fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can't be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -97,7 +97,7 @@ Name | Type | Description  | Notes
 
 Send a document for signing by email
 
-Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can't be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document's status before sending again.
+Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can't be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document's status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -180,7 +180,7 @@ Name | Type | Description  | Notes
 
 Send a document and get the signing link
 
-Marks the document sent without emailing anyone, and returns its signatory's signing link to show or send yourself. Meant for a document with one signatory. A template can't be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document's status before sending again.
+Marks the document sent and returns the first signatory's (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can't be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document's status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 

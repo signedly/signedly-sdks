@@ -25,6 +25,7 @@ Name | Type | Description | Notes
 **placeholder** | **string** | Hint text shown while the field is empty. Send an empty string for Checkbox and Radio. |
 **readonly** | **bool** | True: the signer can&#39;t change the field&#39;s value. | [optional] [default to false]
 **select_options** | **string[]** | Dropdown: required; the choices the signer picks from, at least one (up to 100 characters each). | [optional]
+**signatory_id** | **string** | Optional: the template role this field belongs to, a role&#39;s &#x60;id&#x60; from GET /ap1/signatories/?document_id&#x3D;&lt;the template&#39;s ID&gt;. Left out on a new field, it is the first role in signing order; left out on a change, the field keeps its role. An ID that isn&#39;t one of this template&#39;s roles is a 400. | [optional]
 **size** | **int** | Checkbox and Radio: the side of the tick or dot in points, centred in the box. Defaults to the box&#39;s smaller side. | [optional]
 **tool_tip** | **string** | Shown when the signer points at the field. Defaults to the label. | [optional]
 **value** | **string** | Leave it out for an empty field the signer fills in; a value given is prefilled. | [optional]

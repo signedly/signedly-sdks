@@ -17,7 +17,7 @@ getAuditTrailLink($id): \Signedly\Model\GetAuditTrailLink200Response
 
 Get a link to the audit trail
 
-A link to the document's audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+A link to the document's audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
 
 ### Example
 
@@ -141,7 +141,7 @@ getViewLink($id): \Signedly\Model\GetAuditTrailLink200Response
 
 Get a link to view the document
 
-A link to the document's PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+A link to the document's PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
 
 ### Example
 

@@ -13,16 +13,19 @@ info:
 
     ## Authentication
 
-    1. In the Signedly web app, open **Account & Settings → API** and generate a
-       **client ID** and **client secret** for your organisation.
+    1. In the Signedly web app, your organisation's **super admin** opens **Account &
+       Settings → API** and generates a **client ID** and **client secret**. Only the
+       super admin can see, regenerate or replace the keys and manage webhooks there,
+       because a key acts for the organisation admin.
     2. `POST /ap1/token/` with them. You get an `access_token` (valid **2 hours**) and
        a `refresh_token` (valid **7 days**). While both are still valid, calling
        `/ap1/token/` again returns the same pair.
     3. Send the access token on every other call:
        `Authorization: Bearer <access_token>`.
     4. When the access token expires, `POST /ap1/refreshtoken/` with the refresh token
-       for a new access token. When the refresh token has expired too, call
-       `/ap1/token/` again.
+       for a new access token. The refresh token stays the same and each refresh keeps
+       it valid for 7 more days, up to 30 days after `/ap1/token/` made it. When it has
+       expired, call `/ap1/token/` again.
 
     `/ap1/token/` and `/ap1/refreshtoken/` allow 60 calls a minute per IP address;
     more answer 429. A missing, unknown or expired access token answers 403
@@ -55,7 +58,9 @@ info:
 
     Live documents also need an API contract with Signedly. Without one, or with an
     unpaid API invoice, `POST /ap1/upload/` (except templates), `/ap1/upload_app/`,
-    `/ap1/documents/fromtemplate/` and `/ap1/bulk-sends/` answer 402 with live keys.
+    `/ap1/documents/fromtemplate/`, `/ap1/bulk-sends/` and sending a draft already
+    uploaded (`/ap1/document/send/`, `/ap1/document/send_url/`,
+    `/ap1/document/update_and_send/`) answer 402 with live keys.
     Test keys work without a contract (see Sandbox).
 
     ## Sending a document for signing
@@ -71,14 +76,24 @@ info:
        - `POST /ap1/document/send/` emails every signatory a signing link (with
          ordered signing, only the first; each next one is emailed in
          turn), or
-       - `POST /ap1/document/send_url/` sends no email and returns the first
-         signatory's signing link, for you to show or send yourself.
+       - `POST /ap1/document/send_url/` returns the first signatory's signing
+         link, for you to show or send yourself, and emails them nothing; any other
+         signatories are emailed as by `send/` (all at once, or with ordered signing
+         each in turn after the one before signs).
     5. Poll `GET /ap1/documents-status-list/` (or `GET /ap1/documents/`) until the
        status is 6 (Completed), then `GET /ap1/document/download-link/` for the
        signed PDF and `GET /ap1/document/download-audit-link/` for its audit trail.
 
+    **The two document lists differ on purpose.** `GET /ap1/documents/` lists only the
+    documents this API client made through the API. `GET /ap1/documents-status-list/`
+    lists every document of the organisation's admin, including ones made in the web app.
+    Use the first to see your integration's own documents, and the second for everything
+    the admin account owns.
+
     **From a template:** upload with `type` 4 and a `template_name` (or make the
-    template in the web app), place its fields with `POST /ap1/templates/fields/`,
+    template in the web app), place its fields with `POST /ap1/templates/fields/`
+    (each on the role named by its `signatory_id`, a role's `id` from
+    `GET /ap1/signatories/?document_id=<template ID>`; without one, on the first role),
     then for each signing make a document with `POST /ap1/documents/fromtemplate/`,
     add its signatory, and send it.
 
@@ -87,6 +102,15 @@ info:
     own signature. After signing they go to the `redirect_url` you sent, and the
     signed PDF and its audit trail are emailed to `final_email` (otherwise to your
     organisation's admin).
+
+    **A PDF that is already digitally signed** (Adobe, DocuSign, a DSC or Aadhaar
+    eSign) is accepted, but signing it on Signedly invalidates those signatures. The
+    upload and send answers (`upload/`, `upload_app/`, `send/`, `send_url/`,
+    `update_and_send/`) say so: `existing_signatures` has the `count` (null when the
+    file couldn't be checked) and the signers' `names`, and `warnings` holds the text
+    to show your user, e.g. "This PDF already has 1 digital signature (by Asha Rao).
+    Signing it on Signedly will invalidate it." `warnings` is empty when there is
+    nothing to warn about. Nothing is refused because of it.
 
     ## Quick start with curl
 
@@ -160,7 +184,8 @@ info:
     Instead of polling, add an endpoint with `POST /ap1/webhooks/` (or in **Account &
     Settings → API**) and Signedly posts your organisation's document events to it:
     `document.sent`, `document.viewed`, `document.signed`, `document.approved`,
-    `document.completed`, `document.rejected` and `document.expired` (all of them,
+    `document.completed`, `document.rejected`, `document.expired` and
+    `document.voided` (all of them,
     or the `events` you choose). Each is a JSON `POST`:
 
     ```json
@@ -212,20 +237,26 @@ info:
     - its emails are real, with `[TEST]` at the start of the subject;
     - it isn't billed or counted toward your plan;
     - your organisation can make 50 a calendar month (templates don't count); the next
-      upload answers 429.
+      upload answers 429;
+    - a test token sees and acts only on test documents: a live document answers 404
+      and isn't listed. It can use your templates (list them, read their fields, make
+      documents and bulk sends from them) but not change or delete a live one.
 
     ## Fields
 
     Positions and sizes are in **PDF points** (1/72 inch), measured from the
     **top-left corner** of the page as it is displayed (rotation applied).
-    `page_number` counts pages from 0. A field must sit wholly on its page (1 point
+    `page_number` counts pages from 0: send the `id` and `page_number` that
+    `GET /ap1/documents/{id}/pages/` lists for the same page. A field needs a known
+    `kind` and a `width` and `height` above 0, and must sit wholly on its page (1 point
     of tolerance); otherwise it is refused with 400. A field's page and signatory
     can't be changed later: delete the field and add it again.
 
     ## Status values
 
     **Document `status`:** 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent ·
-    5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Signatories,
+    5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
+    (stopped by its sender in the web app; its links no longer sign). Signatories,
     fields and sends are only accepted while a document is 1–3 (not yet sent).
 
     **Signatory `status`:** 1 Waiting · 2 Invited · 3 Signed · 4 Viewed · 5 Rejected.
@@ -233,8 +264,9 @@ info:
     ## Lists
 
     `GET /ap1/documents/`, `/ap1/documents-status-list/`, `/ap1/templates/`,
-    `/ap1/logs/` and `/ap1/logs/hits/` are paged: pass `limit` (default 10) and
-    `offset`, and read `count`, `next`, `previous` and `results` from the response.
+    `/ap1/logs/` and `/ap1/logs/hits/` are paged: pass `limit` (default 10, at most
+    100; a larger value gets 100) and `offset`, and read `count`, `next`, `previous` and
+    `results` from the response. Follow `next` until it is null to read every result.
 
     ## Errors
 
@@ -475,7 +507,8 @@ paths:
     get:
       description: "A link to the document's audit trail PDF: who did what, when and\
         \ from where. It is made when the document is completed; ask for it after\
-        \ GET /ap1/document/download-link/ gives the signed PDF."
+        \ GET /ap1/document/download-link/ gives the signed PDF. Until it is made\
+        \ the answer is 202: try again later."
       operationId: get_audit_trail_link
       parameters:
       - description: The document's ID.
@@ -494,6 +527,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_audit_trail_link_200_response'
           description: The link.
+        "202":
+          content:
+            application/json:
+              example:
+                error: "The audit trail is not yet ready, please try after some time."
+              schema:
+                additionalProperties: true
+                description: "Why the request was refused: {\"error\": \"...\"}, or\
+                  \ each bad field with its messages. See the example."
+                type: object
+          description: The audit trail isn't made yet.
+        "400":
+          content:
+            application/json:
+              example:
+                id:
+                - Must be a document ID (a UUID).
+              schema:
+                additionalProperties: true
+                description: "Why the request was refused: {\"error\": \"...\"}, or\
+                  \ each bad field with its messages. See the example."
+                type: object
+          description: '`id` isn''t a document ID (a UUID).'
         "404":
           content:
             application/json:
@@ -543,6 +599,18 @@ paths:
                   \ each bad field with its messages. See the example."
                 type: object
           description: The signed PDF isn't ready yet.
+        "400":
+          content:
+            application/json:
+              example:
+                id:
+                - Must be a document ID (a UUID).
+              schema:
+                additionalProperties: true
+                description: "Why the request was refused: {\"error\": \"...\"}, or\
+                  \ each bad field with its messages. See the example."
+                type: object
+          description: '`id` isn''t a document ID (a UUID).'
         "404":
           content:
             application/json:
@@ -565,8 +633,15 @@ paths:
         \ (with ordered signing, only the first; each next one is emailed in turn).\
         \ The document needs at least one field, and every signatory at least one\
         \ field. A template can't be sent, nor a document that has been sent already,\
-        \ and every field must sit on its page. A send that timed out may have worked:\
-        \ check the document's status before sending again."
+        \ nor one with no signatory or no field, and every field must sit on its page.\
+        \ A send that timed out may have worked: check the document's status before\
+        \ sending again. Whether the uploaded PDF already had digital signatures (Adobe,\
+        \ DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them;\
+        \ the request is never refused for it. `existing_signatures.count` is how\
+        \ many (null when the file couldn't be checked, e.g. an encrypted PDF, or\
+        \ a document uploaded before the check existed), `existing_signatures.names`\
+        \ the signers' names where readable, and `warnings` the text to show your\
+        \ user (empty when there is nothing to warn about)."
       operationId: send_document
       requestBody:
         content:
@@ -580,6 +655,10 @@ paths:
             application/json:
               example:
                 detail: Document sent successfully
+                existing_signatures:
+                  count: 0
+                  names: []
+                warnings: []
               schema:
                 $ref: '#/components/schemas/send_document_200_response'
           description: Sent; the document is now 4 Sent.
@@ -626,11 +705,20 @@ paths:
       - application/json
   /ap1/document/send_url/:
     post:
-      description: "Marks the document sent without emailing anyone, and returns its\
-        \ signatory's signing link to show or send yourself. Meant for a document\
-        \ with one signatory. A template can't be sent, nor a document that has been\
-        \ sent already, and every field must sit on its page. A send that timed out\
-        \ may have worked: check the document's status before sending again."
+      description: "Marks the document sent and returns the first signatory's (in\
+        \ signing order) signing link to show or send yourself; that signatory gets\
+        \ no email. Any other signatories are emailed as by send/: all now without\
+        \ signing order, or each in turn after the one before signs with it. A template\
+        \ can't be sent, nor a document that has been sent already, nor one with no\
+        \ signatory or no field, and every field must sit on its page. A send that\
+        \ timed out may have worked: check the document's status before sending again.\
+        \ Whether the uploaded PDF already had digital signatures (Adobe, DocuSign,\
+        \ a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request\
+        \ is never refused for it. `existing_signatures.count` is how many (null when\
+        \ the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded\
+        \ before the check existed), `existing_signatures.names` the signers' names\
+        \ where readable, and `warnings` the text to show your user (empty when there\
+        \ is nothing to warn about)."
       operationId: send_document_by_link
       requestBody:
         content:
@@ -644,7 +732,11 @@ paths:
             application/json:
               example:
                 document_id: 6f0c…
+                existing_signatures:
+                  count: 0
+                  names: []
                 url: https://apps.signedly.com/api-receiver/U2lnbmVl…/…
+                warnings: []
               schema:
                 $ref: '#/components/schemas/send_document_by_link_200_response'
           description: Sent; the document is now 4 Sent.
@@ -695,8 +787,15 @@ paths:
         \ `email`), and emails the signatories their signing links, like POST /ap1/document/send/.\
         \ All or nothing: if anything is refused, nothing changes. A retry after a\
         \ timed-out call that worked answers 400 (already sent); treat that as success.\
-        \ A template can't be sent, nor a document that has been sent already, and\
-        \ every field must sit on its page."
+        \ A template can't be sent, nor a document that has been sent already, nor\
+        \ one with no signatory or no field, and every field must sit on its page.\
+        \ Whether the uploaded PDF already had digital signatures (Adobe, DocuSign,\
+        \ a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request\
+        \ is never refused for it. `existing_signatures.count` is how many (null when\
+        \ the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded\
+        \ before the check existed), `existing_signatures.names` the signers' names\
+        \ where readable, and `warnings` the text to show your user (empty when there\
+        \ is nothing to warn about)."
       operationId: fill_and_send_document
       requestBody:
         content:
@@ -710,6 +809,10 @@ paths:
             application/json:
               example:
                 detail: Document sent successfully
+                existing_signatures:
+                  count: 0
+                  names: []
+                warnings: []
               schema:
                 $ref: '#/components/schemas/send_document_200_response'
           description: Sent; the document is now 4 Sent.
@@ -760,7 +863,10 @@ paths:
   /ap1/document/view-link/:
     get:
       description: "A link to the document's PDF as it stands now, with the values\
-        \ and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/."
+        \ and signatures applied so far. Once the document is completed and sealed,\
+        \ it is the final signed PDF, the same file as GET /ap1/document/download-link/\
+        \ gives. The PDF is made when the document is sent; before that the answer\
+        \ is 202: try again later."
       operationId: get_view_link
       parameters:
       - description: The document's ID.
@@ -779,6 +885,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_audit_trail_link_200_response'
           description: The link.
+        "202":
+          content:
+            application/json:
+              example:
+                error: "The document's PDF is not yet ready, please try after some\
+                  \ time."
+              schema:
+                additionalProperties: true
+                description: "Why the request was refused: {\"error\": \"...\"}, or\
+                  \ each bad field with its messages. See the example."
+                type: object
+          description: The document's PDF isn't made yet (the document isn't sent).
+        "400":
+          content:
+            application/json:
+              example:
+                id:
+                - Must be a document ID (a UUID).
+              schema:
+                additionalProperties: true
+                description: "Why the request was refused: {\"error\": \"...\"}, or\
+                  \ each bad field with its messages. See the example."
+                type: object
+          description: '`id` isn''t a document ID (a UUID).'
         "404":
           content:
             application/json:
@@ -810,8 +940,8 @@ paths:
           type: string
       - description: "Only documents with these statuses: 1 Draft · 2 Signees Added\
           \ · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived\
-          \ · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas\
-          \ (`status=4,6`)."
+          \ · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values\
+          \ with commas (`status=4,6`)."
         explode: true
         in: query
         name: status
@@ -830,7 +960,7 @@ paths:
             type: string
           type: array
         style: form
-      - description: How many results to return (default 10).
+      - description: "How many results to return (default 10, at most 100)."
         in: query
         name: limit
         schema:
@@ -891,7 +1021,7 @@ paths:
               example:
                 detail: Document deleted successfully
               schema:
-                $ref: '#/components/schemas/send_document_200_response'
+                $ref: '#/components/schemas/delete_document_204_response'
           description: Deleted.
         "400":
           content:
@@ -905,28 +1035,17 @@ paths:
                   \ each bad field with its messages. See the example."
                 type: object
           description: "The document has been sent, so it is kept."
-        "403":
-          content:
-            application/json:
-              example:
-                error: Document not found
-              schema:
-                additionalProperties: true
-                description: "Why the request was refused: {\"error\": \"...\"}, or\
-                  \ each bad field with its messages. See the example."
-                type: object
-          description: The document isn't your organisation's.
         "404":
           content:
             application/json:
               example:
-                detail: Not found.
+                detail: Document not found
               schema:
                 additionalProperties: true
                 description: "Why the request was refused: {\"error\": \"...\"}, or\
                   \ each bad field with its messages. See the example."
                 type: object
-          description: No document has this ID.
+          description: The document doesn't exist or isn't your organisation's.
       summary: Delete a template or an unsent document
       tags:
       - Documents
@@ -955,28 +1074,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_download_status_200_response'
           description: Whether the signed PDF is ready.
-        "403":
-          content:
-            application/json:
-              example:
-                error: Document not found
-              schema:
-                additionalProperties: true
-                description: "Why the request was refused: {\"error\": \"...\"}, or\
-                  \ each bad field with its messages. See the example."
-                type: object
-          description: The document isn't your organisation's.
         "404":
           content:
             application/json:
               example:
-                detail: Not found.
+                detail: Document not found
               schema:
                 additionalProperties: true
                 description: "Why the request was refused: {\"error\": \"...\"}, or\
                   \ each bad field with its messages. See the example."
                 type: object
-          description: No document has this ID.
+          description: The document doesn't exist or isn't your organisation's.
       summary: Check whether the signed PDF is ready
       tags:
       - Documents
@@ -984,9 +1092,10 @@ paths:
       - application/json
   /ap1/documents/:
     get:
-      description: "The documents this API client uploaded or made from a template,\
-        \ newest change first, with their signatories, pages and fields. Templates\
-        \ and unsent bulk-send copies aren't listed. Paged: see `limit` and `offset`."
+      description: "Every document of your organisation's admin account, newest change\
+        \ first, with their signatories, pages and fields: those made through the\
+        \ API (`upload_app` included) and in the web app. Templates and unsent bulk-send\
+        \ copies aren't listed. Paged: see `limit` and `offset`."
       operationId: list_documents
       parameters:
       - description: Only documents whose name contains this (any case).
@@ -996,8 +1105,8 @@ paths:
           type: string
       - description: "Only documents with these statuses: 1 Draft · 2 Signees Added\
           \ · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived\
-          \ · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas\
-          \ (`status=4,6`)."
+          \ · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values\
+          \ with commas (`status=4,6`)."
         explode: true
         in: query
         name: status
@@ -1016,7 +1125,7 @@ paths:
             type: string
           type: array
         style: form
-      - description: How many results to return (default 10).
+      - description: "How many results to return (default 10, at most 100)."
         in: query
         name: limit
         schema:
@@ -1110,7 +1219,7 @@ paths:
                 type: object
           description: "A `status` isn't one of the values above, or an ID isn't a\
             \ UUID."
-      summary: List the documents this API client created
+      summary: List your organisation's documents
       tags:
       - Documents
       x-accepts:
@@ -1195,8 +1304,10 @@ paths:
     post:
       description: "Places fields on a document, each assigned to a signatory. Only\
         \ while the document isn't sent yet (status 1 Draft, 2 Signees Added or 3\
-        \ Prepared). A field must sit wholly on its page (1 point of tolerance). For\
-        \ a template, use POST /ap1/templates/fields/."
+        \ Prepared). A field must be one of the listed kinds, have a width and height\
+        \ above 0, and sit wholly on its page (1 point of tolerance); a new field's\
+        \ `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its\
+        \ `page`. For a template, use POST /ap1/templates/fields/."
       operationId: create_document_fields
       requestBody:
         content:
@@ -1382,7 +1493,7 @@ paths:
               example:
                 detail: Field deleted successfully
               schema:
-                $ref: '#/components/schemas/send_document_200_response'
+                $ref: '#/components/schemas/delete_document_204_response'
           description: Deleted.
         "400":
           content:
@@ -1539,8 +1650,9 @@ paths:
                 description: "Why the request was refused: {\"error\": \"...\"}, or\
                   \ each bad field with its messages. See the example."
                 type: object
-          description: "The ID isn't a template, the name is taken, or `recipients`\
-            \ don't fill the template's open roles exactly once."
+          description: "The ID isn't a template, the template isn't finished yet (still\
+            \ a draft), the name is taken, or `recipients` don't fill the template's\
+            \ open roles exactly once."
         "404":
           content:
             application/json:
@@ -1632,7 +1744,9 @@ paths:
   /ap1/logs/:
     get:
       description: "This API client's calls, newest first, with their headers and\
-        \ bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`."
+        \ bodies (credentials and tokens are redacted). Headers, body and query parameters\
+        \ are kept for 90 days and are empty after that; calls older than 2 years\
+        \ are not listed. Paged: see `limit` and `offset`."
       operationId: list_request_logs
       parameters:
       - description: Only this HTTP method.
@@ -1655,7 +1769,7 @@ paths:
         name: ip_address
         schema:
           type: string
-      - description: How many results to return (default 10).
+      - description: "How many results to return (default 10, at most 100)."
         in: query
         name: limit
         schema:
@@ -1692,8 +1806,10 @@ paths:
       - application/json
   /ap1/logs/hits/:
     get:
-      description: "How many calls this API client has made to each path and method,\
-        \ most recently used first. Paged: see `limit` and `offset`."
+      description: "How many calls this API client has made to each endpoint and method,\
+        \ most recently used first. An endpoint that takes an id is counted under\
+        \ its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged:\
+        \ see `limit` and `offset`."
       operationId: list_request_counts
       parameters:
       - description: Only this HTTP method.
@@ -1711,7 +1827,7 @@ paths:
         name: path
         schema:
           type: string
-      - description: How many results to return (default 10).
+      - description: "How many results to return (default 10, at most 100)."
         in: query
         name: limit
         schema:
@@ -1747,8 +1863,8 @@ paths:
   /ap1/refreshtoken/:
     post:
       description: "Makes a new access token, valid 2 hours, with the refresh token.\
-        \ The refresh token itself isn't renewed: when it expires (7 days after /ap1/token/\
-        \ made it), call /ap1/token/ again."
+        \ The refresh token stays the same and is then valid for 7 more days, up to\
+        \ 30 days after /ap1/token/ made it; after that, call /ap1/token/ again."
       operationId: refresh_access_token
       requestBody:
         content:
@@ -2008,7 +2124,7 @@ paths:
               example:
                 detail: Signatory deleted successfully
               schema:
-                $ref: '#/components/schemas/send_document_200_response'
+                $ref: '#/components/schemas/delete_document_204_response'
           description: Removed.
         "400":
           content:
@@ -2051,7 +2167,7 @@ paths:
         name: name
         schema:
           type: string
-      - description: How many results to return (default 10).
+      - description: "How many results to return (default 10, at most 100)."
         in: query
         name: limit
         schema:
@@ -2094,6 +2210,7 @@ paths:
                       placeholder: null
                       readonly: false
                       select_options: []
+                      signatory_id: 0b6e…
                       size: 20
                       tool_tip: null
                       updated_at: 2026-10-26T12:00:00Z
@@ -2160,6 +2277,7 @@ paths:
                 placeholder: null
                 readonly: false
                 select_options: []
+                signatory_id: 0b6e…
                 size: 20
                 tool_tip: null
                 updated_at: 2026-10-26T12:00:00Z
@@ -2190,9 +2308,16 @@ paths:
       x-accepts:
       - application/json
     post:
-      description: "Places fields on a template. They have no signatory yet: on a\
-        \ document made from the template, they go to its first signatory. A field\
-        \ must sit wholly on its page (1 point of tolerance)."
+      description: "Places fields on a template. Each field belongs to one of the\
+        \ template's roles (GET /ap1/signatories/?document_id=<the template's ID>\
+        \ lists them; a template made in the web app can have several): the role whose\
+        \ `id` is its `signatory_id`, or without one the first role in signing order.\
+        \ On a document made from the template, a role's fields go to the signatory\
+        \ who takes that role. A `signatory_id` that isn't one of this template's\
+        \ roles is refused with 400 and nothing is saved. A field must be one of the\
+        \ listed kinds, have a width and height above 0, and sit wholly on its page\
+        \ (1 point of tolerance); a new field's `page_number` must be the one GET\
+        \ /ap1/documents/{id}/pages/ lists for its `page`."
       operationId: create_template_fields
       requestBody:
         content:
@@ -2229,6 +2354,7 @@ paths:
                 placeholder: null
                 readonly: false
                 select_options: []
+                signatory_id: 0b6e…
                 size: 20
                 tool_tip: null
                 updated_at: 2026-10-26T12:00:00Z
@@ -2275,7 +2401,9 @@ paths:
   /ap1/templates/fields/{id}/:
     put:
       description: "Changes a template's field; send all of its values, as when adding\
-        \ it. Its page can't change: delete the field and add it again."
+        \ it. A `signatory_id` naming another of the template's roles moves the field\
+        \ to that role; without one it keeps its role. Its page can't change: delete\
+        \ the field and add it again."
       operationId: update_template_field
       parameters:
       - description: The field's ID.
@@ -2316,6 +2444,7 @@ paths:
                 placeholder: null
                 readonly: false
                 select_options: []
+                signatory_id: 0b6e…
                 size: 20
                 tool_tip: null
                 updated_at: 2026-10-26T12:00:00Z
@@ -2434,7 +2563,14 @@ paths:
         \ is made in the background. Find it in `GET /ap1/documents/?name=<name>`\
         \ (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`,\
         \ and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing\
-        \ fields."
+        \ fields. The answer also has `existing_signatures` and `warnings`: Whether\
+        \ the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC\
+        \ or Aadhaar eSign). Signing it on Signedly invalidates them; the request\
+        \ is never refused for it. `existing_signatures.count` is how many (null when\
+        \ the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded\
+        \ before the check existed), `existing_signatures.names` the signers' names\
+        \ where readable, and `warnings` the text to show your user (empty when there\
+        \ is nothing to warn about)."
       operationId: upload_document
       requestBody:
         content:
@@ -2448,6 +2584,9 @@ paths:
             application/json:
               example:
                 created_at: 2026-10-26T12:00:00Z
+                existing_signatures:
+                  count: 0
+                  names: []
                 id: 2527…
                 is_test: false
                 mimetype: application/pdf
@@ -2455,10 +2594,11 @@ paths:
                 status: 2
                 type: 2
                 updated_at: 2026-10-26T12:00:00Z
+                warnings: []
               schema:
                 $ref: '#/components/schemas/Upload'
           description: The upload. Its `status` is 2 Uploaded; the document is made
-            next.
+            next. With `existing_signatures` and `warnings` (see above).
         "400":
           content:
             application/json:
@@ -2480,11 +2620,17 @@ paths:
       - application/json
   /ap1/upload_app/:
     post:
-      description: "Uploads a PDF or DOCX for one signer and returns their signing\
-        \ link in `redirect_url`; give it to the signer. They place their own signature\
-        \ on the signing page and are then sent to the `redirect_url` you gave. The\
-        \ signed PDF and its audit trail are emailed to `final_email`, or to your\
-        \ organisation's admin without one."
+      description: "Uploads a PDF or DOCX (at most 25 MB) for one signer and returns\
+        \ their signing link in `redirect_url`; give it to the signer. They place\
+        \ their own signature on the signing page and are then sent to the `redirect_url`\
+        \ you gave. The signed PDF and its audit trail are emailed to `final_email`,\
+        \ or to your organisation's admin without one. Whether the uploaded PDF already\
+        \ had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing\
+        \ it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count`\
+        \ is how many (null when the file couldn't be checked, e.g. an encrypted PDF,\
+        \ or a document uploaded before the check existed), `existing_signatures.names`\
+        \ the signers' names where readable, and `warnings` the text to show your\
+        \ user (empty when there is nothing to warn about)."
       operationId: upload_document_for_one_signer
       requestBody:
         content:
@@ -2497,8 +2643,15 @@ paths:
           content:
             application/json:
               example:
+                existing_signatures:
+                  count: 1
+                  names:
+                  - Asha Rao
                 id: 6f0c…
                 redirect_url: https://apps.signedly.com/sign-now/DocumentType@6f0c…/…
+                warnings:
+                - This PDF already has 1 digital signature (by Asha Rao). Signing
+                  it on Signedly will invalidate it.
               schema:
                 $ref: '#/components/schemas/upload_document_for_one_signer_200_response'
           description: The new document.
@@ -2513,7 +2666,8 @@ paths:
                   \ each bad field with its messages. See the example."
                 type: object
           description: "A value is missing or not valid (the file isn't a PDF or DOCX,\
-            \ an email or the URL isn't valid). Nothing was kept."
+            \ isn't really one, or is over 25 MB; an email or the URL isn't valid).\
+            \ Nothing was kept."
         "502":
           content:
             application/json:
@@ -2852,7 +3006,7 @@ paths:
         name: status
         schema:
           type: string
-      - description: How many results to return (default 10).
+      - description: "How many results to return (default 10, at most 100)."
         in: query
         name: limit
         schema:
@@ -3286,7 +3440,7 @@ components:
           type: array
         status:
           description: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress
-            · 6 Completed · 7 Rejected · 8 Archived · 9 Expired
+            · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
           title: Status
           type: integer
         subject:
@@ -3740,7 +3894,7 @@ components:
           type: string
         status:
           description: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress
-            · 6 Completed · 7 Rejected · 8 Archived · 9 Expired
+            · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
           title: Status
           type: integer
       required:
@@ -4407,7 +4561,7 @@ components:
           type: array
         status:
           description: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress
-            · 6 Completed · 7 Rejected · 8 Archived · 9 Expired
+            · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
           title: Status
           type: integer
         title:
@@ -4445,6 +4599,7 @@ components:
         - select_options
         - select_options
         kind: 5
+        signatory_id: signatory_id
         label: label
         page_number: 7
         size: 9
@@ -4569,6 +4724,12 @@ components:
           items:
             type: string
           type: array
+        signatory_id:
+          description: The ID of the template role it belongs to (the `id` GET /ap1/signatories/?document_id=<the
+            template's ID> lists).
+          nullable: true
+          title: Signatory id
+          type: string
         size:
           description: "Checkbox and Radio: the side of the tick or dot in points."
           title: Size
@@ -5436,13 +5597,55 @@ components:
       - message
       - subject
       type: object
+    send_document_200_response_existing_signatures:
+      description: "Whether the uploaded PDF already had digital signatures (Adobe,\
+        \ DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them;\
+        \ the request is never refused for it. `existing_signatures.count` is how\
+        \ many (null when the file couldn't be checked, e.g. an encrypted PDF, or\
+        \ a document uploaded before the check existed), `existing_signatures.names`\
+        \ the signers' names where readable, and `warnings` the text to show your\
+        \ user (empty when there is nothing to warn about)."
+      example:
+        names:
+        - names
+        - names
+        count: 0
+      properties:
+        count:
+          description: How many digital signatures the PDF already had; null when
+            unknown.
+          nullable: true
+          type: integer
+        names:
+          description: "The signers' names (certificate common name), each once; may\
+            \ be fewer than `count`."
+          items:
+            type: string
+          type: array
+      type: object
     send_document_200_response:
       example:
+        existing_signatures:
+          names:
+          - names
+          - names
+          count: 0
+        warnings:
+        - warnings
+        - warnings
         detail: detail
       properties:
         detail:
           description: What was done.
           type: string
+        existing_signatures:
+          $ref: '#/components/schemas/send_document_200_response_existing_signatures'
+        warnings:
+          description: "Warnings about the document, e.g. that signing will invalidate\
+            \ its existing digital signatures. Empty when there are none."
+          items:
+            type: string
+          type: array
       type: object
     send_document_by_link_request:
       properties:
@@ -5461,6 +5664,14 @@ components:
       type: object
     send_document_by_link_200_response:
       example:
+        existing_signatures:
+          names:
+          - names
+          - names
+          count: 0
+        warnings:
+        - warnings
+        - warnings
         document_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         url: https://openapi-generator.tech
       properties:
@@ -5468,10 +5679,18 @@ components:
           description: The document's ID.
           format: uuid
           type: string
+        existing_signatures:
+          $ref: '#/components/schemas/send_document_200_response_existing_signatures'
         url:
           description: The signatory's signing link.
           format: uri
           type: string
+        warnings:
+          description: "Warnings about the document, e.g. that signing will invalidate\
+            \ its existing digital signatures. Empty when there are none."
+          items:
+            type: string
+          type: array
       type: object
     fill_and_send_document_request_elements_inner:
       properties:
@@ -5566,6 +5785,14 @@ components:
         id:
           description: The document's ID.
           format: uuid
+          type: string
+      type: object
+    delete_document_204_response:
+      example:
+        detail: detail
+      properties:
+        detail:
+          description: What was done.
           type: string
       type: object
     update_document_field_by_body_request_items_inner:
@@ -5926,7 +6153,8 @@ components:
           type: string
         status:
           description: "Its status: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent\
-            \ · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired."
+            \ · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired\
+            \ · 10 Voided."
           type: integer
         type:
           description: Always 2 (Document).
@@ -6131,6 +6359,14 @@ components:
           items:
             type: string
           type: array
+        signatory_id:
+          description: "Optional: the template role this field belongs to, a role's\
+            \ `id` from GET /ap1/signatories/?document_id=<the template's ID>. Left\
+            \ out on a new field, it is the first role in signing order; left out\
+            \ on a change, the field keeps its role. An ID that isn't one of this\
+            \ template's roles is a 400."
+          format: uuid
+          type: string
         size:
           description: "Checkbox and Radio: the side of the tick or dot in points,\
             \ centred in the box. Defaults to the box's smaller side."
@@ -6183,7 +6419,8 @@ components:
         file:
           description: "A PDF or DOCX file. A PDF that can't be read (damaged, or\
             \ not really a PDF) is refused with 400 and the reason; save or export\
-            \ it as a new PDF and upload that. At most 2 MB."
+            \ it as a new PDF and upload that. A DOCX that isn't a Word document is\
+            \ refused the same way. At most 2 MB."
           format: binary
           type: string
         name:
@@ -6238,9 +6475,19 @@ components:
       type: object
     upload_document_for_one_signer_200_response:
       example:
+        existing_signatures:
+          names:
+          - names
+          - names
+          count: 0
+        warnings:
+        - warnings
+        - warnings
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         redirect_url: https://openapi-generator.tech
       properties:
+        existing_signatures:
+          $ref: '#/components/schemas/send_document_200_response_existing_signatures'
         id:
           description: The document's ID.
           format: uuid
@@ -6249,6 +6496,12 @@ components:
           description: The signer's signing link (not the `redirect_url` you sent).
           format: uri
           type: string
+        warnings:
+          description: "Warnings about the document, e.g. that signing will invalidate\
+            \ its existing digital signatures. Empty when there are none."
+          items:
+            type: string
+          type: array
       type: object
     create_webhook_endpoint_request:
       properties:
@@ -6258,7 +6511,7 @@ components:
         events:
           description: "The event types to send; leave out for all: `document.approved`,\
             \ `document.completed`, `document.expired`, `document.rejected`, `document.sent`,\
-            \ `document.signed`, `document.viewed`."
+            \ `document.signed`, `document.viewed`, `document.voided`."
           items:
             enum:
             - document.approved
@@ -6268,6 +6521,7 @@ components:
             - document.sent
             - document.signed
             - document.viewed
+            - document.voided
             type: string
           type: array
         url:
@@ -6285,7 +6539,7 @@ components:
         events:
           description: "The event types to send; leave out for all: `document.approved`,\
             \ `document.completed`, `document.expired`, `document.rejected`, `document.sent`,\
-            \ `document.signed`, `document.viewed`."
+            \ `document.signed`, `document.viewed`, `document.voided`."
           items:
             enum:
             - document.approved
@@ -6295,6 +6549,7 @@ components:
             - document.sent
             - document.signed
             - document.viewed
+            - document.voided
             type: string
           type: array
         is_active:

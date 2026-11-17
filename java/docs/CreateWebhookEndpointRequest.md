@@ -8,7 +8,7 @@
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 |**description** | **String** | Your note about it (up to 200 characters). |  [optional] |
-|**events** | [**List&lt;EventsEnum&gt;**](#List&lt;EventsEnum&gt;) | The event types to send; leave out for all: &#x60;document.approved&#x60;, &#x60;document.completed&#x60;, &#x60;document.expired&#x60;, &#x60;document.rejected&#x60;, &#x60;document.sent&#x60;, &#x60;document.signed&#x60;, &#x60;document.viewed&#x60;. |  [optional] |
+|**events** | [**List&lt;EventsEnum&gt;**](#List&lt;EventsEnum&gt;) | The event types to send; leave out for all: &#x60;document.approved&#x60;, &#x60;document.completed&#x60;, &#x60;document.expired&#x60;, &#x60;document.rejected&#x60;, &#x60;document.sent&#x60;, &#x60;document.signed&#x60;, &#x60;document.viewed&#x60;, &#x60;document.voided&#x60;. |  [optional] |
 |**url** | **String** | Where to post events: https://, on a public internet address. Redirects aren&#39;t followed. |  |
 
 
@@ -24,6 +24,7 @@
 | SENT | &quot;document.sent&quot; |
 | SIGNED | &quot;document.signed&quot; |
 | VIEWED | &quot;document.viewed&quot; |
+| VOIDED | &quot;document.voided&quot; |
 
 
 

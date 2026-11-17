@@ -1,0 +1,50 @@
+name: Spec matches backend integration
+
+# Daily, by hand, or when the backend asks (repository_dispatch
+# "backend-integration-updated"): does the committed spec match what the backend's
+# integration branch would serve? A difference means an /ap1/ change merged in the
+# backend: run scripts/spec-from-backend.sh, open a PR, and publish new SDK versions
+# after the backend release.
+#
+# The backend repository is private: this needs the secret BACKEND_READ_TOKEN
+# (a fine-grained token with read access to signedly/backend contents). Without it
+# the job says so and passes.
+on:
+  schedule: [{ cron: "30 5 * * *" }]
+  workflow_dispatch:
+  repository_dispatch:
+    types: [backend-integration-updated]
+
+jobs:
+  compare:
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-24.04' }}
+    env:
+      BACKEND_READ_TOKEN: ${{ secrets.BACKEND_READ_TOKEN }}
+    steps:
+      - name: Token present?
+        id: token
+        run: |
+          if [ -z "$BACKEND_READ_TOKEN" ]; then
+            echo "::notice::BACKEND_READ_TOKEN isn't set, so the spec can't be compared with backend integration."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v7
+        if: steps.token.outputs.present == 'true'
+      - uses: actions/checkout@v7
+        if: steps.token.outputs.present == 'true'
+        with:
+          repository: signedly/backend
+          ref: integration
+          path: .backend
+          token: ${{ secrets.BACKEND_READ_TOKEN }}
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        if: steps.token.outputs.present == 'true'
+        with: { python-version: "3.14" }
+      - name: Compare
+        if: steps.token.outputs.present == 'true'
+        run: |
+          pip install -q -r .backend/requirements.txt
+          BACKEND_PYTHON=python scripts/spec-from-backend.sh .backend --check
