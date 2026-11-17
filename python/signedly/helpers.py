@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from signedly.api.authentication_api import AuthenticationApi
 from signedly.api_client import ApiClient
 from signedly.configuration import Configuration
+from signedly.exceptions import ApiException
 from signedly.models.get_access_token_request import GetAccessTokenRequest
 from signedly.models.refresh_access_token_request import RefreshAccessTokenRequest
 
@@ -57,11 +58,17 @@ class SignedlyClient:
             now = time.time()
             if now < self._expires - RENEW_BEFORE:
                 return
+            token = None
             if self._refresh_token and now < self._refresh_expires - RENEW_BEFORE:
-                token = self._auth.refresh_access_token(
-                    RefreshAccessTokenRequest(refresh_token=self._refresh_token)
-                )
-            else:
+                try:
+                    token = self._auth.refresh_access_token(
+                        RefreshAccessTokenRequest(refresh_token=self._refresh_token)
+                    )
+                except ApiException:
+                    # A refused refresh token (signed out, or replaced) isn't
+                    # fatal: log in again with the keys.
+                    self._refresh_token = None
+            if token is None:
                 token = self._auth.get_access_token(
                     GetAccessTokenRequest(
                         client_id=self.client_id, client_secret=self.client_secret
