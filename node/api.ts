@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Signedly API
- *  The Signedly REST API lets your system upload documents, add signatories and fields, send them for signing and download the signed result. Every path starts with `/ap1/`, and every request and response body is JSON unless an endpoint says otherwise (the uploads are `multipart/form-data`).  ## Authentication  1. In the Signedly web app, open **Account & Settings → API** and generate a    **client ID** and **client secret** for your organisation. 2. `POST /ap1/token/` with them. You get an `access_token` (valid **2 hours**) and    a `refresh_token` (valid **7 days**). While both are still valid, calling    `/ap1/token/` again returns the same pair. 3. Send the access token on every other call:    `Authorization: Bearer <access_token>`. 4. When the access token expires, `POST /ap1/refreshtoken/` with the refresh token    for a new access token. When the refresh token has expired too, call    `/ap1/token/` again.  `/ap1/token/` and `/ap1/refreshtoken/` allow 60 calls a minute per IP address; more answer 429. A missing, unknown or expired access token answers 403 (`\"Client not found\"` or `\"Access token expired\"`).  The API acts for your **organisation\'s admin account**: documents you upload belong to it and appear in its Signedly web app, and you can reach only that account\'s documents, templates, signatories and fields. Another organisation\'s IDs answer 404, as if they didn\'t exist.  ## Plans  What the API allows depends on the Signedly plan of your **organisation\'s admin account** (Account & Settings → Account & Plan). The same rules apply to live and test keys.  | What | Free | Personal Pro | Business Pro | Teams | |---|---|---|---|---| | Generate live and test keys (Account & Settings → API) | – | ✓ | ✓ | ✓ | | Every endpoint, `/ap1/token/` and `/ap1/refreshtoken/` included | – | ✓ | ✓ | ✓ | | `require_email_otp` on `POST /ap1/signatories/` and `POST /ap1/signatories/bulk/` | – | ✓ | ✓ | ✓ | | Bulk send: `GET /ap1/bulk-sends/columns/` and `POST /ap1/bulk-sends/` | – | – | – | ✓ |  The API is part of the paid plans. On Free (or with no plan) every call answers 403 `\"... Your plan doesn\'t include API access.\"`, with live or test keys, also with a token or keys made earlier; they work again once the plan is paid. On a paid plan, a feature it doesn\'t include answers 400 with `\"Your plan doesn\'t include ...\"` and changes nothing, and `GET /ap1/bulk-sends/{id}/` still reports bulk sends already made.  Live documents also need an API contract with Signedly. Without one, or with an unpaid API invoice, `POST /ap1/upload/` (except templates), `/ap1/upload_app/`, `/ap1/documents/fromtemplate/` and `/ap1/bulk-sends/` answer 402 with live keys. Test keys work without a contract (see Sandbox).  ## Sending a document for signing  1. `POST /ap1/upload/` a PDF or DOCX (`type` 2). The document is prepared in the    background: find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is    the upload\'s `id`), and wait until `GET /ap1/documents/{id}/pages/` lists its    pages. 2. `POST /ap1/signatories/` (one) or `POST /ap1/signatories/bulk/` (several) to    add the people who sign. 3. `POST /ap1/documents/fields/` to place the fields each signatory fills in. 4. Send it:    - `POST /ap1/document/send/` emails every signatory a signing link (with      ordered signing, only the first; each next one is emailed in      turn), or    - `POST /ap1/document/send_url/` sends no email and returns the first      signatory\'s signing link, for you to show or send yourself. 5. Poll `GET /ap1/documents-status-list/` (or `GET /ap1/documents/`) until the    status is 6 (Completed), then `GET /ap1/document/download-link/` for the    signed PDF and `GET /ap1/document/download-audit-link/` for its audit trail.  **From a template:** upload with `type` 4 and a `template_name` (or make the template in the web app), place its fields with `POST /ap1/templates/fields/`, then for each signing make a document with `POST /ap1/documents/fromtemplate/`, add its signatory, and send it.  **One signer, one call:** `POST /ap1/upload_app/` uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; the signer places their own signature. After signing they go to the `redirect_url` you sent, and the signed PDF and its audit trail are emailed to `final_email` (otherwise to your organisation\'s admin).  ## Quick start with curl  Each step uses an ID from the step before. `$API` is this server, e.g. `https://l0ads.signedly.com`.  ```bash # 1. Token curl -X POST $API/ap1/token/ -H \'Content-Type: application/json\' \\   -d \'{\"client_id\": \"<client id>\", \"client_secret\": \"<client secret>\"}\' TOKEN=<access_token from the answer>  # 2. Upload a PDF (answers with the upload\'s id) curl -X POST $API/ap1/upload/ -H \"Authorization: Bearer $TOKEN\" \\   -F file=@nda.pdf -F name=nda-ann-lee -F type=2  # 3. Find the document, then wait until it has pages curl \"$API/ap1/documents/?name=nda-ann-lee\" -H \"Authorization: Bearer $TOKEN\" DOC=<results[0].id> curl $API/ap1/documents/$DOC/pages/ -H \"Authorization: Bearer $TOKEN\" PAGE=<[0].id>  # 4. Add the signatory curl -X POST $API/ap1/signatories/ -H \"Authorization: Bearer $TOKEN\" \\   -H \'Content-Type: application/json\' \\   -d \'{\"document_id\": \"\'$DOC\'\", \"name\": \"Ann Lee\", \"email\": \"ann@example.com\"}\' SIGNER=<id from the answer>  # 5. Place her signature: 150 × 40 points, 72 points from the left, 640 from the top curl -X POST $API/ap1/documents/fields/ -H \"Authorization: Bearer $TOKEN\" \\   -H \'Content-Type: application/json\' \\   -d \'[{\"document_id\": \"\'$DOC\'\", \"signatory_id\": \"\'$SIGNER\'\", \"kind\": 2,         \"label\": \"Signature\", \"placeholder\": \"Sign here\", \"page\": \"\'$PAGE\'\",         \"page_number\": 0, \"x\": 72, \"y\": 640, \"width\": 150, \"height\": 40}]\'  # 6. Send it (Ann gets the signing email) curl -X POST $API/ap1/document/send/ -H \"Authorization: Bearer $TOKEN\" \\   -H \'Content-Type: application/json\' \\   -d \'{\"document_id\": \"\'$DOC\'\", \"subject\": \"Please sign the NDA\",        \"message\": \"Hi Ann, please sign by Friday.\", \"expiry_date\": \"2026-12-31\"}\'  # 7. Poll until status is 6 (Completed), then get the signed PDF curl \"$API/ap1/documents-status-list/?document_ids=$DOC\" -H \"Authorization: Bearer $TOKEN\" curl \"$API/ap1/document/download-link/?id=$DOC\" -H \"Authorization: Bearer $TOKEN\" ```  ## Postman  Import the whole API into Postman with **Import → Link** and `<this server>/swaggerap1/postman.json`. Set `client_id` and `client_secret` in the collection\'s **Variables**, run **Get an access token** (it saves the token for every other request), and set `document_id` when a request needs one.  ## SDKs  Official client libraries, generated from this API\'s spec. Each also gets and renews the access token for you and checks webhook signatures:  | Language | Install | |---|---| | Python 3.8+ | `pip install signedly` | | Node / TypeScript | `npm install @signedly/sdk` | | PHP 7.4+ | `composer require signedly/sdk` | | Java 11+ | Maven or Gradle `com.signedly:signedly-sdk` |  Source and a quick start for each language: https://github.com/signedly/signedly-sdks  ## Webhooks  Instead of polling, add an endpoint with `POST /ap1/webhooks/` (or in **Account & Settings → API**) and Signedly posts your organisation\'s document events to it: `document.sent`, `document.viewed`, `document.signed`, `document.approved`, `document.completed`, `document.rejected` and `document.expired` (all of them, or the `events` you choose). Each is a JSON `POST`:  ```json {\"id\": \"5b7f…\", \"type\": \"document.signed\", \"created_at\": \"2026-10-27T09:12:00+00:00\",  \"test\": false,  \"data\": {\"document\": {\"id\": \"6f0c…\", \"name\": \"nda.pdf\", \"status\": 5},           \"recipient\": {\"id\": \"0b6e…\", \"email\": \"ann@example.com\", \"name\": \"Ann Lee\",                         \"role\": \"signer\"}}} ```  `recipient` is null for events no recipient caused (sent, completed, expired); `test` is true for documents made with your test keys. Fetch anything else, such as download links, with your access token: events never carry links.  **Check every event is from Signedly.** The `Signedly-Signature` header is `t=<unix seconds>,v1=<signature>`, where the signature is the hex HMAC-SHA256 of `<t>.<raw body>` with the endpoint\'s secret. Refuse an event whose signature doesn\'t match or whose `t` is more than 5 minutes off:  ```python import hashlib, hmac, time  def is_from_signedly(secret, header, raw_body):     parts = dict(item.split(\"=\", 1) for item in header.split(\",\"))     signed = f\"{parts[\'t\']}.{raw_body.decode()}\".encode()     expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()     fresh = abs(time.time() - int(parts[\"t\"])) <= 300     return fresh and hmac.compare_digest(parts[\"v1\"], expected) ```  **Answer 2xx within 10 seconds**, then do the work. Anything else is retried after 1 and 5 minutes, then 30 minutes and 2, 5 and 10 hours (7 tries in about 18 hours). `Signedly-Event-Id` is the same on every try of an event: use it to ignore repeats. After 20 events in a row fail for good, Signedly switches the endpoint off and emails your organisation\'s admin; switch it on again with `PUT /ap1/webhooks/{id}/` and `\"is_active\": true`. Each endpoint\'s deliveries and their last answers are at `GET /ap1/webhooks/{id}/deliveries/`, and any can be sent again.  ## Sandbox  Build and test against the API without paying for documents: in **Account & Settings → API**, generate your **test keys**, and get a token with them at `/ap1/token/` as usual. Everything works the same, except that what you upload or make from a template with a test token is a **test document** (`is_test` on its upload):  - every page of its PDF and of its audit trail says **TEST – NOT LEGALLY BINDING**; - its emails are real, with `[TEST]` at the start of the subject; - it isn\'t billed or counted toward your plan; - your organisation can make 50 a calendar month (templates don\'t count); the next   upload answers 429.  ## Fields  Positions and sizes are in **PDF points** (1/72 inch), measured from the **top-left corner** of the page as it is displayed (rotation applied). `page_number` counts pages from 0. A field must sit wholly on its page (1 point of tolerance); otherwise it is refused with 400. A field\'s page and signatory can\'t be changed later: delete the field and add it again.  ## Status values  **Document `status`:** 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Signatories, fields and sends are only accepted while a document is 1–3 (not yet sent).  **Signatory `status`:** 1 Waiting · 2 Invited · 3 Signed · 4 Viewed · 5 Rejected.  ## Lists  `GET /ap1/documents/`, `/ap1/documents-status-list/`, `/ap1/templates/`, `/ap1/logs/` and `/ap1/logs/hits/` are paged: pass `limit` (default 10) and `offset`, and read `count`, `next`, `previous` and `results` from the response.  ## Errors  | Status | Meaning | |---|---| | 400 | The request was refused, also when your plan doesn\'t include it (see Plans); the body says why (`{\"error\": \"...\"}`, or the name of each bad field with its messages). Nothing was changed. | | 403 | The access token is missing, unknown or expired; the client ID and secret or the refresh token were refused; the organisation\'s plan has no API access (Free, see Plans); or an `expiry_date` isn\'t in the future (`\"Invalid Date Entered\"`). | | 402 | No API contract, or an unpaid API invoice: live documents are refused (test keys keep working). | | 404 | The document, template, signatory or field doesn\'t exist or isn\'t yours. | | 429 | Too many token requests (wait a minute), or this month\'s 50 test documents are used. | | 5xx | Our side failed; retry later. |  A send that times out may still have worked: check the document\'s status before sending again (a second send of a sent document answers 400).  Download, view and audit links are valid for about 7 days; ask for a new one whenever you need it. 
+ *  The Signedly REST API lets your system upload documents, add signatories and fields, send them for signing and download the signed result. Every path starts with `/ap1/`, and every request and response body is JSON unless an endpoint says otherwise (the uploads are `multipart/form-data`).  ## Authentication  1. In the Signedly web app, your organisation\'s **super admin** opens **Account &    Settings → API** and generates a **client ID** and **client secret**. Only the    super admin can see, regenerate or replace the keys and manage webhooks there,    because a key acts for the organisation admin. 2. `POST /ap1/token/` with them. You get an `access_token` (valid **2 hours**) and    a `refresh_token` (valid **7 days**). While both are still valid, calling    `/ap1/token/` again returns the same pair. 3. Send the access token on every other call:    `Authorization: Bearer <access_token>`. 4. When the access token expires, `POST /ap1/refreshtoken/` with the refresh token    for a new access token. The refresh token stays the same and each refresh keeps    it valid for 7 more days, up to 30 days after `/ap1/token/` made it. When it has    expired, call `/ap1/token/` again.  `/ap1/token/` and `/ap1/refreshtoken/` allow 60 calls a minute per IP address; more answer 429. A missing, unknown or expired access token answers 403 (`\"Client not found\"` or `\"Access token expired\"`).  The API acts for your **organisation\'s admin account**: documents you upload belong to it and appear in its Signedly web app, and you can reach only that account\'s documents, templates, signatories and fields. Another organisation\'s IDs answer 404, as if they didn\'t exist.  ## Plans  What the API allows depends on the Signedly plan of your **organisation\'s admin account** (Account & Settings → Account & Plan). The same rules apply to live and test keys.  | What | Free | Personal Pro | Business Pro | Teams | |---|---|---|---|---| | Generate live and test keys (Account & Settings → API) | – | ✓ | ✓ | ✓ | | Every endpoint, `/ap1/token/` and `/ap1/refreshtoken/` included | – | ✓ | ✓ | ✓ | | `require_email_otp` on `POST /ap1/signatories/` and `POST /ap1/signatories/bulk/` | – | ✓ | ✓ | ✓ | | Bulk send: `GET /ap1/bulk-sends/columns/` and `POST /ap1/bulk-sends/` | – | – | – | ✓ |  The API is part of the paid plans. On Free (or with no plan) every call answers 403 `\"... Your plan doesn\'t include API access.\"`, with live or test keys, also with a token or keys made earlier; they work again once the plan is paid. On a paid plan, a feature it doesn\'t include answers 400 with `\"Your plan doesn\'t include ...\"` and changes nothing, and `GET /ap1/bulk-sends/{id}/` still reports bulk sends already made.  Live documents also need an API contract with Signedly. Without one, or with an unpaid API invoice, `POST /ap1/upload/` (except templates), `/ap1/upload_app/`, `/ap1/documents/fromtemplate/`, `/ap1/bulk-sends/` and sending a draft already uploaded (`/ap1/document/send/`, `/ap1/document/send_url/`, `/ap1/document/update_and_send/`) answer 402 with live keys. Test keys work without a contract (see Sandbox).  ## Sending a document for signing  1. `POST /ap1/upload/` a PDF or DOCX (`type` 2). The document is prepared in the    background: find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is    the upload\'s `id`), and wait until `GET /ap1/documents/{id}/pages/` lists its    pages. 2. `POST /ap1/signatories/` (one) or `POST /ap1/signatories/bulk/` (several) to    add the people who sign. 3. `POST /ap1/documents/fields/` to place the fields each signatory fills in. 4. Send it:    - `POST /ap1/document/send/` emails every signatory a signing link (with      ordered signing, only the first; each next one is emailed in      turn), or    - `POST /ap1/document/send_url/` returns the first signatory\'s signing      link, for you to show or send yourself, and emails them nothing; any other      signatories are emailed as by `send/` (all at once, or with ordered signing      each in turn after the one before signs). 5. Poll `GET /ap1/documents-status-list/` (or `GET /ap1/documents/`) until the    status is 6 (Completed), then `GET /ap1/document/download-link/` for the    signed PDF and `GET /ap1/document/download-audit-link/` for its audit trail.  **The two document lists differ on purpose.** `GET /ap1/documents/` lists only the documents this API client made through the API. `GET /ap1/documents-status-list/` lists every document of the organisation\'s admin, including ones made in the web app. Use the first to see your integration\'s own documents, and the second for everything the admin account owns.  **From a template:** upload with `type` 4 and a `template_name` (or make the template in the web app), place its fields with `POST /ap1/templates/fields/` (each on the role named by its `signatory_id`, a role\'s `id` from `GET /ap1/signatories/?document_id=<template ID>`; without one, on the first role), then for each signing make a document with `POST /ap1/documents/fromtemplate/`, add its signatory, and send it.  **One signer, one call:** `POST /ap1/upload_app/` uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; the signer places their own signature. After signing they go to the `redirect_url` you sent, and the signed PDF and its audit trail are emailed to `final_email` (otherwise to your organisation\'s admin).  **A PDF that is already digitally signed** (Adobe, DocuSign, a DSC or Aadhaar eSign) is accepted, but signing it on Signedly invalidates those signatures. The upload and send answers (`upload/`, `upload_app/`, `send/`, `send_url/`, `update_and_send/`) say so: `existing_signatures` has the `count` (null when the file couldn\'t be checked) and the signers\' `names`, and `warnings` holds the text to show your user, e.g. \"This PDF already has 1 digital signature (by Asha Rao). Signing it on Signedly will invalidate it.\" `warnings` is empty when there is nothing to warn about. Nothing is refused because of it.  ## Quick start with curl  Each step uses an ID from the step before. `$API` is this server, e.g. `https://l0ads.signedly.com`.  ```bash # 1. Token curl -X POST $API/ap1/token/ -H \'Content-Type: application/json\' \\   -d \'{\"client_id\": \"<client id>\", \"client_secret\": \"<client secret>\"}\' TOKEN=<access_token from the answer>  # 2. Upload a PDF (answers with the upload\'s id) curl -X POST $API/ap1/upload/ -H \"Authorization: Bearer $TOKEN\" \\   -F file=@nda.pdf -F name=nda-ann-lee -F type=2  # 3. Find the document, then wait until it has pages curl \"$API/ap1/documents/?name=nda-ann-lee\" -H \"Authorization: Bearer $TOKEN\" DOC=<results[0].id> curl $API/ap1/documents/$DOC/pages/ -H \"Authorization: Bearer $TOKEN\" PAGE=<[0].id>  # 4. Add the signatory curl -X POST $API/ap1/signatories/ -H \"Authorization: Bearer $TOKEN\" \\   -H \'Content-Type: application/json\' \\   -d \'{\"document_id\": \"\'$DOC\'\", \"name\": \"Ann Lee\", \"email\": \"ann@example.com\"}\' SIGNER=<id from the answer>  # 5. Place her signature: 150 × 40 points, 72 points from the left, 640 from the top curl -X POST $API/ap1/documents/fields/ -H \"Authorization: Bearer $TOKEN\" \\   -H \'Content-Type: application/json\' \\   -d \'[{\"document_id\": \"\'$DOC\'\", \"signatory_id\": \"\'$SIGNER\'\", \"kind\": 2,         \"label\": \"Signature\", \"placeholder\": \"Sign here\", \"page\": \"\'$PAGE\'\",         \"page_number\": 0, \"x\": 72, \"y\": 640, \"width\": 150, \"height\": 40}]\'  # 6. Send it (Ann gets the signing email) curl -X POST $API/ap1/document/send/ -H \"Authorization: Bearer $TOKEN\" \\   -H \'Content-Type: application/json\' \\   -d \'{\"document_id\": \"\'$DOC\'\", \"subject\": \"Please sign the NDA\",        \"message\": \"Hi Ann, please sign by Friday.\", \"expiry_date\": \"2026-12-31\"}\'  # 7. Poll until status is 6 (Completed), then get the signed PDF curl \"$API/ap1/documents-status-list/?document_ids=$DOC\" -H \"Authorization: Bearer $TOKEN\" curl \"$API/ap1/document/download-link/?id=$DOC\" -H \"Authorization: Bearer $TOKEN\" ```  ## Postman  Import the whole API into Postman with **Import → Link** and `<this server>/swaggerap1/postman.json`. Set `client_id` and `client_secret` in the collection\'s **Variables**, run **Get an access token** (it saves the token for every other request), and set `document_id` when a request needs one.  ## SDKs  Official client libraries, generated from this API\'s spec. Each also gets and renews the access token for you and checks webhook signatures:  | Language | Install | |---|---| | Python 3.8+ | `pip install signedly` | | Node / TypeScript | `npm install @signedly/sdk` | | PHP 7.4+ | `composer require signedly/sdk` | | Java 11+ | Maven or Gradle `com.signedly:signedly-sdk` |  Source and a quick start for each language: https://github.com/signedly/signedly-sdks  ## Webhooks  Instead of polling, add an endpoint with `POST /ap1/webhooks/` (or in **Account & Settings → API**) and Signedly posts your organisation\'s document events to it: `document.sent`, `document.viewed`, `document.signed`, `document.approved`, `document.completed`, `document.rejected`, `document.expired` and `document.voided` (all of them, or the `events` you choose). Each is a JSON `POST`:  ```json {\"id\": \"5b7f…\", \"type\": \"document.signed\", \"created_at\": \"2026-10-27T09:12:00+00:00\",  \"test\": false,  \"data\": {\"document\": {\"id\": \"6f0c…\", \"name\": \"nda.pdf\", \"status\": 5},           \"recipient\": {\"id\": \"0b6e…\", \"email\": \"ann@example.com\", \"name\": \"Ann Lee\",                         \"role\": \"signer\"}}} ```  `recipient` is null for events no recipient caused (sent, completed, expired); `test` is true for documents made with your test keys. Fetch anything else, such as download links, with your access token: events never carry links.  **Check every event is from Signedly.** The `Signedly-Signature` header is `t=<unix seconds>,v1=<signature>`, where the signature is the hex HMAC-SHA256 of `<t>.<raw body>` with the endpoint\'s secret. Refuse an event whose signature doesn\'t match or whose `t` is more than 5 minutes off:  ```python import hashlib, hmac, time  def is_from_signedly(secret, header, raw_body):     parts = dict(item.split(\"=\", 1) for item in header.split(\",\"))     signed = f\"{parts[\'t\']}.{raw_body.decode()}\".encode()     expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()     fresh = abs(time.time() - int(parts[\"t\"])) <= 300     return fresh and hmac.compare_digest(parts[\"v1\"], expected) ```  **Answer 2xx within 10 seconds**, then do the work. Anything else is retried after 1 and 5 minutes, then 30 minutes and 2, 5 and 10 hours (7 tries in about 18 hours). `Signedly-Event-Id` is the same on every try of an event: use it to ignore repeats. After 20 events in a row fail for good, Signedly switches the endpoint off and emails your organisation\'s admin; switch it on again with `PUT /ap1/webhooks/{id}/` and `\"is_active\": true`. Each endpoint\'s deliveries and their last answers are at `GET /ap1/webhooks/{id}/deliveries/`, and any can be sent again.  ## Sandbox  Build and test against the API without paying for documents: in **Account & Settings → API**, generate your **test keys**, and get a token with them at `/ap1/token/` as usual. Everything works the same, except that what you upload or make from a template with a test token is a **test document** (`is_test` on its upload):  - every page of its PDF and of its audit trail says **TEST – NOT LEGALLY BINDING**; - its emails are real, with `[TEST]` at the start of the subject; - it isn\'t billed or counted toward your plan; - your organisation can make 50 a calendar month (templates don\'t count); the next   upload answers 429; - a test token sees and acts only on test documents: a live document answers 404   and isn\'t listed. It can use your templates (list them, read their fields, make   documents and bulk sends from them) but not change or delete a live one.  ## Fields  Positions and sizes are in **PDF points** (1/72 inch), measured from the **top-left corner** of the page as it is displayed (rotation applied). `page_number` counts pages from 0: send the `id` and `page_number` that `GET /ap1/documents/{id}/pages/` lists for the same page. A field needs a known `kind` and a `width` and `height` above 0, and must sit wholly on its page (1 point of tolerance); otherwise it is refused with 400. A field\'s page and signatory can\'t be changed later: delete the field and add it again.  ## Status values  **Document `status`:** 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided (stopped by its sender in the web app; its links no longer sign). Signatories, fields and sends are only accepted while a document is 1–3 (not yet sent).  **Signatory `status`:** 1 Waiting · 2 Invited · 3 Signed · 4 Viewed · 5 Rejected.  ## Lists  `GET /ap1/documents/`, `/ap1/documents-status-list/`, `/ap1/templates/`, `/ap1/logs/` and `/ap1/logs/hits/` are paged: pass `limit` (default 10, at most 100; a larger value gets 100) and `offset`, and read `count`, `next`, `previous` and `results` from the response. Follow `next` until it is null to read every result.  ## Errors  | Status | Meaning | |---|---| | 400 | The request was refused, also when your plan doesn\'t include it (see Plans); the body says why (`{\"error\": \"...\"}`, or the name of each bad field with its messages). Nothing was changed. | | 403 | The access token is missing, unknown or expired; the client ID and secret or the refresh token were refused; the organisation\'s plan has no API access (Free, see Plans); or an `expiry_date` isn\'t in the future (`\"Invalid Date Entered\"`). | | 402 | No API contract, or an unpaid API invoice: live documents are refused (test keys keep working). | | 404 | The document, template, signatory or field doesn\'t exist or isn\'t yours. | | 429 | Too many token requests (wait a minute), or this month\'s 50 test documents are used. | | 5xx | Our side failed; retry later. |  A send that times out may still have worked: check the document\'s status before sending again (a second send of a sent document answers 400).  Download, view and audit links are valid for about 7 days; ask for a new one whenever you need it. 
  *
  * The version of the OpenAPI document: v1
  * Contact: support@signedly.com
@@ -343,7 +343,7 @@ export interface CreateDocumentFromTemplate200Response {
      */
     'name'?: string;
     /**
-     * Its status: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired.
+     * Its status: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided.
      * @type {number}
      * @memberof CreateDocumentFromTemplate200Response
      */
@@ -633,6 +633,12 @@ export interface CreateTemplateFieldsRequestInner {
      */
     'select_options'?: Array<string>;
     /**
+     * Optional: the template role this field belongs to, a role\'s `id` from GET /ap1/signatories/?document_id=<the template\'s ID>. Left out on a new field, it is the first role in signing order; left out on a change, the field keeps its role. An ID that isn\'t one of this template\'s roles is a 400.
+     * @type {string}
+     * @memberof CreateTemplateFieldsRequestInner
+     */
+    'signatory_id'?: string;
+    /**
      * Checkbox and Radio: the side of the tick or dot in points, centred in the box. Defaults to the box\'s smaller side.
      * @type {number}
      * @memberof CreateTemplateFieldsRequestInner
@@ -692,7 +698,7 @@ export interface CreateWebhookEndpointRequest {
      */
     'description'?: string;
     /**
-     * The event types to send; leave out for all: `document.approved`, `document.completed`, `document.expired`, `document.rejected`, `document.sent`, `document.signed`, `document.viewed`.
+     * The event types to send; leave out for all: `document.approved`, `document.completed`, `document.expired`, `document.rejected`, `document.sent`, `document.signed`, `document.viewed`, `document.voided`.
      * @type {Array<string>}
      * @memberof CreateWebhookEndpointRequest
      */
@@ -712,11 +718,25 @@ export const CreateWebhookEndpointRequestEventsEnum = {
     Rejected: 'document.rejected',
     Sent: 'document.sent',
     Signed: 'document.signed',
-    Viewed: 'document.viewed'
+    Viewed: 'document.viewed',
+    Voided: 'document.voided'
 } as const;
 
 export type CreateWebhookEndpointRequestEventsEnum = typeof CreateWebhookEndpointRequestEventsEnum[keyof typeof CreateWebhookEndpointRequestEventsEnum];
 
+/**
+ * 
+ * @export
+ * @interface DeleteDocument204Response
+ */
+export interface DeleteDocument204Response {
+    /**
+     * What was done.
+     * @type {string}
+     * @memberof DeleteDocument204Response
+     */
+    'detail'?: string;
+}
 /**
  * 
  * @export
@@ -797,7 +817,7 @@ export interface Document {
      */
     'signatories'?: Array<Signatory>;
     /**
-     * 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired
+     * 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
      * @type {number}
      * @memberof Document
      */
@@ -896,7 +916,7 @@ export interface DocumentStatusRow {
      */
     'id': string;
     /**
-     * 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired
+     * 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
      * @type {number}
      * @memberof DocumentStatusRow
      */
@@ -1498,6 +1518,37 @@ export interface SendDocument200Response {
      * @memberof SendDocument200Response
      */
     'detail'?: string;
+    /**
+     * 
+     * @type {SendDocument200ResponseExistingSignatures}
+     * @memberof SendDocument200Response
+     */
+    'existing_signatures'?: SendDocument200ResponseExistingSignatures;
+    /**
+     * Warnings about the document, e.g. that signing will invalidate its existing digital signatures. Empty when there are none.
+     * @type {Array<string>}
+     * @memberof SendDocument200Response
+     */
+    'warnings'?: Array<string>;
+}
+/**
+ * Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
+ * @export
+ * @interface SendDocument200ResponseExistingSignatures
+ */
+export interface SendDocument200ResponseExistingSignatures {
+    /**
+     * How many digital signatures the PDF already had; null when unknown.
+     * @type {number}
+     * @memberof SendDocument200ResponseExistingSignatures
+     */
+    'count'?: number | null;
+    /**
+     * The signers\' names (certificate common name), each once; may be fewer than `count`.
+     * @type {Array<string>}
+     * @memberof SendDocument200ResponseExistingSignatures
+     */
+    'names'?: Array<string>;
 }
 /**
  * 
@@ -1512,11 +1563,23 @@ export interface SendDocumentByLink200Response {
      */
     'document_id'?: string;
     /**
+     * 
+     * @type {SendDocument200ResponseExistingSignatures}
+     * @memberof SendDocumentByLink200Response
+     */
+    'existing_signatures'?: SendDocument200ResponseExistingSignatures;
+    /**
      * The signatory\'s signing link.
      * @type {string}
      * @memberof SendDocumentByLink200Response
      */
     'url'?: string;
+    /**
+     * Warnings about the document, e.g. that signing will invalidate its existing digital signatures. Empty when there are none.
+     * @type {Array<string>}
+     * @memberof SendDocumentByLink200Response
+     */
+    'warnings'?: Array<string>;
 }
 /**
  * 
@@ -1672,7 +1735,7 @@ export interface Template {
      */
     'pages'?: Array<Page>;
     /**
-     * 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired
+     * 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
      * @type {number}
      * @memberof Template
      */
@@ -1834,6 +1897,12 @@ export interface TemplateField {
      * @memberof TemplateField
      */
     'select_options'?: Array<string>;
+    /**
+     * The ID of the template role it belongs to (the `id` GET /ap1/signatories/?document_id=<the template\'s ID> lists).
+     * @type {string}
+     * @memberof TemplateField
+     */
+    'signatory_id'?: string | null;
     /**
      * Checkbox and Radio: the side of the tick or dot in points.
      * @type {number}
@@ -2131,7 +2200,7 @@ export interface UpdateWebhookEndpointRequest {
      */
     'description'?: string;
     /**
-     * The event types to send; leave out for all: `document.approved`, `document.completed`, `document.expired`, `document.rejected`, `document.sent`, `document.signed`, `document.viewed`.
+     * The event types to send; leave out for all: `document.approved`, `document.completed`, `document.expired`, `document.rejected`, `document.sent`, `document.signed`, `document.viewed`, `document.voided`.
      * @type {Array<string>}
      * @memberof UpdateWebhookEndpointRequest
      */
@@ -2157,7 +2226,8 @@ export const UpdateWebhookEndpointRequestEventsEnum = {
     Rejected: 'document.rejected',
     Sent: 'document.sent',
     Signed: 'document.signed',
-    Viewed: 'document.viewed'
+    Viewed: 'document.viewed',
+    Voided: 'document.voided'
 } as const;
 
 export type UpdateWebhookEndpointRequestEventsEnum = typeof UpdateWebhookEndpointRequestEventsEnum[keyof typeof UpdateWebhookEndpointRequestEventsEnum];
@@ -2224,6 +2294,12 @@ export interface Upload {
  */
 export interface UploadDocumentForOneSigner200Response {
     /**
+     * 
+     * @type {SendDocument200ResponseExistingSignatures}
+     * @memberof UploadDocumentForOneSigner200Response
+     */
+    'existing_signatures'?: SendDocument200ResponseExistingSignatures;
+    /**
      * The document\'s ID.
      * @type {string}
      * @memberof UploadDocumentForOneSigner200Response
@@ -2235,6 +2311,12 @@ export interface UploadDocumentForOneSigner200Response {
      * @memberof UploadDocumentForOneSigner200Response
      */
     'redirect_url'?: string;
+    /**
+     * Warnings about the document, e.g. that signing will invalidate its existing digital signatures. Empty when there are none.
+     * @type {Array<string>}
+     * @memberof UploadDocumentForOneSigner200Response
+     */
+    'warnings'?: Array<string>;
 }
 /**
  * 
@@ -2280,7 +2362,7 @@ export interface UploadDocumentForOneSignerRequest {
  */
 export interface UploadDocumentRequest {
     /**
-     * A PDF or DOCX file. A PDF that can\'t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+     * A PDF or DOCX file. A PDF that can\'t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn\'t a Word document is refused the same way. At most 2 MB.
      * @type {File}
      * @memberof UploadDocumentRequest
      */
@@ -2564,11 +2646,11 @@ export interface WebhookEndpointWithSecret {
 export const APIRequestLogsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * How many calls this API client has made to each path and method, most recently used first. Paged: see `limit` and `offset`.
+         * How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged: see `limit` and `offset`.
          * @summary Count your API calls per path
          * @param {ListRequestCountsMethodEnum} [method] Only this HTTP method.
          * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2617,12 +2699,12 @@ export const APIRequestLogsApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`.
+         * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see `limit` and `offset`.
          * @summary List your API calls
          * @param {ListRequestLogsMethodEnum} [method] Only this HTTP method.
          * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
          * @param {string} [ipAddress] Only calls from this IP address.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2685,11 +2767,11 @@ export const APIRequestLogsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = APIRequestLogsApiAxiosParamCreator(configuration)
     return {
         /**
-         * How many calls this API client has made to each path and method, most recently used first. Paged: see `limit` and `offset`.
+         * How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged: see `limit` and `offset`.
          * @summary Count your API calls per path
          * @param {ListRequestCountsMethodEnum} [method] Only this HTTP method.
          * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2701,12 +2783,12 @@ export const APIRequestLogsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`.
+         * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see `limit` and `offset`.
          * @summary List your API calls
          * @param {ListRequestLogsMethodEnum} [method] Only this HTTP method.
          * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
          * @param {string} [ipAddress] Only calls from this IP address.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2728,11 +2810,11 @@ export const APIRequestLogsApiFactory = function (configuration?: Configuration,
     const localVarFp = APIRequestLogsApiFp(configuration)
     return {
         /**
-         * How many calls this API client has made to each path and method, most recently used first. Paged: see `limit` and `offset`.
+         * How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged: see `limit` and `offset`.
          * @summary Count your API calls per path
          * @param {ListRequestCountsMethodEnum} [method] Only this HTTP method.
          * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2741,12 +2823,12 @@ export const APIRequestLogsApiFactory = function (configuration?: Configuration,
             return localVarFp.listRequestCounts(method, path, limit, offset, options).then((request) => request(axios, basePath));
         },
         /**
-         * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`.
+         * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see `limit` and `offset`.
          * @summary List your API calls
          * @param {ListRequestLogsMethodEnum} [method] Only this HTTP method.
          * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
          * @param {string} [ipAddress] Only calls from this IP address.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2765,11 +2847,11 @@ export const APIRequestLogsApiFactory = function (configuration?: Configuration,
  */
 export class APIRequestLogsApi extends BaseAPI {
     /**
-     * How many calls this API client has made to each path and method, most recently used first. Paged: see `limit` and `offset`.
+     * How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. `/ap1/documents-status/{pk}/`, not once per id. Paged: see `limit` and `offset`.
      * @summary Count your API calls per path
      * @param {ListRequestCountsMethodEnum} [method] Only this HTTP method.
      * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
-     * @param {number} [limit] How many results to return (default 10).
+     * @param {number} [limit] How many results to return (default 10, at most 100).
      * @param {number} [offset] How many results to skip.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2780,12 +2862,12 @@ export class APIRequestLogsApi extends BaseAPI {
     }
 
     /**
-     * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see `limit` and `offset`.
+     * This API client\'s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see `limit` and `offset`.
      * @summary List your API calls
      * @param {ListRequestLogsMethodEnum} [method] Only this HTTP method.
      * @param {string} [path] Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;.
      * @param {string} [ipAddress] Only calls from this IP address.
-     * @param {number} [limit] How many results to return (default 10).
+     * @param {number} [limit] How many results to return (default 10, at most 100).
      * @param {number} [offset] How many results to skip.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2861,7 +2943,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Makes a new access token, valid 2 hours, with the refresh token. The refresh token itself isn\'t renewed: when it expires (7 days after /ap1/token/ made it), call /ap1/token/ again.
+         * Makes a new access token, valid 2 hours, with the refresh token. The refresh token stays the same and is then valid for 7 more days, up to 30 days after /ap1/token/ made it; after that, call /ap1/token/ again.
          * @summary Refresh the access token
          * @param {RefreshAccessTokenRequest} data 
          * @param {*} [options] Override http request option.
@@ -2920,7 +3002,7 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Makes a new access token, valid 2 hours, with the refresh token. The refresh token itself isn\'t renewed: when it expires (7 days after /ap1/token/ made it), call /ap1/token/ again.
+         * Makes a new access token, valid 2 hours, with the refresh token. The refresh token stays the same and is then valid for 7 more days, up to 30 days after /ap1/token/ made it; after that, call /ap1/token/ again.
          * @summary Refresh the access token
          * @param {RefreshAccessTokenRequest} data 
          * @param {*} [options] Override http request option.
@@ -2953,7 +3035,7 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
             return localVarFp.getAccessToken(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * Makes a new access token, valid 2 hours, with the refresh token. The refresh token itself isn\'t renewed: when it expires (7 days after /ap1/token/ made it), call /ap1/token/ again.
+         * Makes a new access token, valid 2 hours, with the refresh token. The refresh token stays the same and is then valid for 7 more days, up to 30 days after /ap1/token/ made it; after that, call /ap1/token/ again.
          * @summary Refresh the access token
          * @param {RefreshAccessTokenRequest} data 
          * @param {*} [options] Override http request option.
@@ -2985,7 +3067,7 @@ export class AuthenticationApi extends BaseAPI {
     }
 
     /**
-     * Makes a new access token, valid 2 hours, with the refresh token. The refresh token itself isn\'t renewed: when it expires (7 days after /ap1/token/ made it), call /ap1/token/ again.
+     * Makes a new access token, valid 2 hours, with the refresh token. The refresh token stays the same and is then valid for 7 more days, up to 30 days after /ap1/token/ made it; after that, call /ap1/token/ again.
      * @summary Refresh the access token
      * @param {RefreshAccessTokenRequest} data 
      * @param {*} [options] Override http request option.
@@ -3419,9 +3501,9 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
          * The ID and status of every document of your organisation\'s admin account, including those made in the web app, newest change first. Templates and unsent bulk-send copies aren\'t listed. A light way to poll for completed documents. Paged: see `limit` and `offset`.
          * @summary List the status of your organisation\'s documents
          * @param {string} [name] Only documents whose name contains this (any case).
-         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
          * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3474,12 +3556,12 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
-         * @summary List the documents this API client created
+         * Every document of your organisation\'s admin account, newest change first, with their signatories, pages and fields: those made through the API (`upload_app` included) and in the web app. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
+         * @summary List your organisation\'s documents
          * @param {string} [name] Only documents whose name contains this (any case).
-         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
          * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3532,9 +3614,9 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
+         * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields. The answer also has `existing_signatures` and `warnings`: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Upload a document or template
-         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn\\\&#39;t a Word document is refused the same way. At most 2 MB.
          * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
          * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
          * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3595,7 +3677,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
+         * Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Upload a document for one signer and get their signing link
          * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
          * @param {string} signeeName The signer\\\&#39;s name.
@@ -3694,7 +3776,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteDocument(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendDocument200Response>> {
+        async deleteDocument(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeleteDocument204Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDocument(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.deleteDocument']?.[localVarOperationServerIndex]?.url;
@@ -3730,9 +3812,9 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
          * The ID and status of every document of your organisation\'s admin account, including those made in the web app, newest change first. Templates and unsent bulk-send copies aren\'t listed. A light way to poll for completed documents. Paged: see `limit` and `offset`.
          * @summary List the status of your organisation\'s documents
          * @param {string} [name] Only documents whose name contains this (any case).
-         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
          * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3744,12 +3826,12 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
-         * @summary List the documents this API client created
+         * Every document of your organisation\'s admin account, newest change first, with their signatories, pages and fields: those made through the API (`upload_app` included) and in the web app. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
+         * @summary List your organisation\'s documents
          * @param {string} [name] Only documents whose name contains this (any case).
-         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
          * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3761,9 +3843,9 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
+         * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields. The answer also has `existing_signatures` and `warnings`: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Upload a document or template
-         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn\\\&#39;t a Word document is refused the same way. At most 2 MB.
          * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
          * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
          * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3777,7 +3859,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
+         * Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Upload a document for one signer and get their signing link
          * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
          * @param {string} signeeName The signer\\\&#39;s name.
@@ -3820,7 +3902,7 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteDocument(id: string, options?: RawAxiosRequestConfig): AxiosPromise<SendDocument200Response> {
+        deleteDocument(id: string, options?: RawAxiosRequestConfig): AxiosPromise<DeleteDocument204Response> {
             return localVarFp.deleteDocument(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -3847,9 +3929,9 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
          * The ID and status of every document of your organisation\'s admin account, including those made in the web app, newest change first. Templates and unsent bulk-send copies aren\'t listed. A light way to poll for completed documents. Paged: see `limit` and `offset`.
          * @summary List the status of your organisation\'s documents
          * @param {string} [name] Only documents whose name contains this (any case).
-         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
          * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3858,12 +3940,12 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
             return localVarFp.listDocumentStatuses(name, status, documentIds, limit, offset, options).then((request) => request(axios, basePath));
         },
         /**
-         * The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
-         * @summary List the documents this API client created
+         * Every document of your organisation\'s admin account, newest change first, with their signatories, pages and fields: those made through the API (`upload_app` included) and in the web app. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
+         * @summary List your organisation\'s documents
          * @param {string} [name] Only documents whose name contains this (any case).
-         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+         * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
          * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -3872,9 +3954,9 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
             return localVarFp.listDocuments(name, status, documentIds, limit, offset, options).then((request) => request(axios, basePath));
         },
         /**
-         * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
+         * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields. The answer also has `existing_signatures` and `warnings`: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Upload a document or template
-         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+         * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn\\\&#39;t a Word document is refused the same way. At most 2 MB.
          * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
          * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
          * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -3885,7 +3967,7 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
             return localVarFp.uploadDocument(file, name, type, templateName, options).then((request) => request(axios, basePath));
         },
         /**
-         * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
+         * Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Upload a document for one signer and get their signing link
          * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
          * @param {string} signeeName The signer\\\&#39;s name.
@@ -3960,9 +4042,9 @@ export class DocumentsApi extends BaseAPI {
      * The ID and status of every document of your organisation\'s admin account, including those made in the web app, newest change first. Templates and unsent bulk-send copies aren\'t listed. A light way to poll for completed documents. Paged: see `limit` and `offset`.
      * @summary List the status of your organisation\'s documents
      * @param {string} [name] Only documents whose name contains this (any case).
-     * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+     * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
      * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-     * @param {number} [limit] How many results to return (default 10).
+     * @param {number} [limit] How many results to return (default 10, at most 100).
      * @param {number} [offset] How many results to skip.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3973,12 +4055,12 @@ export class DocumentsApi extends BaseAPI {
     }
 
     /**
-     * The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
-     * @summary List the documents this API client created
+     * Every document of your organisation\'s admin account, newest change first, with their signatories, pages and fields: those made through the API (`upload_app` included) and in the web app. Templates and unsent bulk-send copies aren\'t listed. Paged: see `limit` and `offset`.
+     * @summary List your organisation\'s documents
      * @param {string} [name] Only documents whose name contains this (any case).
-     * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
+     * @param {Array<number>} [status] Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;).
      * @param {Array<string>} [documentIds] Only these documents. Repeat it or separate IDs with commas.
-     * @param {number} [limit] How many results to return (default 10).
+     * @param {number} [limit] How many results to return (default 10, at most 100).
      * @param {number} [offset] How many results to skip.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -3989,9 +4071,9 @@ export class DocumentsApi extends BaseAPI {
     }
 
     /**
-     * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
+     * Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload\'s `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields. The answer also has `existing_signatures` and `warnings`: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
      * @summary Upload a document or template
-     * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+     * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn\\\&#39;t a Word document is refused the same way. At most 2 MB.
      * @param {string} name The document\\\&#39;s name. It must differ from every other upload of this API client.
      * @param {UploadDocumentTypeEnum} type 2 Document · 4 Template
      * @param {string} [templateName] The template\\\&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client\\\&#39;s other templates.
@@ -4004,7 +4086,7 @@ export class DocumentsApi extends BaseAPI {
     }
 
     /**
-     * Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one.
+     * Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation\'s admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
      * @summary Upload a document for one signer and get their signing link
      * @param {File} file A PDF or DOCX file. A PDF that can\\\&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that.
      * @param {string} signeeName The signer\\\&#39;s name.
@@ -4037,7 +4119,7 @@ export type UploadDocumentTypeEnum = typeof UploadDocumentTypeEnum[keyof typeof 
 export const DownloadsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+         * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
          * @summary Get a link to the audit trail
          * @param {string} id The document\&#39;s ID.
          * @param {*} [options] Override http request option.
@@ -4117,7 +4199,7 @@ export const DownloadsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+         * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
          * @summary Get a link to view the document
          * @param {string} id The document\&#39;s ID.
          * @param {*} [options] Override http request option.
@@ -4167,7 +4249,7 @@ export const DownloadsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DownloadsApiAxiosParamCreator(configuration)
     return {
         /**
-         * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+         * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
          * @summary Get a link to the audit trail
          * @param {string} id The document\&#39;s ID.
          * @param {*} [options] Override http request option.
@@ -4193,7 +4275,7 @@ export const DownloadsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+         * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
          * @summary Get a link to view the document
          * @param {string} id The document\&#39;s ID.
          * @param {*} [options] Override http request option.
@@ -4216,7 +4298,7 @@ export const DownloadsApiFactory = function (configuration?: Configuration, base
     const localVarFp = DownloadsApiFp(configuration)
     return {
         /**
-         * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+         * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
          * @summary Get a link to the audit trail
          * @param {string} id The document\&#39;s ID.
          * @param {*} [options] Override http request option.
@@ -4236,7 +4318,7 @@ export const DownloadsApiFactory = function (configuration?: Configuration, base
             return localVarFp.getDownloadLink(id, options).then((request) => request(axios, basePath));
         },
         /**
-         * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+         * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
          * @summary Get a link to view the document
          * @param {string} id The document\&#39;s ID.
          * @param {*} [options] Override http request option.
@@ -4256,7 +4338,7 @@ export const DownloadsApiFactory = function (configuration?: Configuration, base
  */
 export class DownloadsApi extends BaseAPI {
     /**
-     * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF.
+     * A link to the document\'s audit trail PDF: who did what, when and from where. It is made when the document is completed; ask for it after GET /ap1/document/download-link/ gives the signed PDF. Until it is made the answer is 202: try again later.
      * @summary Get a link to the audit trail
      * @param {string} id The document\&#39;s ID.
      * @param {*} [options] Override http request option.
@@ -4280,7 +4362,7 @@ export class DownloadsApi extends BaseAPI {
     }
 
     /**
-     * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. For the final signed PDF, use GET /ap1/document/download-link/.
+     * A link to the document\'s PDF as it stands now, with the values and signatures applied so far. Once the document is completed and sealed, it is the final signed PDF, the same file as GET /ap1/document/download-link/ gives. The PDF is made when the document is sent; before that the answer is 202: try again later.
      * @summary Get a link to view the document
      * @param {string} id The document\&#39;s ID.
      * @param {*} [options] Override http request option.
@@ -4301,7 +4383,7 @@ export class DownloadsApi extends BaseAPI {
 export const FieldsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+         * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`. For a template, use POST /ap1/templates/fields/.
          * @summary Add fields to a document
          * @param {Array<CreateDocumentFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -4340,7 +4422,7 @@ export const FieldsApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
-         * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+         * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
          * @summary Add fields to a template
          * @param {Array<CreateTemplateFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -4584,7 +4666,7 @@ export const FieldsApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
-         * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+         * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
          * @summary Change a template\'s field
          * @param {string} id The field\&#39;s ID.
          * @param {CreateTemplateFieldsRequestInner} data 
@@ -4637,7 +4719,7 @@ export const FieldsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = FieldsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+         * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`. For a template, use POST /ap1/templates/fields/.
          * @summary Add fields to a document
          * @param {Array<CreateDocumentFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -4650,7 +4732,7 @@ export const FieldsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+         * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
          * @summary Add fields to a template
          * @param {Array<CreateTemplateFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -4670,7 +4752,7 @@ export const FieldsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteField(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendDocument200Response>> {
+        async deleteField(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeleteDocument204Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteField(id, data, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['FieldsApi.deleteField']?.[localVarOperationServerIndex]?.url;
@@ -4730,7 +4812,7 @@ export const FieldsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+         * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
          * @summary Change a template\'s field
          * @param {string} id The field\&#39;s ID.
          * @param {CreateTemplateFieldsRequestInner} data 
@@ -4754,7 +4836,7 @@ export const FieldsApiFactory = function (configuration?: Configuration, basePat
     const localVarFp = FieldsApiFp(configuration)
     return {
         /**
-         * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+         * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`. For a template, use POST /ap1/templates/fields/.
          * @summary Add fields to a document
          * @param {Array<CreateDocumentFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -4764,7 +4846,7 @@ export const FieldsApiFactory = function (configuration?: Configuration, basePat
             return localVarFp.createDocumentFields(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+         * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
          * @summary Add fields to a template
          * @param {Array<CreateTemplateFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -4781,7 +4863,7 @@ export const FieldsApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteField(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<SendDocument200Response> {
+        deleteField(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<DeleteDocument204Response> {
             return localVarFp.deleteField(id, data, options).then((request) => request(axios, basePath));
         },
         /**
@@ -4826,7 +4908,7 @@ export const FieldsApiFactory = function (configuration?: Configuration, basePat
             return localVarFp.updateDocumentFieldByBody(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+         * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
          * @summary Change a template\'s field
          * @param {string} id The field\&#39;s ID.
          * @param {CreateTemplateFieldsRequestInner} data 
@@ -4847,7 +4929,7 @@ export const FieldsApiFactory = function (configuration?: Configuration, basePat
  */
 export class FieldsApi extends BaseAPI {
     /**
-     * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+     * Places fields on a document, each assigned to a signatory. Only while the document isn\'t sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`. For a template, use POST /ap1/templates/fields/.
      * @summary Add fields to a document
      * @param {Array<CreateDocumentFieldsRequestInner>} data 
      * @param {*} [options] Override http request option.
@@ -4859,7 +4941,7 @@ export class FieldsApi extends BaseAPI {
     }
 
     /**
-     * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+     * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
      * @summary Add fields to a template
      * @param {Array<CreateTemplateFieldsRequestInner>} data 
      * @param {*} [options] Override http request option.
@@ -4933,7 +5015,7 @@ export class FieldsApi extends BaseAPI {
     }
 
     /**
-     * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+     * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
      * @summary Change a template\'s field
      * @param {string} id The field\&#39;s ID.
      * @param {CreateTemplateFieldsRequestInner} data 
@@ -4955,7 +5037,7 @@ export class FieldsApi extends BaseAPI {
 export const SendingApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page.
+         * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Fill in fields, add a signatory and send, in one call
          * @param {FillAndSendDocumentRequest} data 
          * @param {*} [options] Override http request option.
@@ -4994,7 +5076,7 @@ export const SendingApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+         * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Send a document for signing by email
          * @param {SendDocumentRequest} data 
          * @param {*} [options] Override http request option.
@@ -5033,7 +5115,7 @@ export const SendingApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Marks the document sent without emailing anyone, and returns its signatory\'s signing link to show or send yourself. Meant for a document with one signatory. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+         * Marks the document sent and returns the first signatory\'s (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Send a document and get the signing link
          * @param {SendDocumentByLinkRequest} data 
          * @param {*} [options] Override http request option.
@@ -5082,7 +5164,7 @@ export const SendingApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = SendingApiAxiosParamCreator(configuration)
     return {
         /**
-         * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page.
+         * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Fill in fields, add a signatory and send, in one call
          * @param {FillAndSendDocumentRequest} data 
          * @param {*} [options] Override http request option.
@@ -5095,7 +5177,7 @@ export const SendingApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+         * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Send a document for signing by email
          * @param {SendDocumentRequest} data 
          * @param {*} [options] Override http request option.
@@ -5108,7 +5190,7 @@ export const SendingApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Marks the document sent without emailing anyone, and returns its signatory\'s signing link to show or send yourself. Meant for a document with one signatory. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+         * Marks the document sent and returns the first signatory\'s (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Send a document and get the signing link
          * @param {SendDocumentByLinkRequest} data 
          * @param {*} [options] Override http request option.
@@ -5131,7 +5213,7 @@ export const SendingApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = SendingApiFp(configuration)
     return {
         /**
-         * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page.
+         * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Fill in fields, add a signatory and send, in one call
          * @param {FillAndSendDocumentRequest} data 
          * @param {*} [options] Override http request option.
@@ -5141,7 +5223,7 @@ export const SendingApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.fillAndSendDocument(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+         * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Send a document for signing by email
          * @param {SendDocumentRequest} data 
          * @param {*} [options] Override http request option.
@@ -5151,7 +5233,7 @@ export const SendingApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.sendDocument(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * Marks the document sent without emailing anyone, and returns its signatory\'s signing link to show or send yourself. Meant for a document with one signatory. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+         * Marks the document sent and returns the first signatory\'s (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
          * @summary Send a document and get the signing link
          * @param {SendDocumentByLinkRequest} data 
          * @param {*} [options] Override http request option.
@@ -5171,7 +5253,7 @@ export const SendingApiFactory = function (configuration?: Configuration, basePa
  */
 export class SendingApi extends BaseAPI {
     /**
-     * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page.
+     * Sets the values of the document\'s fields, adds one signatory (`name`, `email`), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
      * @summary Fill in fields, add a signatory and send, in one call
      * @param {FillAndSendDocumentRequest} data 
      * @param {*} [options] Override http request option.
@@ -5183,7 +5265,7 @@ export class SendingApi extends BaseAPI {
     }
 
     /**
-     * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+     * Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
      * @summary Send a document for signing by email
      * @param {SendDocumentRequest} data 
      * @param {*} [options] Override http request option.
@@ -5195,7 +5277,7 @@ export class SendingApi extends BaseAPI {
     }
 
     /**
-     * Marks the document sent without emailing anyone, and returns its signatory\'s signing link to show or send yourself. Meant for a document with one signatory. A template can\'t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again.
+     * Marks the document sent and returns the first signatory\'s (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can\'t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document\'s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn\'t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers\' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
      * @summary Send a document and get the signing link
      * @param {SendDocumentByLinkRequest} data 
      * @param {*} [options] Override http request option.
@@ -5420,7 +5502,7 @@ export const SignatoriesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteSignatory(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendDocument200Response>> {
+        async deleteSignatory(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeleteDocument204Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSignatory(id, data, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SignatoriesApi.deleteSignatory']?.[localVarOperationServerIndex]?.url;
@@ -5477,7 +5559,7 @@ export const SignatoriesApiFactory = function (configuration?: Configuration, ba
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteSignatory(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<SendDocument200Response> {
+        deleteSignatory(id: string, data: DeleteFieldRequest, options?: RawAxiosRequestConfig): AxiosPromise<DeleteDocument204Response> {
             return localVarFp.deleteSignatory(id, data, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5559,7 +5641,7 @@ export class SignatoriesApi extends BaseAPI {
 export const TemplatesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+         * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
          * @summary Add fields to a template
          * @param {Array<CreateTemplateFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -5678,7 +5760,7 @@ export const TemplatesApiAxiosParamCreator = function (configuration?: Configura
          * The templates of your organisation\'s admin account, newest first, with their pages and fields. Bulk-send templates aren\'t listed. Paged: see `limit` and `offset`.
          * @summary List your organisation\'s templates
          * @param {string} [name] Only templates whose title contains this (any case).
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5723,7 +5805,7 @@ export const TemplatesApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+         * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
          * @summary Change a template\'s field
          * @param {string} id The field\&#39;s ID.
          * @param {CreateTemplateFieldsRequestInner} data 
@@ -5776,7 +5858,7 @@ export const TemplatesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TemplatesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+         * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
          * @summary Add fields to a template
          * @param {Array<CreateTemplateFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -5795,7 +5877,7 @@ export const TemplatesApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteDocument(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SendDocument200Response>> {
+        async deleteDocument(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DeleteDocument204Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDocument(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TemplatesApi.deleteDocument']?.[localVarOperationServerIndex]?.url;
@@ -5818,7 +5900,7 @@ export const TemplatesApiFp = function(configuration?: Configuration) {
          * The templates of your organisation\'s admin account, newest first, with their pages and fields. Bulk-send templates aren\'t listed. Paged: see `limit` and `offset`.
          * @summary List your organisation\'s templates
          * @param {string} [name] Only templates whose title contains this (any case).
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5830,7 +5912,7 @@ export const TemplatesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+         * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
          * @summary Change a template\'s field
          * @param {string} id The field\&#39;s ID.
          * @param {CreateTemplateFieldsRequestInner} data 
@@ -5854,7 +5936,7 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
     const localVarFp = TemplatesApiFp(configuration)
     return {
         /**
-         * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+         * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
          * @summary Add fields to a template
          * @param {Array<CreateTemplateFieldsRequestInner>} data 
          * @param {*} [options] Override http request option.
@@ -5870,7 +5952,7 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteDocument(id: string, options?: RawAxiosRequestConfig): AxiosPromise<SendDocument200Response> {
+        deleteDocument(id: string, options?: RawAxiosRequestConfig): AxiosPromise<DeleteDocument204Response> {
             return localVarFp.deleteDocument(id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -5887,7 +5969,7 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
          * The templates of your organisation\'s admin account, newest first, with their pages and fields. Bulk-send templates aren\'t listed. Paged: see `limit` and `offset`.
          * @summary List your organisation\'s templates
          * @param {string} [name] Only templates whose title contains this (any case).
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -5896,7 +5978,7 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
             return localVarFp.listTemplates(name, limit, offset, options).then((request) => request(axios, basePath));
         },
         /**
-         * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+         * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
          * @summary Change a template\'s field
          * @param {string} id The field\&#39;s ID.
          * @param {CreateTemplateFieldsRequestInner} data 
@@ -5917,7 +5999,7 @@ export const TemplatesApiFactory = function (configuration?: Configuration, base
  */
 export class TemplatesApi extends BaseAPI {
     /**
-     * Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+     * Places fields on a template. Each field belongs to one of the template\'s roles (GET /ap1/signatories/?document_id=<the template\'s ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role\'s fields go to the signatory who takes that role. A `signatory_id` that isn\'t one of this template\'s roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field\'s `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
      * @summary Add fields to a template
      * @param {Array<CreateTemplateFieldsRequestInner>} data 
      * @param {*} [options] Override http request option.
@@ -5956,7 +6038,7 @@ export class TemplatesApi extends BaseAPI {
      * The templates of your organisation\'s admin account, newest first, with their pages and fields. Bulk-send templates aren\'t listed. Paged: see `limit` and `offset`.
      * @summary List your organisation\'s templates
      * @param {string} [name] Only templates whose title contains this (any case).
-     * @param {number} [limit] How many results to return (default 10).
+     * @param {number} [limit] How many results to return (default 10, at most 100).
      * @param {number} [offset] How many results to skip.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -5967,7 +6049,7 @@ export class TemplatesApi extends BaseAPI {
     }
 
     /**
-     * Changes a template\'s field; send all of its values, as when adding it. Its page can\'t change: delete the field and add it again.
+     * Changes a template\'s field; send all of its values, as when adding it. A `signatory_id` naming another of the template\'s roles moves the field to that role; without one it keeps its role. Its page can\'t change: delete the field and add it again.
      * @summary Change a template\'s field
      * @param {string} id The field\&#39;s ID.
      * @param {CreateTemplateFieldsRequestInner} data 
@@ -6106,7 +6188,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
          * @summary List an endpoint\'s deliveries
          * @param {string} id The endpoint\&#39;s ID.
          * @param {string} [status] Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6412,7 +6494,7 @@ export const WebhooksApiFp = function(configuration?: Configuration) {
          * @summary List an endpoint\'s deliveries
          * @param {string} id The endpoint\&#39;s ID.
          * @param {string} [status] Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6536,7 +6618,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
          * @summary List an endpoint\'s deliveries
          * @param {string} id The endpoint\&#39;s ID.
          * @param {string} [status] Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries.
-         * @param {number} [limit] How many results to return (default 10).
+         * @param {number} [limit] How many results to return (default 10, at most 100).
          * @param {number} [offset] How many results to skip.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -6648,7 +6730,7 @@ export class WebhooksApi extends BaseAPI {
      * @summary List an endpoint\'s deliveries
      * @param {string} id The endpoint\&#39;s ID.
      * @param {string} [status] Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries.
-     * @param {number} [limit] How many results to return (default 10).
+     * @param {number} [limit] How many results to return (default 10, at most 100).
      * @param {number} [offset] How many results to skip.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

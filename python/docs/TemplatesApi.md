@@ -16,7 +16,7 @@ Method | HTTP request | Description
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template's roles (GET /ap1/signatories/?document_id=<the template's ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role's fields go to the signatory who takes that role. A `signatory_id` that isn't one of this template's roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field's `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
 
 ### Example
 
@@ -94,7 +94,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_document**
-> SendDocument200Response delete_document(id)
+> DeleteDocument204Response delete_document(id)
 
 Delete a template or an unsent document
 
@@ -106,7 +106,7 @@ Deletes a template, or a document that was never sent, with its files. A documen
 
 ```python
 import signedly
-from signedly.models.send_document200_response import SendDocument200Response
+from signedly.models.delete_document204_response import DeleteDocument204Response
 from signedly.rest import ApiException
 from pprint import pprint
 
@@ -153,7 +153,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 ### Authorization
 
@@ -170,8 +170,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **204** | Deleted. |  -  |
 **400** | The document has been sent, so it is kept. |  -  |
-**403** | The document isn&#39;t your organisation&#39;s. |  -  |
-**404** | No document has this ID. |  -  |
+**404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -294,7 +293,7 @@ with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.TemplatesApi(api_client)
     name = 'name_example' # str | Only templates whose title contains this (any case). (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
@@ -314,7 +313,7 @@ with signedly.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **name** | **str**| Only templates whose title contains this (any case). | [optional] 
- **limit** | **int**| How many results to return (default 10). | [optional] 
+ **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
 ### Return type
@@ -343,7 +342,7 @@ Name | Type | Description  | Notes
 
 Change a template's field
 
-Changes a template's field; send all of its values, as when adding it. Its page can't change: delete the field and add it again.
+Changes a template's field; send all of its values, as when adding it. A `signatory_id` naming another of the template's roles moves the field to that role; without one it keeps its role. Its page can't change: delete the field and add it again.
 
 ### Example
 

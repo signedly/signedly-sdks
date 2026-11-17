@@ -15,6 +15,7 @@ package com.signedly.api;
 
 import com.signedly.client.ApiException;
 import com.signedly.model.CreateTemplateFieldsRequestInner;
+import com.signedly.model.DeleteDocument204Response;
 import com.signedly.model.SendDocument200Response;
 import com.signedly.model.TemplateField;
 import com.signedly.model.TemplatePage;
@@ -66,7 +67,7 @@ public class TemplatesApiTest {
     @Test
     public void deleteDocumentTest() throws ApiException {
         UUID id = null;
-        SendDocument200Response response = 
+        DeleteDocument204Response response = 
         api.deleteDocument(id);
         
         // TODO: test validations

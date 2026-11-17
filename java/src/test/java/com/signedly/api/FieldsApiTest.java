@@ -18,6 +18,7 @@ import com.signedly.model.CreateDocumentFieldsRequestInner;
 import com.signedly.model.CreateTemplateFieldsRequestInner;
 import com.signedly.model.DeleteFieldRequest;
 import com.signedly.model.Field;
+import com.signedly.model.DeleteDocument204Response;
 import com.signedly.model.SendDocument200Response;
 import com.signedly.model.TemplateField;
 import java.util.UUID;
@@ -87,7 +88,7 @@ public class FieldsApiTest {
     public void deleteFieldTest() throws ApiException {
         UUID id = null;
         DeleteFieldRequest data = null;
-        SendDocument200Response response = 
+        DeleteDocument204Response response = 
         api.deleteField(id, data);
         
         // TODO: test validations

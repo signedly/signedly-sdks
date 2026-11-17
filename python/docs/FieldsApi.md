@@ -19,7 +19,7 @@ Method | HTTP request | Description
 
 Add fields to a document
 
-Places fields on a document, each assigned to a signatory. Only while the document isn't sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+Places fields on a document, each assigned to a signatory. Only while the document isn't sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field's `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`. For a template, use POST /ap1/templates/fields/.
 
 ### Example
 
@@ -101,7 +101,7 @@ Name | Type | Description  | Notes
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template's roles (GET /ap1/signatories/?document_id=<the template's ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role's fields go to the signatory who takes that role. A `signatory_id` that isn't one of this template's roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field's `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
 
 ### Example
 
@@ -179,7 +179,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_field**
-> SendDocument200Response delete_field(id, data)
+> DeleteDocument204Response delete_field(id, data)
 
 Delete a field
 
@@ -191,8 +191,8 @@ Deletes a field of a template, or of a document that isn't sent yet. The documen
 
 ```python
 import signedly
+from signedly.models.delete_document204_response import DeleteDocument204Response
 from signedly.models.delete_field_request import DeleteFieldRequest
-from signedly.models.send_document200_response import SendDocument200Response
 from signedly.rest import ApiException
 from pprint import pprint
 
@@ -241,7 +241,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 ### Authorization
 
@@ -594,7 +594,7 @@ Name | Type | Description  | Notes
 
 Change a template's field
 
-Changes a template's field; send all of its values, as when adding it. Its page can't change: delete the field and add it again.
+Changes a template's field; send all of its values, as when adding it. A `signatory_id` naming another of the template's roles moves the field to that role; without one it keeps its role. Its page can't change: delete the field and add it again.
 
 ### Example
 

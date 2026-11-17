@@ -1,9 +1,11 @@
 name: Spec matches production
 
 # Weekly, by hand, and when the spec changes on integration: does the committed
-# spec match what production serves?
-# A difference after a backend release means: run scripts/update-spec.sh, open a
-# PR, and publish new SDK versions.
+# spec match what production serves? The committed spec follows backend
+# integration (spec-integration.yml), so between an /ap1/ change merging there and
+# the backend release this fails; after the release it must pass. A difference
+# after a release means: run scripts/update-spec.sh, open a PR, and publish new
+# SDK versions.
 on:
   schedule: [{ cron: "0 6 * * 1" }]
   workflow_dispatch:

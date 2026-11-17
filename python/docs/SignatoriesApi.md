@@ -175,7 +175,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_signatory**
-> SendDocument200Response delete_signatory(id, data)
+> DeleteDocument204Response delete_signatory(id, data)
 
 Remove a signatory
 
@@ -187,8 +187,8 @@ Removes a signatory, and the fields assigned to them, from the document. Only wh
 
 ```python
 import signedly
+from signedly.models.delete_document204_response import DeleteDocument204Response
 from signedly.models.delete_field_request import DeleteFieldRequest
-from signedly.models.send_document200_response import SendDocument200Response
 from signedly.rest import ApiException
 from pprint import pprint
 
@@ -237,7 +237,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 ### Authorization
 

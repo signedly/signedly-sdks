@@ -14,8 +14,8 @@ All URIs are relative to *https://l0ads.signedly.com*
 | [**listDocumentPagesWithHttpInfo**](DocumentsApi.md#listDocumentPagesWithHttpInfo) | **GET** /ap1/documents/{id}/pages/ | List a document&#39;s pages and their fields |
 | [**listDocumentStatuses**](DocumentsApi.md#listDocumentStatuses) | **GET** /ap1/documents-status-list/ | List the status of your organisation&#39;s documents |
 | [**listDocumentStatusesWithHttpInfo**](DocumentsApi.md#listDocumentStatusesWithHttpInfo) | **GET** /ap1/documents-status-list/ | List the status of your organisation&#39;s documents |
-| [**listDocuments**](DocumentsApi.md#listDocuments) | **GET** /ap1/documents/ | List the documents this API client created |
-| [**listDocumentsWithHttpInfo**](DocumentsApi.md#listDocumentsWithHttpInfo) | **GET** /ap1/documents/ | List the documents this API client created |
+| [**listDocuments**](DocumentsApi.md#listDocuments) | **GET** /ap1/documents/ | List your organisation&#39;s documents |
+| [**listDocumentsWithHttpInfo**](DocumentsApi.md#listDocumentsWithHttpInfo) | **GET** /ap1/documents/ | List your organisation&#39;s documents |
 | [**uploadDocument**](DocumentsApi.md#uploadDocument) | **POST** /ap1/upload/ | Upload a document or template |
 | [**uploadDocumentWithHttpInfo**](DocumentsApi.md#uploadDocumentWithHttpInfo) | **POST** /ap1/upload/ | Upload a document or template |
 | [**uploadDocumentForOneSigner**](DocumentsApi.md#uploadDocumentForOneSigner) | **POST** /ap1/upload_app/ | Upload a document for one signer and get their signing link |
@@ -94,7 +94,7 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The new document. |  -  |
-| **400** | The ID isn&#39;t a template, the name is taken, or &#x60;recipients&#x60; don&#39;t fill the template&#39;s open roles exactly once. |  -  |
+| **400** | The ID isn&#39;t a template, the template isn&#39;t finished yet (still a draft), the name is taken, or &#x60;recipients&#x60; don&#39;t fill the template&#39;s open roles exactly once. |  -  |
 | **404** | The template doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 ## createDocumentFromTemplateWithHttpInfo
@@ -171,13 +171,13 @@ ApiResponse<[**CreateDocumentFromTemplate200Response**](CreateDocumentFromTempla
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The new document. |  -  |
-| **400** | The ID isn&#39;t a template, the name is taken, or &#x60;recipients&#x60; don&#39;t fill the template&#39;s open roles exactly once. |  -  |
+| **400** | The ID isn&#39;t a template, the template isn&#39;t finished yet (still a draft), the name is taken, or &#x60;recipients&#x60; don&#39;t fill the template&#39;s open roles exactly once. |  -  |
 | **404** | The template doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 
 ## deleteDocument
 
-> SendDocument200Response deleteDocument(id)
+> DeleteDocument204Response deleteDocument(id)
 
 Delete a template or an unsent document
 
@@ -208,7 +208,7 @@ public class Example {
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The document's or template's ID.
         try {
-            SendDocument200Response result = apiInstance.deleteDocument(id);
+            DeleteDocument204Response result = apiInstance.deleteDocument(id);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling DocumentsApi#deleteDocument");
@@ -230,7 +230,7 @@ public class Example {
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 
 ### Authorization
@@ -247,12 +247,11 @@ public class Example {
 |-------------|-------------|------------------|
 | **204** | Deleted. |  -  |
 | **400** | The document has been sent, so it is kept. |  -  |
-| **403** | The document isn&#39;t your organisation&#39;s. |  -  |
-| **404** | No document has this ID. |  -  |
+| **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 ## deleteDocumentWithHttpInfo
 
-> ApiResponse<SendDocument200Response> deleteDocument deleteDocumentWithHttpInfo(id)
+> ApiResponse<DeleteDocument204Response> deleteDocument deleteDocumentWithHttpInfo(id)
 
 Delete a template or an unsent document
 
@@ -284,7 +283,7 @@ public class Example {
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The document's or template's ID.
         try {
-            ApiResponse<SendDocument200Response> response = apiInstance.deleteDocumentWithHttpInfo(id);
+            ApiResponse<DeleteDocument204Response> response = apiInstance.deleteDocumentWithHttpInfo(id);
             System.out.println("Status code: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
             System.out.println("Response body: " + response.getData());
@@ -308,7 +307,7 @@ public class Example {
 
 ### Return type
 
-ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
+ApiResponse<[**DeleteDocument204Response**](DeleteDocument204Response.md)>
 
 
 ### Authorization
@@ -325,8 +324,7 @@ ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
 |-------------|-------------|------------------|
 | **204** | Deleted. |  -  |
 | **400** | The document has been sent, so it is kept. |  -  |
-| **403** | The document isn&#39;t your organisation&#39;s. |  -  |
-| **404** | No document has this ID. |  -  |
+| **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 
 ## getDownloadStatus
@@ -400,8 +398,7 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Whether the signed PDF is ready. |  -  |
-| **403** | The document isn&#39;t your organisation&#39;s. |  -  |
-| **404** | No document has this ID. |  -  |
+| **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 ## getDownloadStatusWithHttpInfo
 
@@ -477,8 +474,7 @@ ApiResponse<[**GetDownloadStatus200Response**](GetDownloadStatus200Response.md)>
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Whether the signed PDF is ready. |  -  |
-| **403** | The document isn&#39;t your organisation&#39;s. |  -  |
-| **404** | No document has this ID. |  -  |
+| **404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 
 ## listDocumentPages
@@ -663,9 +659,9 @@ public class Example {
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
         String name = "name_example"; // String | Only documents whose name contains this (any case).
-        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
+        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
         List<UUID> documentIds = Arrays.asList(); // List<UUID> | Only these documents. Repeat it or separate IDs with commas.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             DocumentStatusPage result = apiInstance.listDocumentStatuses(name, status, documentIds, limit, offset);
@@ -687,9 +683,9 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **name** | **String**| Only documents whose name contains this (any case). | [optional] |
-| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
+| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
 | **documentIds** | [**List&lt;UUID&gt;**](UUID.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -745,9 +741,9 @@ public class Example {
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
         String name = "name_example"; // String | Only documents whose name contains this (any case).
-        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
+        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
         List<UUID> documentIds = Arrays.asList(); // List<UUID> | Only these documents. Repeat it or separate IDs with commas.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             ApiResponse<DocumentStatusPage> response = apiInstance.listDocumentStatusesWithHttpInfo(name, status, documentIds, limit, offset);
@@ -771,9 +767,9 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **name** | **String**| Only documents whose name contains this (any case). | [optional] |
-| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
+| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
 | **documentIds** | [**List&lt;UUID&gt;**](UUID.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -801,9 +797,9 @@ ApiResponse<[**DocumentStatusPage**](DocumentStatusPage.md)>
 
 > DocumentPage listDocuments(name, status, documentIds, limit, offset)
 
-List the documents this API client created
+List your organisation&#39;s documents
 
-The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren&#39;t listed. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
+Every document of your organisation&#39;s admin account, newest change first, with their signatories, pages and fields: those made through the API (&#x60;upload_app&#x60; included) and in the web app. Templates and unsent bulk-send copies aren&#39;t listed. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
 
 ### Example
 
@@ -829,9 +825,9 @@ public class Example {
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
         String name = "name_example"; // String | Only documents whose name contains this (any case).
-        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
+        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
         List<UUID> documentIds = Arrays.asList(); // List<UUID> | Only these documents. Repeat it or separate IDs with commas.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             DocumentPage result = apiInstance.listDocuments(name, status, documentIds, limit, offset);
@@ -853,9 +849,9 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **name** | **String**| Only documents whose name contains this (any case). | [optional] |
-| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
+| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
 | **documentIds** | [**List&lt;UUID&gt;**](UUID.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -882,9 +878,9 @@ public class Example {
 
 > ApiResponse<DocumentPage> listDocuments listDocumentsWithHttpInfo(name, status, documentIds, limit, offset)
 
-List the documents this API client created
+List your organisation&#39;s documents
 
-The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren&#39;t listed. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
+Every document of your organisation&#39;s admin account, newest change first, with their signatories, pages and fields: those made through the API (&#x60;upload_app&#x60; included) and in the web app. Templates and unsent bulk-send copies aren&#39;t listed. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
 
 ### Example
 
@@ -911,9 +907,9 @@ public class Example {
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
         String name = "name_example"; // String | Only documents whose name contains this (any case).
-        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
+        List<Integer> status = Arrays.asList(); // List<Integer> | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`).
         List<UUID> documentIds = Arrays.asList(); // List<UUID> | Only these documents. Repeat it or separate IDs with commas.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             ApiResponse<DocumentPage> response = apiInstance.listDocumentsWithHttpInfo(name, status, documentIds, limit, offset);
@@ -937,9 +933,9 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **name** | **String**| Only documents whose name contains this (any case). | [optional] |
-| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
+| **status** | [**List&lt;Integer&gt;**](Integer.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] |
 | **documentIds** | [**List&lt;UUID&gt;**](UUID.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -969,7 +965,7 @@ ApiResponse<[**DocumentPage**](DocumentPage.md)>
 
 Upload a document or template
 
-Uploads a PDF or DOCX file of up to 2 MB as a document (&#x60;type&#x60; 2) or a template (&#x60;type&#x60; 4). The answer is the upload; the document itself is made in the background. Find it in &#x60;GET /ap1/documents/?name&#x3D;&lt;name&gt;&#x60; (its &#x60;upload.id&#x60; is this upload&#39;s &#x60;id&#x60;), or a template in &#x60;GET /ap1/templates/&#x60;, and wait until &#x60;GET /ap1/documents/{id}/pages/&#x60; lists its pages before placing fields.
+Uploads a PDF or DOCX file of up to 2 MB as a document (&#x60;type&#x60; 2) or a template (&#x60;type&#x60; 4). The answer is the upload; the document itself is made in the background. Find it in &#x60;GET /ap1/documents/?name&#x3D;&lt;name&gt;&#x60; (its &#x60;upload.id&#x60; is this upload&#39;s &#x60;id&#x60;), or a template in &#x60;GET /ap1/templates/&#x60;, and wait until &#x60;GET /ap1/documents/{id}/pages/&#x60; lists its pages before placing fields. The answer also has &#x60;existing_signatures&#x60; and &#x60;warnings&#x60;: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -994,7 +990,7 @@ public class Example {
         //Bearer.setApiKeyPrefix("Token");
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
-        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn't a Word document is refused the same way. At most 2 MB.
         String name = "name_example"; // String | The document's name. It must differ from every other upload of this API client.
         Integer type = 2; // Integer | 2 Document · 4 Template
         String templateName = "templateName_example"; // String | The template's title. Required with `type` 4; it must differ from this API client's other templates.
@@ -1017,7 +1013,7 @@ public class Example {
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | |
+| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn&#39;t a Word document is refused the same way. At most 2 MB. | |
 | **name** | **String**| The document&#39;s name. It must differ from every other upload of this API client. | |
 | **type** | **Integer**| 2 Document · 4 Template | [enum: 2, 4] |
 | **templateName** | **String**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] |
@@ -1039,7 +1035,7 @@ public class Example {
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-| **200** | The upload. Its &#x60;status&#x60; is 2 Uploaded; the document is made next. |  -  |
+| **200** | The upload. Its &#x60;status&#x60; is 2 Uploaded; the document is made next. With &#x60;existing_signatures&#x60; and &#x60;warnings&#x60; (see above). |  -  |
 | **400** | The file is missing, not a PDF or DOCX, or over 2 MB; the name is taken; or &#x60;type&#x60; or &#x60;template_name&#x60; is missing or wrong. |  -  |
 
 ## uploadDocumentWithHttpInfo
@@ -1048,7 +1044,7 @@ public class Example {
 
 Upload a document or template
 
-Uploads a PDF or DOCX file of up to 2 MB as a document (&#x60;type&#x60; 2) or a template (&#x60;type&#x60; 4). The answer is the upload; the document itself is made in the background. Find it in &#x60;GET /ap1/documents/?name&#x3D;&lt;name&gt;&#x60; (its &#x60;upload.id&#x60; is this upload&#39;s &#x60;id&#x60;), or a template in &#x60;GET /ap1/templates/&#x60;, and wait until &#x60;GET /ap1/documents/{id}/pages/&#x60; lists its pages before placing fields.
+Uploads a PDF or DOCX file of up to 2 MB as a document (&#x60;type&#x60; 2) or a template (&#x60;type&#x60; 4). The answer is the upload; the document itself is made in the background. Find it in &#x60;GET /ap1/documents/?name&#x3D;&lt;name&gt;&#x60; (its &#x60;upload.id&#x60; is this upload&#39;s &#x60;id&#x60;), or a template in &#x60;GET /ap1/templates/&#x60;, and wait until &#x60;GET /ap1/documents/{id}/pages/&#x60; lists its pages before placing fields. The answer also has &#x60;existing_signatures&#x60; and &#x60;warnings&#x60;: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -1074,7 +1070,7 @@ public class Example {
         //Bearer.setApiKeyPrefix("Token");
 
         DocumentsApi apiInstance = new DocumentsApi(defaultClient);
-        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+        File _file = new File("/path/to/file"); // File | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn't a Word document is refused the same way. At most 2 MB.
         String name = "name_example"; // String | The document's name. It must differ from every other upload of this API client.
         Integer type = 2; // Integer | 2 Document · 4 Template
         String templateName = "templateName_example"; // String | The template's title. Required with `type` 4; it must differ from this API client's other templates.
@@ -1099,7 +1095,7 @@ public class Example {
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | |
+| **_file** | **File**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn&#39;t a Word document is refused the same way. At most 2 MB. | |
 | **name** | **String**| The document&#39;s name. It must differ from every other upload of this API client. | |
 | **type** | **Integer**| 2 Document · 4 Template | [enum: 2, 4] |
 | **templateName** | **String**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] |
@@ -1121,7 +1117,7 @@ ApiResponse<[**Upload**](Upload.md)>
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-| **200** | The upload. Its &#x60;status&#x60; is 2 Uploaded; the document is made next. |  -  |
+| **200** | The upload. Its &#x60;status&#x60; is 2 Uploaded; the document is made next. With &#x60;existing_signatures&#x60; and &#x60;warnings&#x60; (see above). |  -  |
 | **400** | The file is missing, not a PDF or DOCX, or over 2 MB; the name is taken; or &#x60;type&#x60; or &#x60;template_name&#x60; is missing or wrong. |  -  |
 
 
@@ -1131,7 +1127,7 @@ ApiResponse<[**Upload**](Upload.md)>
 
 Upload a document for one signer and get their signing link
 
-Uploads a PDF or DOCX for one signer and returns their signing link in &#x60;redirect_url&#x60;; give it to the signer. They place their own signature on the signing page and are then sent to the &#x60;redirect_url&#x60; you gave. The signed PDF and its audit trail are emailed to &#x60;final_email&#x60;, or to your organisation&#39;s admin without one.
+Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in &#x60;redirect_url&#x60;; give it to the signer. They place their own signature on the signing page and are then sent to the &#x60;redirect_url&#x60; you gave. The signed PDF and its audit trail are emailed to &#x60;final_email&#x60;, or to your organisation&#39;s admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -1204,7 +1200,7 @@ public class Example {
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The new document. |  -  |
-| **400** | A value is missing or not valid (the file isn&#39;t a PDF or DOCX, an email or the URL isn&#39;t valid). Nothing was kept. |  -  |
+| **400** | A value is missing or not valid (the file isn&#39;t a PDF or DOCX, isn&#39;t really one, or is over 25 MB; an email or the URL isn&#39;t valid). Nothing was kept. |  -  |
 | **502** | The file couldn&#39;t be stored. Nothing was kept; try again. |  -  |
 
 ## uploadDocumentForOneSignerWithHttpInfo
@@ -1213,7 +1209,7 @@ public class Example {
 
 Upload a document for one signer and get their signing link
 
-Uploads a PDF or DOCX for one signer and returns their signing link in &#x60;redirect_url&#x60;; give it to the signer. They place their own signature on the signing page and are then sent to the &#x60;redirect_url&#x60; you gave. The signed PDF and its audit trail are emailed to &#x60;final_email&#x60;, or to your organisation&#39;s admin without one.
+Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in &#x60;redirect_url&#x60;; give it to the signer. They place their own signature on the signing page and are then sent to the &#x60;redirect_url&#x60; you gave. The signed PDF and its audit trail are emailed to &#x60;final_email&#x60;, or to your organisation&#39;s admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -1289,6 +1285,6 @@ ApiResponse<[**UploadDocumentForOneSigner200Response**](UploadDocumentForOneSign
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | The new document. |  -  |
-| **400** | A value is missing or not valid (the file isn&#39;t a PDF or DOCX, an email or the URL isn&#39;t valid). Nothing was kept. |  -  |
+| **400** | A value is missing or not valid (the file isn&#39;t a PDF or DOCX, isn&#39;t really one, or is over 25 MB; an email or the URL isn&#39;t valid). Nothing was kept. |  -  |
 | **502** | The file couldn&#39;t be stored. Nothing was kept; try again. |  -  |
 

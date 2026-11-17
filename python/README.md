@@ -7,16 +7,19 @@ otherwise (the uploads are `multipart/form-data`).
 
 ## Authentication
 
-1. In the Signedly web app, open **Account & Settings → API** and generate a
-   **client ID** and **client secret** for your organisation.
+1. In the Signedly web app, your organisation's **super admin** opens **Account &
+   Settings → API** and generates a **client ID** and **client secret**. Only the
+   super admin can see, regenerate or replace the keys and manage webhooks there,
+   because a key acts for the organisation admin.
 2. `POST /ap1/token/` with them. You get an `access_token` (valid **2 hours**) and
    a `refresh_token` (valid **7 days**). While both are still valid, calling
    `/ap1/token/` again returns the same pair.
 3. Send the access token on every other call:
    `Authorization: Bearer <access_token>`.
 4. When the access token expires, `POST /ap1/refreshtoken/` with the refresh token
-   for a new access token. When the refresh token has expired too, call
-   `/ap1/token/` again.
+   for a new access token. The refresh token stays the same and each refresh keeps
+   it valid for 7 more days, up to 30 days after `/ap1/token/` made it. When it has
+   expired, call `/ap1/token/` again.
 
 `/ap1/token/` and `/ap1/refreshtoken/` allow 60 calls a minute per IP address;
 more answer 429. A missing, unknown or expired access token answers 403
@@ -49,7 +52,9 @@ paid plan, a feature it doesn't include answers 400 with
 
 Live documents also need an API contract with Signedly. Without one, or with an
 unpaid API invoice, `POST /ap1/upload/` (except templates), `/ap1/upload_app/`,
-`/ap1/documents/fromtemplate/` and `/ap1/bulk-sends/` answer 402 with live keys.
+`/ap1/documents/fromtemplate/`, `/ap1/bulk-sends/` and sending a draft already
+uploaded (`/ap1/document/send/`, `/ap1/document/send_url/`,
+`/ap1/document/update_and_send/`) answer 402 with live keys.
 Test keys work without a contract (see Sandbox).
 
 ## Sending a document for signing
@@ -65,14 +70,24 @@ Test keys work without a contract (see Sandbox).
    - `POST /ap1/document/send/` emails every signatory a signing link (with
      ordered signing, only the first; each next one is emailed in
      turn), or
-   - `POST /ap1/document/send_url/` sends no email and returns the first
-     signatory's signing link, for you to show or send yourself.
+   - `POST /ap1/document/send_url/` returns the first signatory's signing
+     link, for you to show or send yourself, and emails them nothing; any other
+     signatories are emailed as by `send/` (all at once, or with ordered signing
+     each in turn after the one before signs).
 5. Poll `GET /ap1/documents-status-list/` (or `GET /ap1/documents/`) until the
    status is 6 (Completed), then `GET /ap1/document/download-link/` for the
    signed PDF and `GET /ap1/document/download-audit-link/` for its audit trail.
 
+**The two document lists differ on purpose.** `GET /ap1/documents/` lists only the
+documents this API client made through the API. `GET /ap1/documents-status-list/`
+lists every document of the organisation's admin, including ones made in the web app.
+Use the first to see your integration's own documents, and the second for everything
+the admin account owns.
+
 **From a template:** upload with `type` 4 and a `template_name` (or make the
-template in the web app), place its fields with `POST /ap1/templates/fields/`,
+template in the web app), place its fields with `POST /ap1/templates/fields/`
+(each on the role named by its `signatory_id`, a role's `id` from
+`GET /ap1/signatories/?document_id=<template ID>`; without one, on the first role),
 then for each signing make a document with `POST /ap1/documents/fromtemplate/`,
 add its signatory, and send it.
 
@@ -81,6 +96,15 @@ signer and returns their signing link in `redirect_url`; the signer places their
 own signature. After signing they go to the `redirect_url` you sent, and the
 signed PDF and its audit trail are emailed to `final_email` (otherwise to your
 organisation's admin).
+
+**A PDF that is already digitally signed** (Adobe, DocuSign, a DSC or Aadhaar
+eSign) is accepted, but signing it on Signedly invalidates those signatures. The
+upload and send answers (`upload/`, `upload_app/`, `send/`, `send_url/`,
+`update_and_send/`) say so: `existing_signatures` has the `count` (null when the
+file couldn't be checked) and the signers' `names`, and `warnings` holds the text
+to show your user, e.g. \"This PDF already has 1 digital signature (by Asha Rao).
+Signing it on Signedly will invalidate it.\" `warnings` is empty when there is
+nothing to warn about. Nothing is refused because of it.
 
 ## Quick start with curl
 
@@ -154,7 +178,8 @@ https://github.com/signedly/signedly-sdks
 Instead of polling, add an endpoint with `POST /ap1/webhooks/` (or in **Account &
 Settings → API**) and Signedly posts your organisation's document events to it:
 `document.sent`, `document.viewed`, `document.signed`, `document.approved`,
-`document.completed`, `document.rejected` and `document.expired` (all of them,
+`document.completed`, `document.rejected`, `document.expired` and
+`document.voided` (all of them,
 or the `events` you choose). Each is a JSON `POST`:
 
 ```json
@@ -206,20 +231,26 @@ upload):
 - its emails are real, with `[TEST]` at the start of the subject;
 - it isn't billed or counted toward your plan;
 - your organisation can make 50 a calendar month (templates don't count); the next
-  upload answers 429.
+  upload answers 429;
+- a test token sees and acts only on test documents: a live document answers 404
+  and isn't listed. It can use your templates (list them, read their fields, make
+  documents and bulk sends from them) but not change or delete a live one.
 
 ## Fields
 
 Positions and sizes are in **PDF points** (1/72 inch), measured from the
 **top-left corner** of the page as it is displayed (rotation applied).
-`page_number` counts pages from 0. A field must sit wholly on its page (1 point
+`page_number` counts pages from 0: send the `id` and `page_number` that
+`GET /ap1/documents/{id}/pages/` lists for the same page. A field needs a known
+`kind` and a `width` and `height` above 0, and must sit wholly on its page (1 point
 of tolerance); otherwise it is refused with 400. A field's page and signatory
 can't be changed later: delete the field and add it again.
 
 ## Status values
 
 **Document `status`:** 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent ·
-5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Signatories,
+5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided
+(stopped by its sender in the web app; its links no longer sign). Signatories,
 fields and sends are only accepted while a document is 1–3 (not yet sent).
 
 **Signatory `status`:** 1 Waiting · 2 Invited · 3 Signed · 4 Viewed · 5 Rejected.
@@ -227,8 +258,9 @@ fields and sends are only accepted while a document is 1–3 (not yet sent).
 ## Lists
 
 `GET /ap1/documents/`, `/ap1/documents-status-list/`, `/ap1/templates/`,
-`/ap1/logs/` and `/ap1/logs/hits/` are paged: pass `limit` (default 10) and
-`offset`, and read `count`, `next`, `previous` and `results` from the response.
+`/ap1/logs/` and `/ap1/logs/hits/` are paged: pass `limit` (default 10, at most
+100; a larger value gets 100) and `offset`, and read `count`, `next`, `previous` and
+`results` from the response. Follow `next` until it is null to read every result.
 
 ## Errors
 
@@ -315,7 +347,7 @@ with signedly.ApiClient(configuration) as api_client:
     api_instance = signedly.APIRequestLogsApi(api_client)
     method = 'method_example' # str | Only this HTTP method. (optional)
     path = 'path_example' # str | Only paths that contain this, e.g. `/ap1/document/`. (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
@@ -346,7 +378,7 @@ Class | Method | HTTP request | Description
 *DocumentsApi* | [**get_download_status**](docs/DocumentsApi.md#get_download_status) | **GET** /ap1/documents-status/{id}/ | Check whether the signed PDF is ready
 *DocumentsApi* | [**list_document_pages**](docs/DocumentsApi.md#list_document_pages) | **GET** /ap1/documents/{id}/pages/ | List a document&#39;s pages and their fields
 *DocumentsApi* | [**list_document_statuses**](docs/DocumentsApi.md#list_document_statuses) | **GET** /ap1/documents-status-list/ | List the status of your organisation&#39;s documents
-*DocumentsApi* | [**list_documents**](docs/DocumentsApi.md#list_documents) | **GET** /ap1/documents/ | List the documents this API client created
+*DocumentsApi* | [**list_documents**](docs/DocumentsApi.md#list_documents) | **GET** /ap1/documents/ | List your organisation&#39;s documents
 *DocumentsApi* | [**upload_document**](docs/DocumentsApi.md#upload_document) | **POST** /ap1/upload/ | Upload a document or template
 *DocumentsApi* | [**upload_document_for_one_signer**](docs/DocumentsApi.md#upload_document_for_one_signer) | **POST** /ap1/upload_app/ | Upload a document for one signer and get their signing link
 *DownloadsApi* | [**get_audit_trail_link**](docs/DownloadsApi.md#get_audit_trail_link) | **GET** /ap1/document/download-audit-link/ | Get a link to the audit trail
@@ -396,6 +428,7 @@ Class | Method | HTTP request | Description
  - [CreateSignatoryRequest](docs/CreateSignatoryRequest.md)
  - [CreateTemplateFieldsRequestInner](docs/CreateTemplateFieldsRequestInner.md)
  - [CreateWebhookEndpointRequest](docs/CreateWebhookEndpointRequest.md)
+ - [DeleteDocument204Response](docs/DeleteDocument204Response.md)
  - [DeleteFieldRequest](docs/DeleteFieldRequest.md)
  - [Document](docs/Document.md)
  - [DocumentPage](docs/DocumentPage.md)
@@ -416,6 +449,7 @@ Class | Method | HTTP request | Description
  - [RequestLog](docs/RequestLog.md)
  - [RequestLogPage](docs/RequestLogPage.md)
  - [SendDocument200Response](docs/SendDocument200Response.md)
+ - [SendDocument200ResponseExistingSignatures](docs/SendDocument200ResponseExistingSignatures.md)
  - [SendDocumentByLink200Response](docs/SendDocumentByLink200Response.md)
  - [SendDocumentByLinkRequest](docs/SendDocumentByLinkRequest.md)
  - [SendDocumentRequest](docs/SendDocumentRequest.md)

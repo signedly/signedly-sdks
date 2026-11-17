@@ -27,6 +27,7 @@ Name | Type | Description | Notes
 **placeholder** | **str** | Hint text shown while the field is empty. | [optional] 
 **readonly** | **bool** | True: the signer can&#39;t change the value. | [optional] 
 **select_options** | **List[str]** | Dropdown: the choices the signer picks from. | [optional] 
+**signatory_id** | **str** | The ID of the template role it belongs to (the &#x60;id&#x60; GET /ap1/signatories/?document_id&#x3D;&lt;the template&#39;s ID&gt; lists). | [optional] 
 **size** | **int** | Checkbox and Radio: the side of the tick or dot in points. | [optional] 
 **tool_tip** | **str** | Shown when the signer points at the field. | [optional] 
 **updated_at** | **datetime** | When the field last changed. | [optional] [readonly] 

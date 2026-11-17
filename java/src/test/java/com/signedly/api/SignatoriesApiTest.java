@@ -17,6 +17,7 @@ import com.signedly.client.ApiException;
 import com.signedly.model.CreateSignatoriesRequest;
 import com.signedly.model.CreateSignatoryRequest;
 import com.signedly.model.DeleteFieldRequest;
+import com.signedly.model.DeleteDocument204Response;
 import com.signedly.model.SendDocument200Response;
 import com.signedly.model.Signatory;
 import java.util.UUID;
@@ -85,7 +86,7 @@ public class SignatoriesApiTest {
     public void deleteSignatoryTest() throws ApiException {
         UUID id = null;
         DeleteFieldRequest data = null;
-        SendDocument200Response response = 
+        DeleteDocument204Response response = 
         api.deleteSignatory(id, data);
         
         // TODO: test validations

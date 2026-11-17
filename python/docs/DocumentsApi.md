@@ -9,7 +9,7 @@ Method | HTTP request | Description
 [**get_download_status**](DocumentsApi.md#get_download_status) | **GET** /ap1/documents-status/{id}/ | Check whether the signed PDF is ready
 [**list_document_pages**](DocumentsApi.md#list_document_pages) | **GET** /ap1/documents/{id}/pages/ | List a document&#39;s pages and their fields
 [**list_document_statuses**](DocumentsApi.md#list_document_statuses) | **GET** /ap1/documents-status-list/ | List the status of your organisation&#39;s documents
-[**list_documents**](DocumentsApi.md#list_documents) | **GET** /ap1/documents/ | List the documents this API client created
+[**list_documents**](DocumentsApi.md#list_documents) | **GET** /ap1/documents/ | List your organisation&#39;s documents
 [**upload_document**](DocumentsApi.md#upload_document) | **POST** /ap1/upload/ | Upload a document or template
 [**upload_document_for_one_signer**](DocumentsApi.md#upload_document_for_one_signer) | **POST** /ap1/upload_app/ | Upload a document for one signer and get their signing link
 
@@ -91,13 +91,13 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | The new document. |  -  |
-**400** | The ID isn&#39;t a template, the name is taken, or &#x60;recipients&#x60; don&#39;t fill the template&#39;s open roles exactly once. |  -  |
+**400** | The ID isn&#39;t a template, the template isn&#39;t finished yet (still a draft), the name is taken, or &#x60;recipients&#x60; don&#39;t fill the template&#39;s open roles exactly once. |  -  |
 **404** | The template doesn&#39;t exist or isn&#39;t yours. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_document**
-> SendDocument200Response delete_document(id)
+> DeleteDocument204Response delete_document(id)
 
 Delete a template or an unsent document
 
@@ -109,7 +109,7 @@ Deletes a template, or a document that was never sent, with its files. A documen
 
 ```python
 import signedly
-from signedly.models.send_document200_response import SendDocument200Response
+from signedly.models.delete_document204_response import DeleteDocument204Response
 from signedly.rest import ApiException
 from pprint import pprint
 
@@ -156,7 +156,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**SendDocument200Response**](SendDocument200Response.md)
+[**DeleteDocument204Response**](DeleteDocument204Response.md)
 
 ### Authorization
 
@@ -173,8 +173,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **204** | Deleted. |  -  |
 **400** | The document has been sent, so it is kept. |  -  |
-**403** | The document isn&#39;t your organisation&#39;s. |  -  |
-**404** | No document has this ID. |  -  |
+**404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -254,8 +253,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Whether the signed PDF is ready. |  -  |
-**403** | The document isn&#39;t your organisation&#39;s. |  -  |
-**404** | No document has this ID. |  -  |
+**404** | The document doesn&#39;t exist or isn&#39;t your organisation&#39;s. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
@@ -378,9 +376,9 @@ with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.DocumentsApi(api_client)
     name = 'name_example' # str | Only documents whose name contains this (any case). (optional)
-    status = [56] # List[int] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`). (optional)
+    status = [56] # List[int] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`). (optional)
     document_ids = ['document_ids_example'] # List[str] | Only these documents. Repeat it or separate IDs with commas. (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
@@ -400,9 +398,9 @@ with signedly.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **name** | **str**| Only documents whose name contains this (any case). | [optional] 
- **status** | [**List[int]**](int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] 
+ **status** | [**List[int]**](int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] 
  **document_ids** | [**List[str]**](str.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] 
- **limit** | **int**| How many results to return (default 10). | [optional] 
+ **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
 ### Return type
@@ -430,9 +428,9 @@ Name | Type | Description  | Notes
 # **list_documents**
 > DocumentPage list_documents(name=name, status=status, document_ids=document_ids, limit=limit, offset=offset)
 
-List the documents this API client created
+List your organisation's documents
 
-The documents this API client uploaded or made from a template, newest change first, with their signatories, pages and fields. Templates and unsent bulk-send copies aren't listed. Paged: see `limit` and `offset`.
+Every document of your organisation's admin account, newest change first, with their signatories, pages and fields: those made through the API (`upload_app` included) and in the web app. Templates and unsent bulk-send copies aren't listed. Paged: see `limit` and `offset`.
 
 ### Example
 
@@ -466,13 +464,13 @@ with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.DocumentsApi(api_client)
     name = 'name_example' # str | Only documents whose name contains this (any case). (optional)
-    status = [56] # List[int] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`). (optional)
+    status = [56] # List[int] | Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (`status=4&status=6`) or separate values with commas (`status=4,6`). (optional)
     document_ids = ['document_ids_example'] # List[str] | Only these documents. Repeat it or separate IDs with commas. (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
-        # List the documents this API client created
+        # List your organisation's documents
         api_response = api_instance.list_documents(name=name, status=status, document_ids=document_ids, limit=limit, offset=offset)
         print("The response of DocumentsApi->list_documents:\n")
         pprint(api_response)
@@ -488,9 +486,9 @@ with signedly.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **name** | **str**| Only documents whose name contains this (any case). | [optional] 
- **status** | [**List[int]**](int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] 
+ **status** | [**List[int]**](int.md)| Only documents with these statuses: 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided. Repeat it (&#x60;status&#x3D;4&amp;status&#x3D;6&#x60;) or separate values with commas (&#x60;status&#x3D;4,6&#x60;). | [optional] 
  **document_ids** | [**List[str]**](str.md)| Only these documents. Repeat it or separate IDs with commas. | [optional] 
- **limit** | **int**| How many results to return (default 10). | [optional] 
+ **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
 ### Return type
@@ -520,7 +518,7 @@ Name | Type | Description  | Notes
 
 Upload a document or template
 
-Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields.
+Uploads a PDF or DOCX file of up to 2 MB as a document (`type` 2) or a template (`type` 4). The answer is the upload; the document itself is made in the background. Find it in `GET /ap1/documents/?name=<name>` (its `upload.id` is this upload's `id`), or a template in `GET /ap1/templates/`, and wait until `GET /ap1/documents/{id}/pages/` lists its pages before placing fields. The answer also has `existing_signatures` and `warnings`: Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -553,7 +551,7 @@ configuration.api_key['Bearer'] = os.environ["API_KEY"]
 with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.DocumentsApi(api_client)
-    file = None # bytearray | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB.
+    file = None # bytearray | A PDF or DOCX file. A PDF that can't be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn't a Word document is refused the same way. At most 2 MB.
     name = 'name_example' # str | The document's name. It must differ from every other upload of this API client.
     type = 56 # int | 2 Document · 4 Template
     template_name = 'template_name_example' # str | The template's title. Required with `type` 4; it must differ from this API client's other templates. (optional)
@@ -574,7 +572,7 @@ with signedly.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **file** | **bytearray**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. At most 2 MB. | 
+ **file** | **bytearray**| A PDF or DOCX file. A PDF that can&#39;t be read (damaged, or not really a PDF) is refused with 400 and the reason; save or export it as a new PDF and upload that. A DOCX that isn&#39;t a Word document is refused the same way. At most 2 MB. | 
  **name** | **str**| The document&#39;s name. It must differ from every other upload of this API client. | 
  **type** | **int**| 2 Document · 4 Template | 
  **template_name** | **str**| The template&#39;s title. Required with &#x60;type&#x60; 4; it must differ from this API client&#39;s other templates. | [optional] 
@@ -596,7 +594,7 @@ Name | Type | Description  | Notes
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | The upload. Its &#x60;status&#x60; is 2 Uploaded; the document is made next. |  -  |
+**200** | The upload. Its &#x60;status&#x60; is 2 Uploaded; the document is made next. With &#x60;existing_signatures&#x60; and &#x60;warnings&#x60; (see above). |  -  |
 **400** | The file is missing, not a PDF or DOCX, or over 2 MB; the name is taken; or &#x60;type&#x60; or &#x60;template_name&#x60; is missing or wrong. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -606,7 +604,7 @@ Name | Type | Description  | Notes
 
 Upload a document for one signer and get their signing link
 
-Uploads a PDF or DOCX for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one.
+Uploads a PDF or DOCX (at most 25 MB) for one signer and returns their signing link in `redirect_url`; give it to the signer. They place their own signature on the signing page and are then sent to the `redirect_url` you gave. The signed PDF and its audit trail are emailed to `final_email`, or to your organisation's admin without one. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. `existing_signatures.count` is how many (null when the file couldn't be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), `existing_signatures.names` the signers' names where readable, and `warnings` the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -685,7 +683,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | The new document. |  -  |
-**400** | A value is missing or not valid (the file isn&#39;t a PDF or DOCX, an email or the URL isn&#39;t valid). Nothing was kept. |  -  |
+**400** | A value is missing or not valid (the file isn&#39;t a PDF or DOCX, isn&#39;t really one, or is over 25 MB; an email or the URL isn&#39;t valid). Nothing was kept. |  -  |
 **502** | The file couldn&#39;t be stored. Nothing was kept; try again. |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

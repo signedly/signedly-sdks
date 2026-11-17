@@ -123,10 +123,15 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
 - **Generated code is never edited by hand.** Change the API (its docs live in
   the backend repo, `backend/api/schema/`), then:
   ```bash
+  scripts/spec-from-backend.sh ../backend      # a backend checkout's spec (no server), then regenerate
   scripts/update-spec.sh                       # production's spec, then regenerate
   scripts/update-spec.sh http://localhost:8000 # or a local backend's
   scripts/generate.sh                          # regenerate from the committed spec only
   ```
+  The committed spec follows the backend's `integration` branch:
+  `scripts/spec-from-backend.sh <checkout>` builds it with the backend's own
+  generator and throwaway keys, no database or server (set `BACKEND_PYTHON` to a
+  Python with the backend's requirements). `--check` only compares.
   The script downloads the pinned generator (checksum checked) into `.cache/`.
   It needs Java 11+.
 - **Hand-written files** are listed in each SDK's `.openapi-generator-ignore`, so
@@ -185,7 +190,8 @@ their emails start with `[TEST]`, they aren't billed, and an organisation can ma
     when loaded with every error shown;
   - each SDK logs in through its helper against a fake Signedly and must send the
     token (`scripts/fake_signedly.py`; Java's `LoginTest`).
-- `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. That means a backend release changed the API, so update the spec and publish new versions.
+- `spec-integration.yml`, daily, by hand, or on a `backend-integration-updated` repository dispatch: fails when backend `integration` would serve a different spec than the committed one (an /ap1/ change merged there), so refresh the spec with `scripts/spec-from-backend.sh`. It reads the private backend repo with the secret `BACKEND_READ_TOKEN` (read access to signedly/backend contents); without it the job only says so.
+- `spec-check.yml`, weekly and by hand: fails when production serves a different spec than the committed one. Between an /ap1/ change reaching integration and the backend release that is expected; after a release it must pass, and the new SDK versions are published.
 
 A newer push to a PR cancels the `sdks.yml` run it replaces. Workflow jobs run on GitHub's runners, or on the self-hosted runner when the repo
 variable `CI_RUNNER` names its label (signedly/bigga `deploy/ci-runner/README.md`).

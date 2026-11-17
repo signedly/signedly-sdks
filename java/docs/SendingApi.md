@@ -19,7 +19,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 Fill in fields, add a signatory and send, in one call
 
-Sets the values of the document&#39;s fields, adds one signatory (&#x60;name&#x60;, &#x60;email&#x60;), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can&#39;t be sent, nor a document that has been sent already, and every field must sit on its page.
+Sets the values of the document&#39;s fields, adds one signatory (&#x60;name&#x60;, &#x60;email&#x60;), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can&#39;t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -94,7 +94,7 @@ public class Example {
 
 Fill in fields, add a signatory and send, in one call
 
-Sets the values of the document&#39;s fields, adds one signatory (&#x60;name&#x60;, &#x60;email&#x60;), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can&#39;t be sent, nor a document that has been sent already, and every field must sit on its page.
+Sets the values of the document&#39;s fields, adds one signatory (&#x60;name&#x60;, &#x60;email&#x60;), and emails the signatories their signing links, like POST /ap1/document/send/. All or nothing: if anything is refused, nothing changes. A retry after a timed-out call that worked answers 400 (already sent); treat that as success. A template can&#39;t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -173,7 +173,7 @@ ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
 
 Send a document for signing by email
 
-Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can&#39;t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again.
+Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can&#39;t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -248,7 +248,7 @@ public class Example {
 
 Send a document for signing by email
 
-Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can&#39;t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again.
+Emails each signatory a signing link with your subject and message (with ordered signing, only the first; each next one is emailed in turn). The document needs at least one field, and every signatory at least one field. A template can&#39;t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -327,7 +327,7 @@ ApiResponse<[**SendDocument200Response**](SendDocument200Response.md)>
 
 Send a document and get the signing link
 
-Marks the document sent without emailing anyone, and returns its signatory&#39;s signing link to show or send yourself. Meant for a document with one signatory. A template can&#39;t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again.
+Marks the document sent and returns the first signatory&#39;s (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can&#39;t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 
@@ -402,7 +402,7 @@ public class Example {
 
 Send a document and get the signing link
 
-Marks the document sent without emailing anyone, and returns its signatory&#39;s signing link to show or send yourself. Meant for a document with one signatory. A template can&#39;t be sent, nor a document that has been sent already, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again.
+Marks the document sent and returns the first signatory&#39;s (in signing order) signing link to show or send yourself; that signatory gets no email. Any other signatories are emailed as by send/: all now without signing order, or each in turn after the one before signs with it. A template can&#39;t be sent, nor a document that has been sent already, nor one with no signatory or no field, and every field must sit on its page. A send that timed out may have worked: check the document&#39;s status before sending again. Whether the uploaded PDF already had digital signatures (Adobe, DocuSign, a DSC or Aadhaar eSign). Signing it on Signedly invalidates them; the request is never refused for it. &#x60;existing_signatures.count&#x60; is how many (null when the file couldn&#39;t be checked, e.g. an encrypted PDF, or a document uploaded before the check existed), &#x60;existing_signatures.names&#x60; the signers&#39; names where readable, and &#x60;warnings&#x60; the text to show your user (empty when there is nothing to warn about).
 
 ### Example
 

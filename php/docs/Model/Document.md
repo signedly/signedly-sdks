@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 **pages** | [**\Signedly\Model\Page[]**](Page.md) | Its pages, each with its fields. | [optional]
 **sent_at** | **\DateTime** | When it was sent, or null. | [optional]
 **signatories** | [**\Signedly\Model\Signatory[]**](Signatory.md) | Who signs it. | [optional]
-**status** | **int** | 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired | [optional]
+**status** | **int** | 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided | [optional]
 **subject** | **string** | The signing email&#39;s subject, once sent. | [optional]
 **updated_at** | **\DateTime** | When it last changed. | [optional] [readonly]
 **upload** | [**\Signedly\Model\Upload**](Upload.md) |  | [optional]

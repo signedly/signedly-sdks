@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **created_at** | **datetime** | When it was made. | [optional] [readonly] 
 **id** | **str** | The template&#39;s ID. | [optional] [readonly] 
 **pages** | [**List[Page]**](Page.md) | Its pages, each with its fields. | [optional] 
-**status** | **int** | 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired | [optional] 
+**status** | **int** | 1 Draft · 2 Signees Added · 3 Prepared · 4 Sent · 5 In Progress · 6 Completed · 7 Rejected · 8 Archived · 9 Expired · 10 Voided | [optional] 
 **title** | **str** | The template&#39;s title. | [optional] 
 **updated_at** | **datetime** | When it last changed. | [optional] [readonly] 
 **upload** | [**Upload**](Upload.md) |  | [optional] 

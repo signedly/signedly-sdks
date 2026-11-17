@@ -137,7 +137,7 @@ try {
 ## `deleteSignatory()`
 
 ```php
-deleteSignatory($id, $data): \Signedly\Model\SendDocument200Response
+deleteSignatory($id, $data): \Signedly\Model\DeleteDocument204Response
 ```
 
 Remove a signatory
@@ -183,7 +183,7 @@ try {
 
 ### Return type
 
-[**\Signedly\Model\SendDocument200Response**](../Model/SendDocument200Response.md)
+[**\Signedly\Model\DeleteDocument204Response**](../Model/DeleteDocument204Response.md)
 
 ### Authorization
 

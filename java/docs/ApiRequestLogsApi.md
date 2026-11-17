@@ -17,7 +17,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 Count your API calls per path
 
-How many calls this API client has made to each path and method, most recently used first. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
+How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. &#x60;/ap1/documents-status/{pk}/&#x60;, not once per id. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
 
 ### Example
 
@@ -44,7 +44,7 @@ public class Example {
         ApiRequestLogsApi apiInstance = new ApiRequestLogsApi(defaultClient);
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             RequestCountPage result = apiInstance.listRequestCounts(method, path, limit, offset);
@@ -67,7 +67,7 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -95,7 +95,7 @@ public class Example {
 
 Count your API calls per path
 
-How many calls this API client has made to each path and method, most recently used first. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
+How many calls this API client has made to each endpoint and method, most recently used first. An endpoint that takes an id is counted under its pattern, e.g. &#x60;/ap1/documents-status/{pk}/&#x60;, not once per id. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
 
 ### Example
 
@@ -123,7 +123,7 @@ public class Example {
         ApiRequestLogsApi apiInstance = new ApiRequestLogsApi(defaultClient);
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             ApiResponse<RequestCountPage> response = apiInstance.listRequestCountsWithHttpInfo(method, path, limit, offset);
@@ -148,7 +148,7 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -177,7 +177,7 @@ ApiResponse<[**RequestCountPage**](RequestCountPage.md)>
 
 List your API calls
 
-This API client&#39;s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
+This API client&#39;s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
 
 ### Example
 
@@ -205,7 +205,7 @@ public class Example {
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
         String ipAddress = "ipAddress_example"; // String | Only calls from this IP address.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             RequestLogPage result = apiInstance.listRequestLogs(method, path, ipAddress, limit, offset);
@@ -229,7 +229,7 @@ public class Example {
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
 | **ipAddress** | **String**| Only calls from this IP address. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type
@@ -257,7 +257,7 @@ public class Example {
 
 List your API calls
 
-This API client&#39;s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
+This API client&#39;s calls, newest first, with their headers and bodies (credentials and tokens are redacted). Headers, body and query parameters are kept for 90 days and are empty after that; calls older than 2 years are not listed. Paged: see &#x60;limit&#x60; and &#x60;offset&#x60;.
 
 ### Example
 
@@ -286,7 +286,7 @@ public class Example {
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
         String ipAddress = "ipAddress_example"; // String | Only calls from this IP address.
-        Integer limit = 56; // Integer | How many results to return (default 10).
+        Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
             ApiResponse<RequestLogPage> response = apiInstance.listRequestLogsWithHttpInfo(method, path, ipAddress, limit, offset);
@@ -312,7 +312,7 @@ public class Example {
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
 | **ipAddress** | **String**| Only calls from this IP address. | [optional] |
-| **limit** | **Integer**| How many results to return (default 10). | [optional] |
+| **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
 ### Return type

@@ -293,7 +293,7 @@ with signedly.ApiClient(configuration) as api_client:
     api_instance = signedly.WebhooksApi(api_client)
     id = 'id_example' # str | The endpoint's ID.
     status = 'status_example' # str | Only `pending`, `succeeded` or `failed` deliveries. (optional)
-    limit = 56 # int | How many results to return (default 10). (optional)
+    limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
@@ -314,7 +314,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| The endpoint&#39;s ID. | 
  **status** | **str**| Only &#x60;pending&#x60;, &#x60;succeeded&#x60; or &#x60;failed&#x60; deliveries. | [optional] 
- **limit** | **int**| How many results to return (default 10). | [optional] 
+ **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
 ### Return type

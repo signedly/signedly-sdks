@@ -21,6 +21,7 @@ import com.signedly.model.DocumentStatusPage;
 import java.io.File;
 import com.signedly.model.GetDownloadStatus200Response;
 import com.signedly.model.Page;
+import com.signedly.model.DeleteDocument204Response;
 import com.signedly.model.SendDocument200Response;
 import java.net.URI;
 import java.util.UUID;
@@ -73,7 +74,7 @@ public class DocumentsApiTest {
     @Test
     public void deleteDocumentTest() throws ApiException {
         UUID id = null;
-        SendDocument200Response response = 
+        DeleteDocument204Response response = 
         api.deleteDocument(id);
         
         // TODO: test validations

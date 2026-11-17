@@ -157,7 +157,7 @@ No authorization required
 
 Refresh the access token
 
-Makes a new access token, valid 2 hours, with the refresh token. The refresh token itself isn&#39;t renewed: when it expires (7 days after /ap1/token/ made it), call /ap1/token/ again.
+Makes a new access token, valid 2 hours, with the refresh token. The refresh token stays the same and is then valid for 7 more days, up to 30 days after /ap1/token/ made it; after that, call /ap1/token/ again.
 
 ### Example
 
@@ -225,7 +225,7 @@ No authorization required
 
 Refresh the access token
 
-Makes a new access token, valid 2 hours, with the refresh token. The refresh token itself isn&#39;t renewed: when it expires (7 days after /ap1/token/ made it), call /ap1/token/ again.
+Makes a new access token, valid 2 hours, with the refresh token. The refresh token stays the same and is then valid for 7 more days, up to 30 days after /ap1/token/ made it; after that, call /ap1/token/ again.
 
 ### Example
 

@@ -22,7 +22,7 @@ createDocumentFields($data): \Signedly\Model\Field[]
 
 Add fields to a document
 
-Places fields on a document, each assigned to a signatory. Only while the document isn't sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must sit wholly on its page (1 point of tolerance). For a template, use POST /ap1/templates/fields/.
+Places fields on a document, each assigned to a signatory. Only while the document isn't sent yet (status 1 Draft, 2 Signees Added or 3 Prepared). A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field's `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`. For a template, use POST /ap1/templates/fields/.
 
 ### Example
 
@@ -84,7 +84,7 @@ createTemplateFields($data): \Signedly\Model\TemplateField[]
 
 Add fields to a template
 
-Places fields on a template. They have no signatory yet: on a document made from the template, they go to its first signatory. A field must sit wholly on its page (1 point of tolerance).
+Places fields on a template. Each field belongs to one of the template's roles (GET /ap1/signatories/?document_id=<the template's ID> lists them; a template made in the web app can have several): the role whose `id` is its `signatory_id`, or without one the first role in signing order. On a document made from the template, a role's fields go to the signatory who takes that role. A `signatory_id` that isn't one of this template's roles is refused with 400 and nothing is saved. A field must be one of the listed kinds, have a width and height above 0, and sit wholly on its page (1 point of tolerance); a new field's `page_number` must be the one GET /ap1/documents/{id}/pages/ lists for its `page`.
 
 ### Example
 
@@ -141,7 +141,7 @@ try {
 ## `deleteField()`
 
 ```php
-deleteField($id, $data): \Signedly\Model\SendDocument200Response
+deleteField($id, $data): \Signedly\Model\DeleteDocument204Response
 ```
 
 Delete a field
@@ -187,7 +187,7 @@ try {
 
 ### Return type
 
-[**\Signedly\Model\SendDocument200Response**](../Model/SendDocument200Response.md)
+[**\Signedly\Model\DeleteDocument204Response**](../Model/DeleteDocument204Response.md)
 
 ### Authorization
 
@@ -460,7 +460,7 @@ updateTemplateField($id, $data): \Signedly\Model\TemplateField
 
 Change a template's field
 
-Changes a template's field; send all of its values, as when adding it. Its page can't change: delete the field and add it again.
+Changes a template's field; send all of its values, as when adding it. A `signatory_id` naming another of the template's roles moves the field to that role; without one it keeps its role. Its page can't change: delete the field and add it again.
 
 ### Example
 

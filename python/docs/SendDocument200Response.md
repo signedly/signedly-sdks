@@ -6,6 +6,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **detail** | **str** | What was done. | [optional] 
+**existing_signatures** | [**SendDocument200ResponseExistingSignatures**](SendDocument200ResponseExistingSignatures.md) |  | [optional] 
+**warnings** | **List[str]** | Warnings about the document, e.g. that signing will invalidate its existing digital signatures. Empty when there are none. | [optional] 
 
 ## Example
 
