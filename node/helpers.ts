@@ -15,6 +15,22 @@ import { AuthenticationApi } from "./api";
 import { Configuration } from "./configuration";
 
 export const LIVE_HOST = "https://l0ads.signedly.com";
+
+/** Thrown when Signedly refuses the client ID and secret (wrong, rotated or no
+ * API access); `status` is the HTTP status. */
+export class SignedlyAuthError extends Error {
+    constructor(message: string, public status?: number, public cause?: unknown) {
+        super(message);
+        this.name = "SignedlyAuthError";
+    }
+}
+
+type TokenAnswer = {
+    access_token?: string;
+    refresh_token?: string;
+    expiry_date?: string;
+    refresh_token_expiry_date?: string;
+};
 const RENEW_BEFORE_MS = 120_000;
 const SIGNATURE_TOLERANCE_S = 300;
 
@@ -32,10 +48,25 @@ export function signedlyConfiguration(
 
     async function renew(): Promise<void> {
         const now = Date.now();
-        const { data } =
-            refresh && now < refreshExpires - RENEW_BEFORE_MS
-                ? await auth.refreshAccessToken({ refresh_token: refresh })
-                : await auth.getAccessToken({ client_id: clientId, client_secret: clientSecret });
+        let data: TokenAnswer | undefined;
+        if (refresh && now < refreshExpires - RENEW_BEFORE_MS) {
+            try {
+                ({ data } = await auth.refreshAccessToken({ refresh_token: refresh }));
+            } catch {
+                // A refused refresh token (signed out, or replaced) isn't fatal:
+                // log in again with the keys.
+                refresh = "";
+            }
+        }
+        if (!data) {
+            try {
+                ({ data } = await auth.getAccessToken({ client_id: clientId, client_secret: clientSecret }));
+            } catch (error: any) {
+                const answer = error?.response?.data;
+                const why = answer?.status ?? answer?.detail ?? error?.message ?? "no answer";
+                throw new SignedlyAuthError(`Signedly refused the API keys: ${why}`, error?.response?.status, error);
+            }
+        }
         access = data.access_token ?? "";
         refresh = data.refresh_token ?? refresh;
         expires = data.expiry_date ? Date.parse(data.expiry_date) : 0;

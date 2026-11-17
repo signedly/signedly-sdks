@@ -58,11 +58,21 @@ public final class SignedlyAuth {
       return access;
     }
     try {
-      RefreshAccessToken200Response answer =
-          !refresh.isEmpty() && now.isBefore(refreshExpires.minusSeconds(RENEW_BEFORE_SECONDS))
-              ? auth.refreshAccessToken(new RefreshAccessTokenRequest().refreshToken(refresh))
-              : auth.getAccessToken(
-                  new GetAccessTokenRequest().clientId(clientId).clientSecret(clientSecret));
+      RefreshAccessToken200Response answer = null;
+      if (!refresh.isEmpty() && now.isBefore(refreshExpires.minusSeconds(RENEW_BEFORE_SECONDS))) {
+        try {
+          answer = auth.refreshAccessToken(new RefreshAccessTokenRequest().refreshToken(refresh));
+        } catch (ApiException refused) {
+          // A refused refresh token (signed out, or replaced) isn't fatal: log in
+          // again with the keys.
+          refresh = "";
+        }
+      }
+      if (answer == null) {
+        answer =
+            auth.getAccessToken(
+                new GetAccessTokenRequest().clientId(clientId).clientSecret(clientSecret));
+      }
       access = answer.getAccessToken();
       if (answer.getRefreshToken() != null) {
         refresh = answer.getRefreshToken();

@@ -7,7 +7,8 @@ PHP and Java**. Each is generated from the API's OpenAPI spec
 
 - **Log in and stay logged in:** give the client ID and secret, and the access token is fetched
   on the first call and renewed (refresh token, then the keys again) before it
-  expires.
+  expires. A refused refresh token (signed out, or replaced) makes the client log
+  in again with the keys.
 - **Check webhook signatures:** `Signedly-Signature` against the endpoint's secret,
   refused when older than 5 minutes.
 - **Sandbox:** test keys work exactly like live ones; what they make is a
@@ -68,6 +69,10 @@ import { signedlyConfiguration } from "@signedly/sdk/dist/helpers";
 const config = signedlyConfiguration(CLIENT_ID, CLIENT_SECRET);
 const { data } = await new DocumentsApi(config).listDocuments();
 ```
+
+When Signedly refuses the client ID and secret, the call rejects with
+`SignedlyAuthError` (from `@signedly/sdk/dist/helpers`): `status` is the HTTP
+status (403) and the message gives the reason.
 
 **PHP**
 

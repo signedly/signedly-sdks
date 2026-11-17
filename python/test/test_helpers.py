@@ -83,3 +83,41 @@ def test_requests_carry_the_token(monkeypatch):
     settings = client.configuration.auth_settings()
     assert settings["Bearer"]["value"] == "Bearer tok-1"
     assert settings["Bearer"]["key"] == "Authorization"
+
+
+def test_a_refused_refresh_token_falls_back_to_the_keys(monkeypatch):
+    from datetime import datetime, timedelta, timezone
+    from types import SimpleNamespace
+
+    from signedly import helpers
+    from signedly.exceptions import ApiException
+
+    calls = []
+    now = [datetime(2026, 1, 1, tzinfo=timezone.utc).timestamp()]
+    monkeypatch.setattr(helpers.time, "time", lambda: now[0])
+
+    def token():
+        start = datetime.fromtimestamp(now[0], tz=timezone.utc)
+        return SimpleNamespace(
+            access_token=f"access-{len(calls)}",
+            refresh_token="r1",
+            expiry_date=start + timedelta(hours=2),
+            refresh_token_expiry_date=start + timedelta(days=7),
+        )
+
+    class FakeAuth:
+        def get_access_token(self, request):
+            calls.append("token")
+            return token()
+
+        def refresh_access_token(self, request):
+            calls.append("refresh")
+            raise ApiException(status=403, reason="Token not found")
+
+    client = helpers.SignedlyClient("id", "secret")
+    client._auth = FakeAuth()
+    config = client.configuration
+    assert config.get_api_key_with_prefix("Bearer") == "Bearer access-1"
+    now[0] += 2 * 3600 - 60
+    assert config.get_api_key_with_prefix("Bearer") == "Bearer access-3"
+    assert calls == ["token", "refresh", "token"]
