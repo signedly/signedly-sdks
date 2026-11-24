@@ -148,4 +148,3 @@ src/main/java/com/signedly/model/WebhookDelivery.java
 src/main/java/com/signedly/model/WebhookDeliveryPage.java
 src/main/java/com/signedly/model/WebhookEndpoint.java
 src/main/java/com/signedly/model/WebhookEndpointWithSecret.java
-src/test/java/com/signedly/model/RotateWebhookSecretRequestTest.java

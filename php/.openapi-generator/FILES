@@ -134,4 +134,3 @@ lib/Model/WebhookEndpoint.php
 lib/Model/WebhookEndpointWithSecret.php
 lib/ObjectSerializer.php
 phpunit.xml.dist
-test/Model/RotateWebhookSecretRequestTest.php

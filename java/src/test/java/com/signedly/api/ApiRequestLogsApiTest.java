@@ -47,10 +47,11 @@ public class ApiRequestLogsApiTest {
     public void listRequestCountsTest() throws ApiException {
         String method = null;
         String path = null;
+        Boolean isTest = null;
         Integer limit = null;
         Integer offset = null;
         RequestCountPage response = 
-        api.listRequestCounts(method, path, limit, offset);
+        api.listRequestCounts(method, path, isTest, limit, offset);
         
         // TODO: test validations
     }
@@ -68,10 +69,11 @@ public class ApiRequestLogsApiTest {
         String method = null;
         String path = null;
         String ipAddress = null;
+        Boolean isTest = null;
         Integer limit = null;
         Integer offset = null;
         RequestLogPage response = 
-        api.listRequestLogs(method, path, ipAddress, limit, offset);
+        api.listRequestLogs(method, path, ipAddress, isTest, limit, offset);
         
         // TODO: test validations
     }

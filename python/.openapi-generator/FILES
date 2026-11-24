@@ -143,5 +143,4 @@ signedly/py.typed
 signedly/rest.py
 test-requirements.txt
 test/__init__.py
-test/test_rotate_webhook_secret_request.py
 tox.ini
