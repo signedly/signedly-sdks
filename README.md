@@ -202,7 +202,8 @@ Publishing needs Signedly's registry accounts and is done by a person. Every
 registry keeps a published version for good (PyPI and Maven Central never take the
 same version again), so publish only from an up-to-date `integration` with CI green.
 Each SDK has its own version (`config/<language>.yaml`): release only the ones
-that changed. Packagist takes the PHP version from the git tag `vX.Y.Z`.
+that changed. Packagist takes the PHP version from the git tag `vX.Y.Z`; every
+published version also gets a per-SDK tag (step 5).
 
 ### Accounts (once)
 
@@ -255,6 +256,14 @@ password manager, and add a second owner.
 4. Check each in a clean place: `pip install signedly`, `npm view @signedly/sdk`,
    `composer require signedly/sdk`, and the artifact page
    https://central.sonatype.com/artifact/com.signedly/signedly-sdk.
+5. Tag the commit each SDK was published from, one annotated tag per SDK and version:
+   `python-vX.Y.Z`, `node-vX.Y.Z`, `java-vX.Y.Z` and `php-vX.Y.Z`, as in
+   ```bash
+   git tag -a python-vX.Y.Z <commit> -m "Python SDK X.Y.Z (PyPI signedly)"
+   git push origin python-vX.Y.Z
+   ```
+   The repo-wide `vX.Y.Z` tags are only Packagist's (step 2). Each SDK keeps its own
+   version, so they can't name a Python, Node or Java release.
 
 ## License
 
