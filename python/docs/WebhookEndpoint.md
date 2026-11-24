@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **failures_in_a_row** | **int** | Events that failed for good since the last success. | [optional] [readonly] 
 **id** | **str** | The endpoint&#39;s ID. | [optional] [readonly] 
 **is_active** | **bool** | False when you or Signedly switched it off; true switches it on. | [optional] 
+**previous_secret_expires_at** | **datetime** | Until when events are also signed with the secret before the last rotation, or null. | [optional] [readonly] 
 **updated_at** | **datetime** | Last change. | [optional] [readonly] 
 **url** | **str** | Where events are posted: https://, public. | 
 

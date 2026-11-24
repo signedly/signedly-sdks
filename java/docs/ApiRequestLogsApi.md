@@ -13,7 +13,7 @@ All URIs are relative to *https://l0ads.signedly.com*
 
 ## listRequestCounts
 
-> RequestCountPage listRequestCounts(method, path, limit, offset)
+> RequestCountPage listRequestCounts(method, path, isTest, limit, offset)
 
 Count your API calls per path
 
@@ -44,10 +44,11 @@ public class Example {
         ApiRequestLogsApi apiInstance = new ApiRequestLogsApi(defaultClient);
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
+        Boolean isTest = true; // Boolean | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
         Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
-            RequestCountPage result = apiInstance.listRequestCounts(method, path, limit, offset);
+            RequestCountPage result = apiInstance.listRequestCounts(method, path, isTest, limit, offset);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling ApiRequestLogsApi#listRequestCounts");
@@ -67,6 +68,7 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
+| **isTest** | **Boolean**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] |
 | **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
@@ -91,7 +93,7 @@ public class Example {
 
 ## listRequestCountsWithHttpInfo
 
-> ApiResponse<RequestCountPage> listRequestCounts listRequestCountsWithHttpInfo(method, path, limit, offset)
+> ApiResponse<RequestCountPage> listRequestCounts listRequestCountsWithHttpInfo(method, path, isTest, limit, offset)
 
 Count your API calls per path
 
@@ -123,10 +125,11 @@ public class Example {
         ApiRequestLogsApi apiInstance = new ApiRequestLogsApi(defaultClient);
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
+        Boolean isTest = true; // Boolean | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
         Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
-            ApiResponse<RequestCountPage> response = apiInstance.listRequestCountsWithHttpInfo(method, path, limit, offset);
+            ApiResponse<RequestCountPage> response = apiInstance.listRequestCountsWithHttpInfo(method, path, isTest, limit, offset);
             System.out.println("Status code: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
             System.out.println("Response body: " + response.getData());
@@ -148,6 +151,7 @@ public class Example {
 |------------- | ------------- | ------------- | -------------|
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
+| **isTest** | **Boolean**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] |
 | **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
@@ -173,7 +177,7 @@ ApiResponse<[**RequestCountPage**](RequestCountPage.md)>
 
 ## listRequestLogs
 
-> RequestLogPage listRequestLogs(method, path, ipAddress, limit, offset)
+> RequestLogPage listRequestLogs(method, path, ipAddress, isTest, limit, offset)
 
 List your API calls
 
@@ -205,10 +209,11 @@ public class Example {
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
         String ipAddress = "ipAddress_example"; // String | Only calls from this IP address.
+        Boolean isTest = true; // Boolean | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
         Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
-            RequestLogPage result = apiInstance.listRequestLogs(method, path, ipAddress, limit, offset);
+            RequestLogPage result = apiInstance.listRequestLogs(method, path, ipAddress, isTest, limit, offset);
             System.out.println(result);
         } catch (ApiException e) {
             System.err.println("Exception when calling ApiRequestLogsApi#listRequestLogs");
@@ -229,6 +234,7 @@ public class Example {
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
 | **ipAddress** | **String**| Only calls from this IP address. | [optional] |
+| **isTest** | **Boolean**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] |
 | **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 
@@ -253,7 +259,7 @@ public class Example {
 
 ## listRequestLogsWithHttpInfo
 
-> ApiResponse<RequestLogPage> listRequestLogs listRequestLogsWithHttpInfo(method, path, ipAddress, limit, offset)
+> ApiResponse<RequestLogPage> listRequestLogs listRequestLogsWithHttpInfo(method, path, ipAddress, isTest, limit, offset)
 
 List your API calls
 
@@ -286,10 +292,11 @@ public class Example {
         String method = "GET"; // String | Only this HTTP method.
         String path = "path_example"; // String | Only paths that contain this, e.g. `/ap1/document/`.
         String ipAddress = "ipAddress_example"; // String | Only calls from this IP address.
+        Boolean isTest = true; // Boolean | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
         Integer limit = 56; // Integer | How many results to return (default 10, at most 100).
         Integer offset = 56; // Integer | How many results to skip.
         try {
-            ApiResponse<RequestLogPage> response = apiInstance.listRequestLogsWithHttpInfo(method, path, ipAddress, limit, offset);
+            ApiResponse<RequestLogPage> response = apiInstance.listRequestLogsWithHttpInfo(method, path, ipAddress, isTest, limit, offset);
             System.out.println("Status code: " + response.getStatusCode());
             System.out.println("Response headers: " + response.getHeaders());
             System.out.println("Response body: " + response.getData());
@@ -312,6 +319,7 @@ public class Example {
 | **method** | **String**| Only this HTTP method. | [optional] [enum: GET, POST, PUT, DELETE] |
 | **path** | **String**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
 | **ipAddress** | **String**| Only calls from this IP address. | [optional] |
+| **isTest** | **Boolean**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] |
 | **limit** | **Integer**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **Integer**| How many results to skip. | [optional] |
 

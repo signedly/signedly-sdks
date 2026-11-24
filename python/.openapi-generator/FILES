@@ -40,6 +40,7 @@ docs/RequestCountPage.md
 docs/RequestHit.md
 docs/RequestLog.md
 docs/RequestLogPage.md
+docs/RotateWebhookSecretRequest.md
 docs/SendDocument200Response.md
 docs/SendDocument200ResponseExistingSignatures.md
 docs/SendDocumentByLink200Response.md
@@ -117,6 +118,7 @@ signedly/models/request_count_page.py
 signedly/models/request_hit.py
 signedly/models/request_log.py
 signedly/models/request_log_page.py
+signedly/models/rotate_webhook_secret_request.py
 signedly/models/send_document200_response.py
 signedly/models/send_document200_response_existing_signatures.py
 signedly/models/send_document_by_link200_response.py
@@ -141,6 +143,5 @@ signedly/py.typed
 signedly/rest.py
 test-requirements.txt
 test/__init__.py
-test/test_delete_document204_response.py
-test/test_send_document200_response_existing_signatures.py
+test/test_rotate_webhook_secret_request.py
 tox.ini

@@ -9,7 +9,7 @@ Method | HTTP request | Description
 
 
 # **list_request_counts**
-> RequestCountPage list_request_counts(method=method, path=path, limit=limit, offset=offset)
+> RequestCountPage list_request_counts(method=method, path=path, is_test=is_test, limit=limit, offset=offset)
 
 Count your API calls per path
 
@@ -48,12 +48,13 @@ with signedly.ApiClient(configuration) as api_client:
     api_instance = signedly.APIRequestLogsApi(api_client)
     method = 'method_example' # str | Only this HTTP method. (optional)
     path = 'path_example' # str | Only paths that contain this, e.g. `/ap1/document/`. (optional)
+    is_test = True # bool | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. (optional)
     limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
         # Count your API calls per path
-        api_response = api_instance.list_request_counts(method=method, path=path, limit=limit, offset=offset)
+        api_response = api_instance.list_request_counts(method=method, path=path, is_test=is_test, limit=limit, offset=offset)
         print("The response of APIRequestLogsApi->list_request_counts:\n")
         pprint(api_response)
     except Exception as e:
@@ -69,6 +70,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **method** | **str**| Only this HTTP method. | [optional] 
  **path** | **str**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] 
+ **is_test** | **bool**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] 
  **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 
@@ -94,7 +96,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_request_logs**
-> RequestLogPage list_request_logs(method=method, path=path, ip_address=ip_address, limit=limit, offset=offset)
+> RequestLogPage list_request_logs(method=method, path=path, ip_address=ip_address, is_test=is_test, limit=limit, offset=offset)
 
 List your API calls
 
@@ -134,12 +136,13 @@ with signedly.ApiClient(configuration) as api_client:
     method = 'method_example' # str | Only this HTTP method. (optional)
     path = 'path_example' # str | Only paths that contain this, e.g. `/ap1/document/`. (optional)
     ip_address = 'ip_address_example' # str | Only calls from this IP address. (optional)
+    is_test = True # bool | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. (optional)
     limit = 56 # int | How many results to return (default 10, at most 100). (optional)
     offset = 56 # int | How many results to skip. (optional)
 
     try:
         # List your API calls
-        api_response = api_instance.list_request_logs(method=method, path=path, ip_address=ip_address, limit=limit, offset=offset)
+        api_response = api_instance.list_request_logs(method=method, path=path, ip_address=ip_address, is_test=is_test, limit=limit, offset=offset)
         print("The response of APIRequestLogsApi->list_request_logs:\n")
         pprint(api_response)
     except Exception as e:
@@ -156,6 +159,7 @@ Name | Type | Description  | Notes
  **method** | **str**| Only this HTTP method. | [optional] 
  **path** | **str**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] 
  **ip_address** | **str**| Only calls from this IP address. | [optional] 
+ **is_test** | **bool**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] 
  **limit** | **int**| How many results to return (default 10, at most 100). | [optional] 
  **offset** | **int**| How many results to skip. | [optional] 
 

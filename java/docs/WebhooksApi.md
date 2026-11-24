@@ -935,7 +935,7 @@ ApiResponse<[**WebhookDelivery**](WebhookDelivery.md)>
 
 Replace a webhook endpoint&#39;s secret
 
-Makes a new secret and answers with it; events from now on are signed with it, and the old one stops working at once.
+Makes a new secret and answers with it. For the next 24 hours every event is signed with both the new and the old secret (two &#x60;v1&#x60; values in &#x60;Signedly-Signature&#x60;), so you can switch without missing events; &#x60;previous_secret_expires_at&#x60; says when the old one stops. Send &#x60;{\&quot;expire_previous\&quot;: true}&#x60; to stop the old one at once (for a leaked secret). Rotating again drops the older secret: at most two sign at once.
 
 ### Example
 
@@ -961,7 +961,7 @@ public class Example {
 
         WebhooksApi apiInstance = new WebhooksApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The endpoint's ID.
-        Object data = null; // Object | 
+        RotateWebhookSecretRequest data = new RotateWebhookSecretRequest(); // RotateWebhookSecretRequest | 
         try {
             WebhookEndpointWithSecret result = apiInstance.rotateWebhookSecret(id, data);
             System.out.println(result);
@@ -982,7 +982,7 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **id** | **UUID**| The endpoint&#39;s ID. | |
-| **data** | **Object**|  | |
+| **data** | [**RotateWebhookSecretRequest**](RotateWebhookSecretRequest.md)|  | |
 
 ### Return type
 
@@ -1010,7 +1010,7 @@ public class Example {
 
 Replace a webhook endpoint&#39;s secret
 
-Makes a new secret and answers with it; events from now on are signed with it, and the old one stops working at once.
+Makes a new secret and answers with it. For the next 24 hours every event is signed with both the new and the old secret (two &#x60;v1&#x60; values in &#x60;Signedly-Signature&#x60;), so you can switch without missing events; &#x60;previous_secret_expires_at&#x60; says when the old one stops. Send &#x60;{\&quot;expire_previous\&quot;: true}&#x60; to stop the old one at once (for a leaked secret). Rotating again drops the older secret: at most two sign at once.
 
 ### Example
 
@@ -1037,7 +1037,7 @@ public class Example {
 
         WebhooksApi apiInstance = new WebhooksApi(defaultClient);
         UUID id = UUID.randomUUID(); // UUID | The endpoint's ID.
-        Object data = null; // Object | 
+        RotateWebhookSecretRequest data = new RotateWebhookSecretRequest(); // RotateWebhookSecretRequest | 
         try {
             ApiResponse<WebhookEndpointWithSecret> response = apiInstance.rotateWebhookSecretWithHttpInfo(id, data);
             System.out.println("Status code: " + response.getStatusCode());
@@ -1060,7 +1060,7 @@ public class Example {
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **id** | **UUID**| The endpoint&#39;s ID. | |
-| **data** | **Object**|  | |
+| **data** | [**RotateWebhookSecretRequest**](RotateWebhookSecretRequest.md)|  | |
 
 ### Return type
 

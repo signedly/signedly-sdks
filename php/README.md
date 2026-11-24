@@ -20,16 +20,29 @@ otherwise (the uploads are `multipart/form-data`).
 4. When the access token expires, `POST /ap1/refreshtoken/` with the refresh token
    for a new access token. The refresh token stays the same and each refresh keeps
    it valid for 7 more days, up to 30 days after `/ap1/token/` made it. When it has
-   expired, call `/ap1/token/` again.
+   expired, call `/ap1/token/` again. Your key pair has one token, shared by all your
+   processes: after a refresh, the access token it replaced keeps working for 60
+   seconds (never past its own expiry), so another process using it isn't refused
+   mid-call; switch every process to the new one.
 
 `/ap1/token/` and `/ap1/refreshtoken/` allow 60 calls a minute per IP address;
-more answer 429. A missing, unknown or expired access token answers 403
+more answer 429. Every other call counts against your API client, separately for
+the live and the test keys: **600 calls a minute** in all, of which **120 a
+minute** may upload or send documents (`upload/`, `upload_app/`, `document/send/`,
+`document/send_url/`, `document/update_and_send/`, `documents/fromtemplate/`,
+`bulk-sends/`; a bulk send counts once, however many rows it has). Over a limit
+the call answers 429 with `Retry-After` (seconds until the next minute) and
+`X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset` (Unix time);
+wait that long and retry. Contact support@signedly.com if your integration needs
+more. A missing, unknown or expired access token answers 403
 (`\"Client not found\"` or `\"Access token expired\"`).
 
 The API acts for your **organisation's admin account**: documents you upload
 belong to it and appear in its Signedly web app, and you can reach only that
-account's documents, templates, signatories and fields. Another organisation's
-IDs answer 404, as if they didn't exist.
+account's documents, templates, signatories and fields, plus every document your
+API client made. When your super admin hands the organisation over, the API acts
+for the new super admin and still reaches what it made before. Another
+organisation's IDs answer 404, as if they didn't exist.
 
 ## Plans
 
@@ -57,6 +70,43 @@ unpaid API invoice, `POST /ap1/upload/` (except templates), `/ap1/upload_app/`,
 uploaded (`/ap1/document/send/`, `/ap1/document/send_url/`,
 `/ap1/document/update_and_send/`) answer 402 with live keys.
 Test keys work without a contract (see Sandbox).
+
+## API billing
+
+Live API documents are billed per document under your organisation's API contract,
+on top of its Signedly plan. List prices (a contract can differ; prices exclude
+tax):
+
+| Tier | Per document | Monthly minimum |
+|---|---|---|
+| Basic | $0.80 / ₹60 | 100 documents |
+| Standard | $0.50 / ₹40 | 250 documents |
+| Premium | $0.25 / ₹20 | 1,000 documents |
+
+- **What counts:** a live document your API client sends, once, when it's sent.
+  `/ap1/upload_app/` documents count when they're made, because that route returns
+  a signing link straight away. Every document of an API bulk send counts. Drafts
+  never sent, templates, test-key documents and documents sent from the web app
+  don't count. Sending again or archiving doesn't count twice. Months are calendar
+  months in UTC; the API page in Account & Settings shows this month's count.
+- **Rejected, voided and expired documents** are still billed: a document is
+  billed when it's sent, whatever happens to it afterwards. A send refused before it
+  goes out (a 4xx answer) isn't billed.
+- **Minimum and overage:** on the 1st of each month your invoice charges that
+  month's minimum upfront, plus last month's documents above its minimum at last
+  month's price. Unused documents of the minimum don't roll over. The first month
+  is charged in full, whatever day the contract starts.
+- **Changing or ending a contract:** new terms apply from the next invoice. When a
+  contract ends, live documents keep working to the end of its last month; the next
+  invoice charges only that month's overage, and live documents are then refused
+  (402) until a contract is in place again.
+- **Paying:** an invoice is due 7 days after it's issued. Reminders go out 1, 7 and
+  13 days after the due date; 14 days after it, live documents are paused (402)
+  until every overdue invoice is paid, and work again as soon as it is. Test keys,
+  your data and documents already sent are never affected.
+- **Tax:** prices exclude tax; INR invoices show GST as its own line when it
+  applies.
+- **Refunds** are handled by hand: email support@signedly.com.
 
 ## Sending a document for signing
 
@@ -198,18 +248,30 @@ as download links, with your access token: events never carry links.
 **Check every event is from Signedly.** The `Signedly-Signature` header is
 `t=<unix seconds>,v1=<signature>`, where the signature is the hex HMAC-SHA256 of
 `<t>.<raw body>` with the endpoint's secret. Refuse an event whose signature
-doesn't match or whose `t` is more than 5 minutes off:
+doesn't match or whose `t` is more than 5 minutes off. The header can carry more
+than one `v1` (after you rotate the secret, see below): accept the event if any
+of them matches. The signature with the old secret is always the last `v1`, so a
+check that reads only the last one keeps working until you switch secrets.
 
 ```python
 import hashlib, hmac, time
 
 def is_from_signedly(secret, header, raw_body):
-    parts = dict(item.split(\"=\", 1) for item in header.split(\",\"))
-    signed = f\"{parts['t']}.{raw_body.decode()}\".encode()
+    items = [item.split(\"=\", 1) for item in header.split(\",\")]
+    t = next(value for name, value in items if name == \"t\")
+    signed = f\"{t}.{raw_body.decode()}\".encode()
     expected = hmac.new(secret.encode(), signed, hashlib.sha256).hexdigest()
-    fresh = abs(time.time() - int(parts[\"t\"])) <= 300
-    return fresh and hmac.compare_digest(parts[\"v1\"], expected)
+    fresh = abs(time.time() - int(t)) <= 300
+    return fresh and any(
+        hmac.compare_digest(value, expected) for name, value in items if name == \"v1\"
+    )
 ```
+
+**Rotating the secret** (`POST /ap1/webhooks/{id}/rotate-secret/`, or in Account &
+Settings → API) gives a new secret. For the next 24 hours every event is signed
+with both the new and the old one, so you can deploy the new secret without
+refusing events; `previous_secret_expires_at` says when the old one stops. If the
+old secret leaked, send `{\"expire_previous\": true}` and it stops at once.
 
 **Answer 2xx within 10 seconds**, then do the work. Anything else is retried after
 1 and 5 minutes, then 30 minutes and 2, 5 and 10 hours (7 tries in about 18
@@ -218,7 +280,28 @@ ignore repeats. After 20 events in a row fail for good, Signedly switches the
 endpoint off and emails your organisation's admin; switch it on again with
 `PUT /ap1/webhooks/{id}/` and `\"is_active\": true`. Each endpoint's deliveries and
 their last answers are at `GET /ap1/webhooks/{id}/deliveries/`, and any can be
-sent again.
+sent again. Webhook history is kept for **30 days**: a delivery that succeeded or
+failed more than 30 days ago is deleted and can't be sent again.
+
+**Delivery is at least once and in no set order.** Build your endpoint for both:
+
+- *The same event can arrive more than once:* an answer that came after the 10
+  seconds, a lost connection after your server got the event, or a delivery you
+  send again from the deliveries list. Every copy has the same `Signedly-Event-Id`
+  and the same body (`id`, `created_at`, `data`); only `t` and the signature in
+  `Signedly-Signature` are new. Keep the event ids you've handled and skip repeats.
+- *Events can arrive out of order:* each is sent on its own and retries mix in, so
+  `document.signed` can come after `document.completed`. `created_at` is when the
+  event happened, not when it was sent: order by it, or fetch the document
+  (`GET /ap1/documents-status/{id}/`) for its current status.
+- *What counts as a failure:* any answer that isn't 2xx within 10 seconds,
+  redirects (3xx) included, since they aren't followed; timeouts; connection and
+  TLS errors; and a URL that no longer points to a public address. Each is retried
+  on the schedule above. An endpoint that is switched off, or an organisation
+  whose plan has no API access, gets nothing, and those deliveries fail at once
+  without counting toward switching the endpoint off.
+- *Where events go:* only `https://` URLs on public internet addresses, checked
+  when you save the endpoint and before every try.
 
 ## Sandbox
 
@@ -236,6 +319,10 @@ upload):
 - a test token sees and acts only on test documents: a live document answers 404
   and isn't listed. It can use your templates (list them, read their fields, make
   documents and bulk sends from them) but not change or delete a live one.
+- `/ap1/logs/` and `/ap1/logs/hits/` show a test token only calls made with your
+  test keys, and a live token only live calls (add `is_test=true` to see the
+  test calls). Webhook deliveries listed or resent with a test token are only
+  those of test documents' events (`\"test\": true`).
 
 ## Fields
 
@@ -271,7 +358,7 @@ fields and sends are only accepted while a document is 1–3 (not yet sent).
 | 403 | The access token is missing, unknown or expired; the client ID and secret or the refresh token were refused; the organisation's plan has no API access (Free, see Plans); or an `expiry_date` isn't in the future (`\"Invalid Date Entered\"`). |
 | 402 | No API contract, or an unpaid API invoice: live documents are refused (test keys keep working). |
 | 404 | The document, template, signatory or field doesn't exist or isn't yours. |
-| 429 | Too many token requests (wait a minute), or this month's 50 test documents are used. |
+| 429 | Too many requests this minute (see the limits under Authentication; wait `Retry-After` seconds), or this month's 50 test documents are used. |
 | 5xx | Our side failed; retry later. |
 
 A send that times out may still have worked: check the document's status before
@@ -279,6 +366,25 @@ sending again (a second send of a sent document answers 400).
 
 Download, view and audit links are valid for about 7 days; ask for a new one
 whenever you need it.
+
+## Versioning and changes
+
+The API has one version today, `/ap1/`. A **breaking change** is only ever made in
+a new version path (for example `/ap1/v2/`): the current one keeps working, and
+its end (sunset) date is announced at least **6 months** ahead, by email to every
+API client's organisation admin and here in these docs.
+
+Breaking means: removing or renaming a route, a field or an enum value; a new
+required input; a changed status code or error shape; a changed meaning of an
+existing field.
+
+Not breaking, and made without notice: new routes; new optional inputs; new fields
+in responses and webhook payloads; new webhook event types; new enum values in
+responses; clearer error messages. **Ignore fields and event types you don't
+know**, so these changes never break your integration.
+
+The SDKs follow the API: a breaking change comes with a new major SDK version
+(see SDKs).
 
 
 For more information, please visit [https://signedly.com](https://signedly.com).
@@ -333,11 +439,12 @@ $apiInstance = new Signedly\Api\APIRequestLogsApi(
 );
 $method = 'method_example'; // string | Only this HTTP method.
 $path = 'path_example'; // string | Only paths that contain this, e.g. `/ap1/document/`.
+$is_test = True; // bool | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
 $limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
-    $result = $apiInstance->listRequestCounts($method, $path, $limit, $offset);
+    $result = $apiInstance->listRequestCounts($method, $path, $is_test, $limit, $offset);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling APIRequestLogsApi->listRequestCounts: ', $e->getMessage(), PHP_EOL;
@@ -432,6 +539,7 @@ Class | Method | HTTP request | Description
 - [RequestHit](docs/Model/RequestHit.md)
 - [RequestLog](docs/Model/RequestLog.md)
 - [RequestLogPage](docs/Model/RequestLogPage.md)
+- [RotateWebhookSecretRequest](docs/Model/RotateWebhookSecretRequest.md)
 - [SendDocument200Response](docs/Model/SendDocument200Response.md)
 - [SendDocument200ResponseExistingSignatures](docs/Model/SendDocument200ResponseExistingSignatures.md)
 - [SendDocumentByLink200Response](docs/Model/SendDocumentByLink200Response.md)
@@ -481,6 +589,6 @@ support@signedly.com
 This PHP package is automatically generated by the [OpenAPI Generator](https://openapi-generator.tech) project:
 
 - API version: `v1`
-    - Package version: `0.1.1`
+    - Package version: `0.1.2`
     - Generator version: `7.10.0`
 - Build package: `org.openapitools.codegen.languages.PhpClientCodegen`

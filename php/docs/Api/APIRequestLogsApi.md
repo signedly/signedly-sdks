@@ -11,7 +11,7 @@ All URIs are relative to https://l0ads.signedly.com, except if the operation def
 ## `listRequestCounts()`
 
 ```php
-listRequestCounts($method, $path, $limit, $offset): \Signedly\Model\RequestCountPage
+listRequestCounts($method, $path, $is_test, $limit, $offset): \Signedly\Model\RequestCountPage
 ```
 
 Count your API calls per path
@@ -39,11 +39,12 @@ $apiInstance = new Signedly\Api\APIRequestLogsApi(
 );
 $method = 'method_example'; // string | Only this HTTP method.
 $path = 'path_example'; // string | Only paths that contain this, e.g. `/ap1/document/`.
+$is_test = True; // bool | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
 $limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
-    $result = $apiInstance->listRequestCounts($method, $path, $limit, $offset);
+    $result = $apiInstance->listRequestCounts($method, $path, $is_test, $limit, $offset);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling APIRequestLogsApi->listRequestCounts: ', $e->getMessage(), PHP_EOL;
@@ -56,6 +57,7 @@ try {
 | ------------- | ------------- | ------------- | ------------- |
 | **method** | **string**| Only this HTTP method. | [optional] |
 | **path** | **string**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
+| **is_test** | **bool**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] |
 | **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 
@@ -79,7 +81,7 @@ try {
 ## `listRequestLogs()`
 
 ```php
-listRequestLogs($method, $path, $ip_address, $limit, $offset): \Signedly\Model\RequestLogPage
+listRequestLogs($method, $path, $ip_address, $is_test, $limit, $offset): \Signedly\Model\RequestLogPage
 ```
 
 List your API calls
@@ -108,11 +110,12 @@ $apiInstance = new Signedly\Api\APIRequestLogsApi(
 $method = 'method_example'; // string | Only this HTTP method.
 $path = 'path_example'; // string | Only paths that contain this, e.g. `/ap1/document/`.
 $ip_address = 'ip_address_example'; // string | Only calls from this IP address.
+$is_test = True; // bool | Live token only: `true` lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls.
 $limit = 56; // int | How many results to return (default 10, at most 100).
 $offset = 56; // int | How many results to skip.
 
 try {
-    $result = $apiInstance->listRequestLogs($method, $path, $ip_address, $limit, $offset);
+    $result = $apiInstance->listRequestLogs($method, $path, $ip_address, $is_test, $limit, $offset);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling APIRequestLogsApi->listRequestLogs: ', $e->getMessage(), PHP_EOL;
@@ -126,6 +129,7 @@ try {
 | **method** | **string**| Only this HTTP method. | [optional] |
 | **path** | **string**| Only paths that contain this, e.g. &#x60;/ap1/document/&#x60;. | [optional] |
 | **ip_address** | **string**| Only calls from this IP address. | [optional] |
+| **is_test** | **bool**| Live token only: &#x60;true&#x60; lists the calls made with your test keys instead of the live ones. A test token always sees only test-key calls. | [optional] |
 | **limit** | **int**| How many results to return (default 10, at most 100). | [optional] |
 | **offset** | **int**| How many results to skip. | [optional] |
 

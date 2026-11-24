@@ -399,7 +399,7 @@ rotateWebhookSecret($id, $data): \Signedly\Model\WebhookEndpointWithSecret
 
 Replace a webhook endpoint's secret
 
-Makes a new secret and answers with it; events from now on are signed with it, and the old one stops working at once.
+Makes a new secret and answers with it. For the next 24 hours every event is signed with both the new and the old secret (two `v1` values in `Signedly-Signature`), so you can switch without missing events; `previous_secret_expires_at` says when the old one stops. Send `{\"expire_previous\": true}` to stop the old one at once (for a leaked secret). Rotating again drops the older secret: at most two sign at once.
 
 ### Example
 
@@ -421,7 +421,7 @@ $apiInstance = new Signedly\Api\WebhooksApi(
     $config
 );
 $id = 'id_example'; // string | The endpoint's ID.
-$data = array('key' => new \stdClass); // object
+$data = new \Signedly\Model\RotateWebhookSecretRequest(); // \Signedly\Model\RotateWebhookSecretRequest
 
 try {
     $result = $apiInstance->rotateWebhookSecret($id, $data);
@@ -436,7 +436,7 @@ try {
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **id** | **string**| The endpoint&#39;s ID. | |
-| **data** | **object**|  | |
+| **data** | [**\Signedly\Model\RotateWebhookSecretRequest**](../Model/RotateWebhookSecretRequest.md)|  | |
 
 ### Return type
 
