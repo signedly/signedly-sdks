@@ -501,7 +501,7 @@ Name | Type | Description  | Notes
 
 Replace a webhook endpoint's secret
 
-Makes a new secret and answers with it; events from now on are signed with it, and the old one stops working at once.
+Makes a new secret and answers with it. For the next 24 hours every event is signed with both the new and the old secret (two `v1` values in `Signedly-Signature`), so you can switch without missing events; `previous_secret_expires_at` says when the old one stops. Send `{\"expire_previous\": true}` to stop the old one at once (for a leaked secret). Rotating again drops the older secret: at most two sign at once.
 
 ### Example
 
@@ -509,6 +509,7 @@ Makes a new secret and answers with it; events from now on are signed with it, a
 
 ```python
 import signedly
+from signedly.models.rotate_webhook_secret_request import RotateWebhookSecretRequest
 from signedly.models.webhook_endpoint_with_secret import WebhookEndpointWithSecret
 from signedly.rest import ApiException
 from pprint import pprint
@@ -535,7 +536,7 @@ with signedly.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = signedly.WebhooksApi(api_client)
     id = 'id_example' # str | The endpoint's ID.
-    data = None # object | 
+    data = signedly.RotateWebhookSecretRequest() # RotateWebhookSecretRequest | 
 
     try:
         # Replace a webhook endpoint's secret
@@ -554,7 +555,7 @@ with signedly.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **id** | **str**| The endpoint&#39;s ID. | 
- **data** | **object**|  | 
+ **data** | [**RotateWebhookSecretRequest**](RotateWebhookSecretRequest.md)|  | 
 
 ### Return type
 

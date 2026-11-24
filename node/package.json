@@ -1,6 +1,6 @@
 {
   "name": "@signedly/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Signedly REST API client: send documents for e-signature, track them and verify webhooks",
   "author": "Signedly <support@signedly.com>",
   "homepage": "https://github.com/signedly/signedly-sdks#readme",

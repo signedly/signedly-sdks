@@ -14,6 +14,7 @@
 package com.signedly.api;
 
 import com.signedly.client.ApiException;
+import com.signedly.model.RotateWebhookSecretRequest;
 import com.signedly.model.CreateWebhookEndpointRequest;
 import java.util.UUID;
 import com.signedly.model.UpdateWebhookEndpointRequest;
@@ -156,7 +157,7 @@ public class WebhooksApiTest {
     @Test
     public void rotateWebhookSecretTest() throws ApiException {
         UUID id = null;
-        Object data = null;
+        RotateWebhookSecretRequest data = null;
         WebhookEndpointWithSecret response = 
         api.rotateWebhookSecret(id, data);
         

@@ -1,5 +1,5 @@
 npmName: "@signedly/sdk"
-npmVersion: 0.1.0
+npmVersion: 0.1.1
 supportsES6: true
 withSeparateModelsAndApi: false
 gitUserId: signedly

@@ -44,6 +44,7 @@ docs/Model/RequestCountPage.md
 docs/Model/RequestHit.md
 docs/Model/RequestLog.md
 docs/Model/RequestLogPage.md
+docs/Model/RotateWebhookSecretRequest.md
 docs/Model/SendDocument200Response.md
 docs/Model/SendDocument200ResponseExistingSignatures.md
 docs/Model/SendDocumentByLink200Response.md
@@ -110,6 +111,7 @@ lib/Model/RequestCountPage.php
 lib/Model/RequestHit.php
 lib/Model/RequestLog.php
 lib/Model/RequestLogPage.php
+lib/Model/RotateWebhookSecretRequest.php
 lib/Model/SendDocument200Response.php
 lib/Model/SendDocument200ResponseExistingSignatures.php
 lib/Model/SendDocumentByLink200Response.php
@@ -132,5 +134,3 @@ lib/Model/WebhookEndpoint.php
 lib/Model/WebhookEndpointWithSecret.php
 lib/ObjectSerializer.php
 phpunit.xml.dist
-test/Model/DeleteDocument204ResponseTest.php
-test/Model/SendDocument200ResponseExistingSignaturesTest.php

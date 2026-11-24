@@ -14,6 +14,7 @@
 |**failuresInARow** | **Integer** | Events that failed for good since the last success. |  [optional] [readonly] |
 |**id** | **UUID** | The endpoint&#39;s ID. |  [optional] [readonly] |
 |**isActive** | **Boolean** | False when you or Signedly switched it off; true switches it on. |  [optional] |
+|**previousSecretExpiresAt** | **OffsetDateTime** | Until when events are also signed with the secret before the last rotation, or null. |  [optional] [readonly] |
 |**updatedAt** | **OffsetDateTime** | Last change. |  [optional] [readonly] |
 |**url** | **URI** | Where events are posted: https://, public. |  |
 

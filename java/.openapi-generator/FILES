@@ -42,6 +42,7 @@ docs/RequestCountPage.md
 docs/RequestHit.md
 docs/RequestLog.md
 docs/RequestLogPage.md
+docs/RotateWebhookSecretRequest.md
 docs/SendDocument200Response.md
 docs/SendDocument200ResponseExistingSignatures.md
 docs/SendDocumentByLink200Response.md
@@ -126,6 +127,7 @@ src/main/java/com/signedly/model/RequestCountPage.java
 src/main/java/com/signedly/model/RequestHit.java
 src/main/java/com/signedly/model/RequestLog.java
 src/main/java/com/signedly/model/RequestLogPage.java
+src/main/java/com/signedly/model/RotateWebhookSecretRequest.java
 src/main/java/com/signedly/model/SendDocument200Response.java
 src/main/java/com/signedly/model/SendDocument200ResponseExistingSignatures.java
 src/main/java/com/signedly/model/SendDocumentByLink200Response.java
@@ -146,5 +148,3 @@ src/main/java/com/signedly/model/WebhookDelivery.java
 src/main/java/com/signedly/model/WebhookDeliveryPage.java
 src/main/java/com/signedly/model/WebhookEndpoint.java
 src/main/java/com/signedly/model/WebhookEndpointWithSecret.java
-src/test/java/com/signedly/model/DeleteDocument204ResponseTest.java
-src/test/java/com/signedly/model/SendDocument200ResponseExistingSignaturesTest.java
